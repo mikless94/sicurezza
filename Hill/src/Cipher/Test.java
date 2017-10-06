@@ -6,7 +6,7 @@ public class Test {
 		Hill h = new Hill();
 		//System.out.println (h.genKey());
 		try {
-			h.setKey("!ade");
+			h.setKey("pade");
 		}catch(InvalidKeyException ex) {};
 		
 				

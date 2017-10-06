@@ -64,12 +64,13 @@ public class Hill implements ClassicCipher {
 	}
 
 	@Override
+	//generates the key for the cipher
 	public String genKey() {
 		String k = "";
 		SecureRandom rand = new SecureRandom();
 		
 		do {
-			for (int i=0 ; i<m; i++ ) {
+			for (int i=0 ; i<m; i++) {
 				int number = rand.nextInt(29);
 				k += reversedDict.get(number);
 				//System.out.println(("numero casuale:"+number+ "\tcarattere:"+reversedDict.get(number)));
