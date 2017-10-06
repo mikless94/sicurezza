@@ -70,7 +70,7 @@ public class Hill implements ClassicCipher {
 		SecureRandom rand = new SecureRandom();
 		
 		do {
-			for (int i=0 ; i<m; i++) {
+			for (int i=0 ; i<m; i++ ) {
 				int number = rand.nextInt(29);
 				k += reversedDict.get(number);
 				//System.out.println(("numero casuale:"+number+ "\tcarattere:"+reversedDict.get(number)));
