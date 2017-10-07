@@ -52,7 +52,7 @@ public class Hill implements ClassicCipher {
 	@Override
 	public void setKey(String key) throws InvalidKeyException {
 		boolean foo;
-		foo = checkKey (key);
+		foo = checkKey(key);
 		if (!foo) 
 			throw new InvalidKeyException("Chiave non valida");
 	}
@@ -81,15 +81,28 @@ public class Hill implements ClassicCipher {
 	
 	
 	private boolean checkKey(String key) {
-		//controllo appartenenza simboli chiave all'alfabeto di codifica
+		//Calcolo lunghezza della chiave:
 		System.out.println(key);
 		if (key.length()!=m)
 			return false;
-		 
-		for (int i = 0; i<key.length() ; i++) {
-			if (!dict.containsKey( Character.toString(key.charAt(i)))) 
+		
+		//Calcolo presenza di caratteri indesiderati:
+		for (int i = 0; i<key.length(); i++) {
+			if (!dict.containsKey(Character.toString(key.charAt(i)))) 
 				return false;
 		}
+		
+		//Calcolo determinante:
+		int k11 = dict.get(Character.toString(key.charAt(0)));
+		int k12 = dict.get(Character.toString(key.charAt(1)));
+		int k21 = dict.get(Character.toString(key.charAt(2)));
+		int k22 = dict.get(Character.toString(key.charAt(3)));
+
+		int det = ((k11*k22) - (k12*k21)) % 29;
+		System.out.println("Determinante della matrice: " + det);
+		if(det == 0)
+			return false;
+		
 		return true;
 	}
 

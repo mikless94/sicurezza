@@ -6,7 +6,8 @@ public class Test {
 		Hill h = new Hill();
 		//System.out.println (h.genKey());
 		try {
-			h.setKey("pade");
+			h.setKey("ciao");
+			System.out.println("Chiave valida!\n");
 		}catch(InvalidKeyException ex) {};
 		
 				
