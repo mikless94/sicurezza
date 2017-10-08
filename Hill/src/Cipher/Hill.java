@@ -54,7 +54,7 @@ public class Hill implements ClassicCipher {
 	@Override
 	public void setKey(String key) throws InvalidKeyException {
 		boolean foo;
-		foo = checkKey (key);
+		foo = checkKey(key);
 		if (!foo) 
 			throw new InvalidKeyException("Chiave inserita non valida");
 		this.key = key;
@@ -88,13 +88,13 @@ public class Hill implements ClassicCipher {
 		//controllo lunghezza chiave
 		if (key.length()!=lenKey)
 			return false;
-		 
+
 		//controllo simboli chiave appartengono all'alfabeto
 		for (int i = 0; i<key.length() ; i++) {
 			if (!dict.containsKey( Character.toString(key.charAt(i)))) 
 				return false;
 		}
-		
+
 		//controllo determinante nullo
 		for (int i=0 ; i<key.length(); i++ ) 
 			key_num[i] = dict.get(Character.toString(key.charAt(i)));
