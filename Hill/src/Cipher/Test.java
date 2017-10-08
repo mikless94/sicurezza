@@ -10,7 +10,7 @@ public class Test {
 		try {
 			h.setKey("lidh");
 		}catch(InvalidKeyException ex) {};
-		
+		 
 		cipherText = h.enc("july");
 		System.out.println (cipherText);
 	

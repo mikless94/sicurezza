@@ -122,7 +122,7 @@ public class Hill implements ClassicCipher {
 		
 		return cipherText;
 	}
-
+ 
 	@Override
 	public String dec(String cipherText) {
 		
