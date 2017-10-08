@@ -6,8 +6,10 @@ import java.util.*;
 public class Hill implements ClassicCipher {
 	//trasformare in 29-b
 	
-	private String key;
-	private int m = 4;
+	private String key; 
+	private int m = 2;
+	private int lenKey = m*2;
+	private int[] key_num = new int[lenKey];
 	private static Map<String, Integer> dict = new HashMap<>();
 	private static Map<Integer, String> reversedDict = new HashMap <> ();
 	
@@ -54,7 +56,8 @@ public class Hill implements ClassicCipher {
 		boolean foo;
 		foo = checkKey (key);
 		if (!foo) 
-			throw new InvalidKeyException("Chiave non valida");
+			throw new InvalidKeyException("Chiave inserita non valida");
+		this.key = key;
 	}
 
 	@Override
@@ -70,7 +73,7 @@ public class Hill implements ClassicCipher {
 		SecureRandom rand = new SecureRandom();
 		
 		do {
-			for (int i=0 ; i<m; i++ ) {
+			for (int i=0 ; i<lenKey; i++ ) {
 				int number = rand.nextInt(29);
 				k += reversedDict.get(number);
 				//System.out.println(("numero casuale:"+number+ "\tcarattere:"+reversedDict.get(number)));
@@ -81,27 +84,48 @@ public class Hill implements ClassicCipher {
 	
 	
 	private boolean checkKey(String key) {
-		//controllo appartenenza simboli chiave all'alfabeto di codifica
-		System.out.println(key);
-		if (key.length()!=m)
+		
+		//controllo lunghezza chiave
+		if (key.length()!=lenKey)
 			return false;
 		 
+		//controllo simboli chiave appartengono all'alfabeto
 		for (int i = 0; i<key.length() ; i++) {
 			if (!dict.containsKey( Character.toString(key.charAt(i)))) 
 				return false;
 		}
+		
+		//controllo determinante nullo
+		for (int i=0 ; i<key.length(); i++ ) 
+			key_num[i] = dict.get(Character.toString(key.charAt(i)));
+		
+		if ((key_num[0]*key_num[3] - key_num[1]*key_num[2]) == 0)
+			return false;
+		
 		return true;
 	}
 
 	@Override
 	public String enc(String plainText) {
-		// TODO Auto-generated method stub
-		return null;
+		String cipherText = "";
+		int [] digram = new int [m];
+		
+		for (int i=0 ; i<key.length(); i++) 
+			key_num[i] = dict.get(Character.toString(key.charAt(i)));
+		
+		for (int i=0; i<plainText.length(); i=i+m) {
+			for (int j=0; j<m; j++) 
+				digram[j] = dict.get(Character.toString(plainText.charAt(i+j)));
+			cipherText += reversedDict.get((digram[0]*key_num[0]+digram[1]*key_num[2])%29);
+			cipherText += reversedDict.get((digram[0]*key_num[1]+digram[1]*key_num[3])%29);
+		}
+		
+		return cipherText;
 	}
 
 	@Override
 	public String dec(String cipherText) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
