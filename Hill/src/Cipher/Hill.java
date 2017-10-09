@@ -8,10 +8,11 @@ public class Hill implements ClassicCipher {
 	
 	private String key; 
 	private int m = 2;
-	private int lenKey = m*2;
+	private int lenKey = m*m;
 	private int[] key_num = new int[lenKey];
 	private static Map<String, Integer> dict = new HashMap<>();
 	private static Map<Integer, String> reversedDict = new HashMap <> ();
+	boolean padding = false;
 	
 	static {
 	    dict.put(" ", 0);
@@ -69,16 +70,17 @@ public class Hill implements ClassicCipher {
 	@Override
 	//generates the key for the cipher
 	public String genKey() {
-		String k = "";
 		SecureRandom rand = new SecureRandom();
-		
+		String k;
 		do {
-			for (int i=0 ; i<lenKey; i++ ) {
+			k = "";
+			for (int i=0 ; i<lenKey; i++) {
 				int number = rand.nextInt(29);
 				k += reversedDict.get(number);
-				//System.out.println(("numero casuale:"+number+ "\tcarattere:"+reversedDict.get(number)));
+				System.out.println(("numero casuale:"+number+ "\tcarattere:"+reversedDict.get(number)));
 			}
-		} while (checkKey(k));
+		} while (!checkKey(k));
+		this.key = k;
 		return k;
 	}
 	
@@ -91,12 +93,15 @@ public class Hill implements ClassicCipher {
 
 		//controllo simboli chiave appartengono all'alfabeto
 		for (int i = 0; i<key.length() ; i++) {
-			if (!dict.containsKey( Character.toString(key.charAt(i)))) 
+			if (!dict.containsKey(Character.toString(key.charAt(i)))) 
 				return false;
 		}
 
 		//controllo determinante nullo
-		for (int i=0 ; i<key.length(); i++ ) 
+		/* Non c'è bisogno di controllare se il determinante ha fattori in comune con il modulo base
+		 * in quanto il modulo base è un numero primo.
+		 */
+		for (int i=0 ; i<key.length(); i++) 
 			key_num[i] = dict.get(Character.toString(key.charAt(i)));
 		
 		if ((key_num[0]*key_num[3] - key_num[1]*key_num[2]) == 0)
@@ -113,6 +118,11 @@ public class Hill implements ClassicCipher {
 		for (int i=0 ; i<key.length(); i++) 
 			key_num[i] = dict.get(Character.toString(key.charAt(i)));
 		
+		if(plainText.length() % 2 != 0){
+			plainText += ' ';
+			padding = true;
+		}
+		
 		for (int i=0; i<plainText.length(); i=i+m) {
 			for (int j=0; j<m; j++) 
 				digram[j] = dict.get(Character.toString(plainText.charAt(i+j)));
@@ -126,7 +136,45 @@ public class Hill implements ClassicCipher {
 	@Override
 	public String dec(String cipherText) {
 		
-		return null;
+		int det = key_num[0]*key_num[3] - key_num[1]*key_num[2];
+
+		/*Inverto valori della diagonale principale, 
+	 	  mentre dell'altra diagonale li sostituisco con gli inversi additivi. 
+	 	  Infine moltiplico tutti i valori della matrice per l'inverso moltiplicativo di det!
+	 	  */
+		int temp = key_num[0];
+		key_num[0] = key_num[3];
+		key_num[3] = temp;
+		key_num[1] = 29 - key_num[1];
+		key_num[2] = 29 - key_num[2];
+		if (det < 0)
+			det = 29 + (det % 29);
+		int inv = 1;
+		int bool = 0;
+		while(bool == 0){
+			if (((det*inv) % 29) == 1)
+				bool = 1;
+			inv++;
+		}
+		inv -= 1;
+		key_num[0] = (key_num[0]*inv) % 29;
+		key_num[1] = (key_num[1]*inv) % 29;
+		key_num[2] = (key_num[2]*inv) % 29;
+		key_num[3] = (key_num[3]*inv) % 29;		
+		
+		String plainText = "";
+		int [] digram = new int [m];
+		
+		for (int i=0; i<cipherText.length(); i=i+m) {
+			for (int j=0; j<m; j++) 
+				digram[j] = dict.get(Character.toString(cipherText.charAt(i+j)));
+			plainText += reversedDict.get((digram[0]*key_num[0]+digram[1]*key_num[2]) % 29);
+			plainText += reversedDict.get((digram[0]*key_num[1]+digram[1]*key_num[3]) % 29);
+		}
+		
+		if (padding)
+			plainText = plainText.substring(0, plainText.length()-1);
+		return plainText;
 	}
 
 }

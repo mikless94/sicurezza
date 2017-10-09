@@ -4,16 +4,20 @@ public class Test {
 
 	public static void main(String[] args) {
 		Hill h = new Hill();
-		String cipherText = "";
+		String ciphertext = "";
 		
-		//System.out.println (h.genKey());
 		try {
-			h.setKey("lidh");
+			h.setKey("aede");
+			System.out.println(h.getKey());
+			String plaintext = "michele";
+			System.out.println ("La stringa da cifrare è: " + plaintext);
+
+			ciphertext = h.enc(plaintext);
+			System.out.println ("La stringa cifrata è: " + ciphertext);
+			
+			String plaintextDec = h.dec(ciphertext);
+			System.out.println ("La stringa decifrata è: " + plaintextDec);
 		}catch(InvalidKeyException ex) {};
-		 
-		cipherText = h.enc("july");
-		System.out.println (cipherText);
-	
 	}
 }
 
