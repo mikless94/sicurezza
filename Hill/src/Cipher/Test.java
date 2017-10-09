@@ -9,7 +9,7 @@ public class Test {
 		try {
 			h.setKey("aede");
 			System.out.println(h.getKey());
-			String plaintext = "michele";
+			String plaintext = "demetrio giuseppe michele";
 			System.out.println ("La stringa da cifrare è: " + plaintext);
 
 			ciphertext = h.enc(plaintext);
