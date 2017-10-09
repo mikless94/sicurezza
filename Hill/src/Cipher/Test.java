@@ -16,15 +16,17 @@ public class Test {
 		
 		
 		if (n == 0){
-			System.out.println("Chiave generata automaticamente!");
-			h.genKey();
-			System.out.println("Chiave utilizzata per cifrare: " + h.getKey());
-			String plaintext = JOptionPane.showInputDialog("Messaggio da cifrare:");
-			System.out.println ("La stringa da cifrare è: " + plaintext);
-			ciphertext = h.enc(plaintext);
-			System.out.println ("La stringa cifrata è: " + ciphertext);
-			String plaintextDec = h.dec(ciphertext);
-			System.out.println ("La stringa decifrata è: " + plaintextDec);			
+			try{
+				System.out.println("Chiave generata automaticamente!");
+				h.genKey();
+				System.out.println("Chiave utilizzata per cifrare: " + h.getKey());
+				String plaintext = JOptionPane.showInputDialog("Messaggio da cifrare:");
+				System.out.println ("La stringa da cifrare è: " + plaintext);
+				ciphertext = h.enc(plaintext);
+				System.out.println ("La stringa cifrata è: " + ciphertext);
+				String plaintextDec = h.dec(ciphertext);
+				System.out.println ("La stringa decifrata è: " + plaintextDec);			
+			} catch(InvalidPlaintext e) {};
 		}
 		
 		else{
@@ -38,7 +40,7 @@ public class Test {
 				System.out.println ("La stringa cifrata è: " + ciphertext);
 				String plaintextDec = h.dec(ciphertext);
 				System.out.println ("La stringa decifrata è: " + plaintextDec);		
-			} catch(InvalidKeyException ex) {};
+			} catch(InvalidKeyException ex) {} catch(InvalidPlaintext e){};
 		}
 		
 		/*try {

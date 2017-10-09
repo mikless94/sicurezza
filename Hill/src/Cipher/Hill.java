@@ -111,7 +111,7 @@ public class Hill implements ClassicCipher {
 	}
 
 	@Override
-	public String enc(String plainText) {
+	public String enc(String plainText) throws InvalidPlaintext {
 		String cipherText = "";
 		int [] digram = new int [m];
 		
@@ -124,8 +124,11 @@ public class Hill implements ClassicCipher {
 		}
 		
 		for (int i=0; i<plainText.length(); i=i+m) {
-			for (int j=0; j<m; j++) 
+			for (int j=0; j<m; j++){
+				if(!dict.containsKey(Character.toString(plainText.charAt(i+j))))
+					throw new InvalidPlaintext("Testo inserito non valido");
 				digram[j] = dict.get(Character.toString(plainText.charAt(i+j)));
+			}
 			cipherText += reversedDict.get((digram[0]*key_num[0]+digram[1]*key_num[2])%29);
 			cipherText += reversedDict.get((digram[0]*key_num[1]+digram[1]*key_num[3])%29);
 		}
