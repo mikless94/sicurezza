@@ -57,7 +57,7 @@ public class Hill implements ClassicCipher {
 		boolean foo;
 		foo = checkKey(key);
 		if (!foo) 
-			throw new InvalidKeyException("Chiave inserita non valida");
+			throw new InvalidKeyException("Chiave '" + key +"' inserita non valida");
 		this.key = key;
 	}
 
