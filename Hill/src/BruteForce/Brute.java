@@ -1,5 +1,7 @@
 package BruteForce;
 import Cipher.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Brute {
 
@@ -13,8 +15,8 @@ public class Brute {
 		//se euristica non è rispettata saltare alla prossima chaive
 		Hill h = new Hill();
 		String k = "";
-		String patternIta = "a";
-		String patternEng = "";
+		Pattern patternIta = Pattern.compile("");
+		Pattern patternEng = Pattern.compile("");
 		
 		for (int i=0; i<29; i++) {
 			for (int j=0; j<29; j++) {
@@ -27,27 +29,22 @@ public class Brute {
 						k += h.getReversedDict().get(l);
 						k += h.getReversedDict().get(n);
 						
-						/*System.out.println(i);
-						System.out.println(j);
-						System.out.println(l);
-						System.out.println(n);
-						System.out.println(k);*/
-						
 						try {
 							h.setKey(k);
 						} catch(InvalidKeyException ex) {
 							continue;
 						};
-						//System.out.println(h.getKey());
+		
 						String plainTextDec = h.dec("kgeprrm ,gilzhpn,fhcaposvv,rqrp'pwwdj ");
 						System.out.println("Testo decifrato con chiave "+h.getKey());
 						
-						if (plainTextDec.matches(patternIta)) 
+						Matcher matcherIta = patternIta.matcher(plainTextDec);
+						Matcher matcherEng = patternEng.matcher(plainTextDec);
+						
+						if (matcherIta.find()) 
 							System.out.println("Testo decifrato in lingua italiana"+plainTextDec);
-						
-						if (plainTextDec.matches(patternEng))
+						else if (matcherEng.find())
 							System.out.println("Testo decifrato in lingua inglese"+plainTextDec);
-						
 						}
 							
 					}
@@ -55,9 +52,6 @@ public class Brute {
 			}
 			
 		}
-		
-		
-
 	}
 
 
