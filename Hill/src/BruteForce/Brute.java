@@ -13,7 +13,7 @@ public class Brute {
 		//se euristica non è rispettata saltare alla prossima chaive
 		Hill h = new Hill();
 		String k = "";
-		String patternIta = "";
+		String patternIta = "a";
 		String patternEng = "";
 		
 		for (int i=0; i<29; i++) {
