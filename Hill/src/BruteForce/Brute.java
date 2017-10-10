@@ -13,11 +13,13 @@ public class Brute {
 		//se euristica non è rispettata saltare alla prossima chaive
 		Hill h = new Hill();
 		String k = "";
+		String patternIta = "";
+		String patternEng = "";
 		
-		for (int i=3; i<29; i++) {
-			for (int j=1; j<29; j++) {
-				for (int l=1; l<29; l++) {
-					for (int n=1; n<29; n++) {
+		for (int i=0; i<29; i++) {
+			for (int j=0; j<29; j++) {
+				for (int l=0; l<29; l++) {
+					for (int n=0; n<29; n++) {
 						//controllo sul determinante della chiave generata
 						k = "";
 						k += h.getReversedDict().get(i);
@@ -37,8 +39,14 @@ public class Brute {
 							continue;
 						};
 						//System.out.println(h.getKey());
-						String plaintextDec = h.dec("kgep");
-						//System.out.println(plaintextDec);
+						String plainTextDec = h.dec("kgeprrm ,gilzhpn,fhcaposvv,rqrp'pwwdj ");
+						System.out.println("Testo decifrato con chiave "+h.getKey());
+						
+						if (plainTextDec.matches(patternIta)) 
+							System.out.println("Testo decifrato in lingua italiana"+plainTextDec);
+						
+						if (plainTextDec.matches(patternEng))
+							System.out.println("Testo decifrato in lingua inglese"+plainTextDec);
 						
 						}
 							
