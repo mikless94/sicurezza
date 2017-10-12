@@ -3,17 +3,18 @@ package FrequencyAnalysis;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.TreeSet;
 import FrequencyAnalysis.Digram;
 
 public class DigramsCollection {
 	
-	private TreeSet<Digram> digrams;
+	private ArrayList<Digram> digrams;
 	
 	public DigramsCollection() 
 	{
-		this.digrams = new TreeSet<>();
+		this.digrams = new ArrayList<>();
 	}
 	
 	public void takeDigramsFromFile(String fileName)
@@ -67,6 +68,7 @@ public class DigramsCollection {
 			}
 			
 			buf.close();
+			Collections.sort(this.digrams);
 			
 		} catch (IOException e) {
 			System.out.println("Errore durante le operazioni di I/O.\n");

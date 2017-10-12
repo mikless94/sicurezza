@@ -61,7 +61,7 @@ public class Digram implements Comparable<Digram> {
 	public int compareTo(Digram o) {
 		int freq = this.frequency - o.frequency;
 	if(freq > 0) 
-		return 1;
+			return 1;
 	else if (freq < 0) 
 		return -1;
 	else
