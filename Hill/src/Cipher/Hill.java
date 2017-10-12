@@ -14,6 +14,7 @@ public class Hill implements ClassicCipher {
 	private static Map<Integer, String> reversedDict = new HashMap <> ();
 	boolean padding = false;
 	
+
 	static {
 	    dict.put(" ", 0);
 	    dict.put("a", 1);
@@ -52,18 +53,24 @@ public class Hill implements ClassicCipher {
     	}	
     }
 	
+    /**
+	 * @return the reversedDict
+	 */
+	public static Map<Integer, String> getReversedDict() {
+		return reversedDict;
+	}
+    
 	@Override
 	public void setKey(String key) throws InvalidKeyException {
 		boolean foo;
 		foo = checkKey(key);
 		if (!foo) 
-			throw new InvalidKeyException("Chiave inserita non valida");
+			throw new InvalidKeyException("Chiave '" + key +"' inserita non valida");
 		this.key = key;
 	}
 
 	@Override
 	public String getKey() {
-		// TODO Auto-generated method stub
 		return this.key;
 	}
 
@@ -84,7 +91,7 @@ public class Hill implements ClassicCipher {
 		return k;
 	}
 	
-	
+
 	private boolean checkKey(String key) {
 		
 		//controllo lunghezza chiave
