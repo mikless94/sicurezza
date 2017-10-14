@@ -9,8 +9,8 @@ public class KnownPlaintextAttack {
 		KnownPlaintext cipher = new KnownPlaintext();
 		
 		try{
-			/*Primo attacco:
-			*/
+			//Primo attacco:
+			
 			System.out.println("--------------------CHIAVE 1-------------------");
 			System.out.println("PLAINTEXT: attacco all'alba");
 			System.out.println("CIPHERTEXT: axiarpjuzhvizhz'");
