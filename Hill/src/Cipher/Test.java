@@ -8,10 +8,9 @@ public class Test {
 	public static void main(String[] args) {
 		Hill h = new Hill();
 		String ciphertext = "";
-		JFrame frame = new JFrame("Test");
 		
 		Object[] options = {"Yes", "No"};
-		int n = JOptionPane.showOptionDialog(frame,"Would you generate your key randomly?","Key Generator",
+		int n = JOptionPane.showOptionDialog(null,"Would you generate your key randomly?","Key Generator",
 				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 		
 		
