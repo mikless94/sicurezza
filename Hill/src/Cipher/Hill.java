@@ -52,14 +52,20 @@ public class Hill implements ClassicCipher {
     	    reversedDict.put(dict.get(i), i);
     	}	
     }
-	
-    /**
-	 * @return the reversedDict
-	 */
+    
+    public static Map<String, Integer> getDict() {
+		return dict;
+	}	
+    
 	public static Map<Integer, String> getReversedDict() {
 		return reversedDict;
 	}
     
+	
+	public int getM() {
+		return m;
+	}
+
 	@Override
 	public void setKey(String key) throws InvalidKeyException {
 		boolean foo;
@@ -186,5 +192,4 @@ public class Hill implements ClassicCipher {
 			plainText = plainText.substring(0, plainText.length()-1);
 		return plainText;
 	}
-
 }
