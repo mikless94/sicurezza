@@ -156,7 +156,7 @@ public class Hill implements ClassicCipher {
 
 		/*Inverto valori della diagonale principale, 
 	 	  mentre dell'altra diagonale li sostituisco con gli inversi additivi. 
-	 	  Infine moltiplico tutti i valori della matrice per l'inverso moltiplicativo di det!
+	 	  Infine moltiplico tutti i valori della matrice per l'inverso moltiplicativo di det.
 	 	  */
 		int temp = key_num[0];
 		key_num[0] = key_num[3];
