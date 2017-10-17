@@ -71,7 +71,7 @@ public class Hill implements ClassicCipher {
 		boolean foo;
 		foo = checkKey(key);
 		if (!foo) 
-			throw new InvalidKeyException("Chiave '" + key +"' inserita non valida");
+			throw new InvalidKeyException();
 		this.key = key;
 	}
 
@@ -156,7 +156,7 @@ public class Hill implements ClassicCipher {
 
 		/*Inverto valori della diagonale principale, 
 	 	  mentre dell'altra diagonale li sostituisco con gli inversi additivi. 
-	 	  Infine moltiplico tutti i valori della matrice per l'inverso moltiplicativo di det!
+	 	  Infine moltiplico tutti i valori della matrice per l'inverso moltiplicativo di det.
 	 	  */
 		int temp = key_num[0];
 		key_num[0] = key_num[3];
@@ -192,6 +192,7 @@ public class Hill implements ClassicCipher {
 		
 		if (padding)
 			plainText = plainText.substring(0, plainText.length()-1);
+		
 		return plainText;
 	}
 }
