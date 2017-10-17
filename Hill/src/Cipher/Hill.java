@@ -117,7 +117,7 @@ public class Hill implements ClassicCipher {
 		for (int i=0 ; i<key.length(); i++) 
 			key_num[i] = dict.get(Character.toString(key.charAt(i)));
 		
-		if ((key_num[0]*key_num[3] - key_num[1]*key_num[2]) == 0)
+		if (((key_num[0]*key_num[3] - key_num[1]*key_num[2])%29) == 0 )
 			return false;
 		
 		return true;
@@ -163,8 +163,10 @@ public class Hill implements ClassicCipher {
 		key_num[3] = temp;
 		key_num[1] = 29 - key_num[1];
 		key_num[2] = 29 - key_num[2];
+		
 		if (det < 0)
-			det = 29 + (det % 29);
+			det = 29 + (det%29);
+		
 		int inv = 1;
 		int bool = 0;
 		while(bool == 0){

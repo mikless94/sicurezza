@@ -18,12 +18,14 @@ public class Brute {
 		int num_keys = 0;
 		Hill h = new Hill();
 		String k = "";
+		int word_length = 9;
+		
 		//Pattern patternIta = Pattern.compile("((([b-df-hj-np-tv-z])(?!\\2)){3})");
 		//Pattern patternIta = Pattern.compile("th|wh|,[a-z']|[a-z&&[^aeiou]]{3,5}""(.+)\\1+");
 		//Pattern patternIta = Pattern.compile("(\\w)\\2+|([aeiou])\\1+|,[a-z',]|q[^qu]|jq|th|lk|kl|fv|fw|gz|nm|gc|yz|wv|wz|vw|vz|zw|rw|cf|sw|nr|kh|bt|rz|kx|pv|dp|"
 				//+ "lb|gk|zh|vs|vt|mt|cj|jq|gw");
-		Pattern patternIta = Pattern.compile("(.)\\1{2,}|,\\S|'{2,}|\\s{2,}|[a-z&&[^aeiou]]{4,}");
-		//Pattern patternEng = Pattern.compile("");
+		Pattern patternIta = Pattern.compile("(.)\\1{2,}|,\\S|'{2,}|\\s{2,}|[a-z&&[^aeiou]]{4,}|\\w{"+word_length+",}\\b");
+		
 		
 		for (int i=0; i<29; i++) {
 			for (int j=0; j<29; j++) {
@@ -42,22 +44,19 @@ public class Brute {
 							continue;
 						};
 		
-						String plainText = h.dec("kgeprrm ,gilzhpn,fhcaposvv,rqrp'pwwdj ");
+						String plainText = h.dec("m bqhigabqkmawahofsbhx'frc'zavfqbntgxpo'r ckudiqrqrvexj,jtesllffo'i vttytwofhjgohtbays'i");
 						Matcher matcherIta = patternIta.matcher(plainText);
-						//System.out.println(k);
 						if (!matcherIta.find()) {
+							num_keys++;
 							System.out.println(plainText);
+							//System.out.println(k);
 						}
-						
-					
-					
-						}
-				
-							
+						}	
 					}
 				}
 			}
-		//System.out.println((num_keys));
+		System.out.println("numero chiavi:"+num_keys);
+	
 			
 		}
 	}
