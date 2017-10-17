@@ -71,7 +71,7 @@ public class Hill implements ClassicCipher {
 		boolean foo;
 		foo = checkKey(key);
 		if (!foo) 
-			throw new InvalidKeyException("Chiave '" + key +"' inserita non valida");
+			throw new InvalidKeyException();
 		this.key = key;
 	}
 
@@ -117,7 +117,7 @@ public class Hill implements ClassicCipher {
 		for (int i=0 ; i<key.length(); i++) 
 			key_num[i] = dict.get(Character.toString(key.charAt(i)));
 		
-		if ((key_num[0]*key_num[3] - key_num[1]*key_num[2]) == 0)
+		if ((((key_num[0]*key_num[3] - key_num[1]*key_num[2])) %29 )== 0)
 			return false;
 		
 		return true;
@@ -190,6 +190,7 @@ public class Hill implements ClassicCipher {
 		
 		if (padding)
 			plainText = plainText.substring(0, plainText.length()-1);
+		
 		return plainText;
 	}
 }
