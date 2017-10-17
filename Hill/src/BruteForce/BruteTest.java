@@ -2,9 +2,6 @@ package BruteForce;
 
 import javax.swing.JOptionPane;
 
-import Cipher.InvalidKeyException;
-
-
 public class BruteTest {
 	final static int DEFAULT_WORD_LENGTH = 3;
 	private static int wordLength = DEFAULT_WORD_LENGTH;
