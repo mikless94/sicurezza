@@ -87,10 +87,16 @@ public class DigramsCollection {
 		
 		return s;
 	}
+
 	
 	public String sizeOfCollection() 
 	{
 		return Integer.toString(this.digrams.size());
 	}
+	
+	public ArrayList<Digram> getDigramCollection(){
+		return this.digrams;
+	}
+	
 }
 	
