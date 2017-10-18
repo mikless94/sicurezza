@@ -1,37 +1,26 @@
 package FrequencyAnalysis;
 
+import java.io.*;
 import java.util.ArrayList;
 
 public class Test {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException{
 		
-		DigramsCollection coll_di = new DigramsCollection();
-		CryptoAnalysis data = new CryptoAnalysis();
-		ArrayList<Digram> stat_di = new ArrayList<Digram>();
-		ArrayList<String> dig = new ArrayList<String>();
+		ArrayList<String> decTexts = new ArrayList<String>();
+		FrequencyAnalysisAttack fq = new FrequencyAnalysisAttack();
+		String genStatsFile = "Jones2004_Bigram.txt";
+		String cipherTextFile = "ciphertext.txt";
+		boolean flag = false;
 		
-		coll_di.takeDigramsFromFile("Jones2004_Bigram.txt"); //ho le statistiche inglesi dei digrammi
-		System.out.println("Ci sono: " + coll_di.sizeOfCollection() + " digrammi.\n" +
-		coll_di.printCollection() + "\n");
+		fq.takeGeneralDigramStats(genStatsFile);
+		fq.readCipherTextFromFile(cipherTextFile);
+		decTexts = fq.attack(flag);
+		
+		for(String s : decTexts)
+		{
+			System.out.println(s + "\n");
+		}
 
-		data.readCipherTextFromFile("ciphertext.txt"); //ho il testo cifrato, letto da file
-		System.out.println("Testo cifrato: \n" + data.getCipherText());
-		
-		stat_di = data.analyzeText(); //ho le statistiche del testo (frequenza digrammi)
-		
-		for (Digram d : stat_di) {
-			System.out.println(d.printDigram());
-		}
-		
-		String text = data.tryToDec(coll_di.getDigramCollection(), stat_di);
-		System.out.println("\nTesto decodificato.\n");
-		System.out.println(text);
-		
-		dig = data.betDigram(text);
-		System.out.println(dig.size());
-		for(String s : dig) {
-			System.out.println(s);
-		}
 	}
 }

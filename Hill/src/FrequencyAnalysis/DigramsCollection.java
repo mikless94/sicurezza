@@ -66,7 +66,6 @@ public class DigramsCollection {
 				}
 				stringLine = buf.readLine();
 			}
-			
 			buf.close();
 			Collections.sort(this.digrams);
 			
@@ -79,12 +78,10 @@ public class DigramsCollection {
 	public String printCollection()
 	{
 		String s = "";
-		
 		for(Digram d : this.digrams)
 		{
 			s += d.printDigram() + "\n";
 		}
-		
 		return s;
 	}
 

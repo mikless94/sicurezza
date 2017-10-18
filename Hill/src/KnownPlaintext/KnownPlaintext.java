@@ -34,7 +34,7 @@ public class KnownPlaintext {
 			}
 		}
 		
-		if (plainMatrix[0]*plainMatrix[3] - plainMatrix[1]*plainMatrix[2] == 0)
+		if (((plainMatrix[0]*plainMatrix[3] - plainMatrix[1]*plainMatrix[2]) % 29) == 0)
 			throw new PlainTextException("Non esistono due digrammi nel plainText " + plainText + " tale per cui la matrice X sia invertibile!");
 
 		/*Per ottenere la matrice K ---> cipherMatrix = (plainMatrix)*K ---> K = cipherMatrix*(plainMatrix)^-1
