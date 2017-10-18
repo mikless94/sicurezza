@@ -20,6 +20,7 @@ public class BruteAttack {
 	private Hill h = new Hill();
 	private String k = "";
 	private int wordLength;
+	private int seqCons;
 	
 	/**
 	 * @return the wordLength
@@ -34,9 +35,25 @@ public class BruteAttack {
 	public void setwordLength(int wordLength) {
 		this.wordLength = wordLength;
 	}
+	
+	
+
+	/**
+	 * @return the seqCons
+	 */
+	public int getSeqCons() {
+		return seqCons;
+	}
+
+	/**
+	 * @param seqCons the seqCons to set
+	 */
+	public void setSeqCons(int seqCons) {
+		this.seqCons = seqCons;
+	}
 
 	public void attack (String cipherText) {
-		Pattern patternIta = Pattern.compile("(.)\\1{2,}|,\\S|'{2,}|\\s{2,}|[a-z&&[^aeiou]]{5,}|\\w{"+wordLength+",}\\b");
+		Pattern patternIta = Pattern.compile("(.)\\1{2,}|,\\S|'{2,}|\\s{2,}|[a-z&&[^aeiou]]{"+seqCons+",}|\\w{"+wordLength+",}\\b");
 		
 		for (int i=0; i<29; i++) {
 			for (int j=0; j<29; j++) {
@@ -65,8 +82,8 @@ public class BruteAttack {
 				}
 			}
 		}
-		System.out.println("numero chiavi con lunghezza parola "+wordLength+":"+num_keys+"\n");
-	
+		System.out.println("numero chiavi con lunghezza parola "+wordLength+" e numero massimo di consonanti consecutive "+seqCons+" :" +num_keys+"\n");
+		System.out.println("######################################################################");
 	}
 }
 
