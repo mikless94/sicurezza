@@ -180,7 +180,7 @@ public class FrequencyAnalysisAttack {
 	private ArrayList<String> tryToDec(ArrayList<String> keys)
 	{
 		ArrayList<String> ret = new ArrayList<String>();
-		Pattern pattern = Pattern.compile("\\s{2,}|[a-z&&[^aeiou]]{5,}");
+		Pattern pattern = Pattern.compile("\\s{2,}|[a-z&&[^aeiou]]{10,}");
 		Hill ciph = new Hill();
 		for(String s : keys)
 		{
