@@ -8,21 +8,21 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import Cipher.*;
-import FrequencyAnalysis.Digram;
+import FrequencyAnalysis.Bigram;
 import KnownPlaintext.*;
 
 public class FrequencyAnalysisAttack {
 	
 	private String cipherText;
-	private DigramsCollection genDigramStats;
-	private ArrayList<Digram> cipherTextStats;
+	private BigramsCollection genBigramStats;
+	private ArrayList<Bigram> cipherTextStats;
 	private ArrayList<String> commonWord;
 	private String subText;
 	
 	public FrequencyAnalysisAttack() {
 		this.cipherText = "";
-		this.genDigramStats = new DigramsCollection();
-		this.cipherTextStats = new ArrayList<Digram>();
+		this.genBigramStats = new BigramsCollection();
+		this.cipherTextStats = new ArrayList<Bigram>();
 		this.commonWord = new ArrayList<String>();
 		this.commonWord.add("the ");
 		this.commonWord.add(" the");
@@ -57,8 +57,8 @@ public class FrequencyAnalysisAttack {
 		this.cipherText = cipherText;
 	}
 	
-	public void takeGeneralDigramStats(String fileName) {
-		genDigramStats.takeDigramsFromFile(fileName);
+	public void takeGeneralBigramStats(String fileName) {
+		this.genBigramStats.takeDigramsFromFile(fileName);
 	}
 	
 	public ArrayList<String> attack(boolean mode) {
@@ -72,11 +72,10 @@ public class FrequencyAnalysisAttack {
 		if(mode)
 		{
 			int i;
-			for(i = 0; i < 2; i++) 
+			for(i = 0; i < 5; i++) 
 			{
-				Digram digram = cipherTextStats.get(sizeTextStats - 1 - i);
+				Bigram digram = cipherTextStats.get(sizeTextStats - 1 - i);
 				String s = "" + digram.getFirstCharacter() + digram.getSecondCharacter();
-				//acquisisci tutti i possibili digrammi dopo il primo del testo
 				ArrayList<String> digrams = this.getFollowingDigrams(s);
 				possibleKeys = this.findPossibleKeys(s, digrams, commonWord.get(0));
 				retList.addAll(this.tryToDec(possibleKeys));
@@ -86,23 +85,22 @@ public class FrequencyAnalysisAttack {
 		else
 		{
 			int i;
-			for(i = 0; i < 2; i++) 
+			for(i = 0; i < 5; i++) 
 			{
-				Digram digram = cipherTextStats.get(sizeTextStats - 1 - i);
+				Bigram digram = cipherTextStats.get(sizeTextStats - 1 - i);
 				String s = "" + digram.getFirstCharacter() + digram.getSecondCharacter();
-				//acquisisci tutti i possibili digrammi dopo il primo del testo
-				ArrayList<String> digrams = this.getFollowingDigrams(s); //funzionante
-				possibleKeys = this.findPossibleKeys(s, digrams, commonWord.get(1)); // funzionante
+				ArrayList<String> digrams = this.getFollowingDigrams(s);
+				possibleKeys = this.findPossibleKeys(s, digrams, commonWord.get(1)); 
 				retList.addAll(this.tryToDec(possibleKeys));
 			}
 			return retList;
 		}
 	}
 	
-	private ArrayList<Digram> findCipherTextStats()
+	private ArrayList<Bigram> findCipherTextStats()
 	{
 		TreeMap<String, Integer> statistics = new TreeMap<String, Integer>();
-		ArrayList<Digram> ret_list = new ArrayList<Digram>();
+		ArrayList<Bigram> ret_list = new ArrayList<Bigram>();
 		char [] array = this.cipherText.toCharArray();
 		int size = array.length;
 		int i;
@@ -132,7 +130,7 @@ public class FrequencyAnalysisAttack {
 			char [] vect = key.toCharArray();
 			String s1 = "" + vect[0];
 			String s2 = "" + vect[1];
-			ret_list.add(new Digram(s1, s2, (int) value));
+			ret_list.add(new Bigram(s1, s2, (int) value));
 		}
 
 		Collections.sort(ret_list);
@@ -160,17 +158,17 @@ public class FrequencyAnalysisAttack {
 		return digrams;
 	}
 	
-	private ArrayList<String> findPossibleKeys(String knownCodedDigram, ArrayList<String> foundDigrams, String plainDigram)
+	private ArrayList<String> findPossibleKeys(String knownCodedBigram, ArrayList<String> foundBigrams, String plainBigram)
 	{
 		ArrayList<String> possibleKeys = new ArrayList<String>();
 		KnownPlaintext knownPlain = new KnownPlaintext();
 		
-		for(String s : foundDigrams)
+		for(String s : foundBigrams)
 		{
-			String codedDigram = knownCodedDigram + s;
+			String codedDigram = knownCodedBigram + s;
 			String res;
 			try {
-				res = knownPlain.attack(plainDigram, codedDigram);
+				res = knownPlain.attack(plainBigram, codedDigram);
 				possibleKeys.add(res);
 			} catch (PlainTextException e) {
 				e.printStackTrace();
@@ -182,7 +180,7 @@ public class FrequencyAnalysisAttack {
 	private ArrayList<String> tryToDec(ArrayList<String> keys)
 	{
 		ArrayList<String> ret = new ArrayList<String>();
-		Pattern pattern = Pattern.compile("\\\\s{2,}|[a-z&&[^aeiou]]{5,}");
+		Pattern pattern = Pattern.compile("\\s{2,}|[a-z&&[^aeiou]]{5,}");
 		Hill ciph = new Hill();
 		for(String s : keys)
 		{
@@ -199,6 +197,31 @@ public class FrequencyAnalysisAttack {
 			{
 				continue;
 			}
+		}
+		return ret;
+	}
+	
+	public String decCipherText(String key) {
+		Hill plaintext = new Hill();
+		try {
+				plaintext.setKey(key);
+			}catch(InvalidKeyException E) {
+				System.out.println("Chiave inserita non valida.\n");	
+		}
+		return plaintext.dec(this.cipherText);
+	}
+	
+	public String printGenStats()
+	{
+		return this.genBigramStats.printCollection();
+	}
+	
+	public String printCipherTextStats()
+	{
+		String ret = "";
+		for(Bigram b : this.cipherTextStats)
+		{
+			ret += b.printDigram() + "\n";
 		}
 		return ret;
 	}

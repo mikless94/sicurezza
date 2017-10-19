@@ -1,13 +1,13 @@
 package FrequencyAnalysis;
 
-public class Digram implements Comparable<Digram> {
+public class Bigram implements Comparable<Bigram> {
 	
 	private String firstCharacter;
 	private String secondCharacter;
 	private int frequency;
 	
 	
-	public Digram(String firstCharacter, String secondaCharacter, int frequency) {
+	public Bigram(String firstCharacter, String secondaCharacter, int frequency) {
 		this.firstCharacter = firstCharacter;
 		this.secondCharacter = secondaCharacter;
 		this.frequency = frequency;
@@ -52,13 +52,13 @@ public class Digram implements Comparable<Digram> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Digram other = (Digram) obj;
+		Bigram other = (Bigram) obj;
 		if (frequency != other.frequency)
 			return false;
 		return true;
 	}
 	@Override
-	public int compareTo(Digram o) {
+	public int compareTo(Bigram o) {
 		int freq = this.frequency - o.frequency;
 	if(freq > 0) 
 			return 1;

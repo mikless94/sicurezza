@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import FrequencyAnalysis.Digram;
+import FrequencyAnalysis.Bigram;
 
-public class DigramsCollection {
+public class BigramsCollection {
 	
-	private ArrayList<Digram> digrams;
+	private ArrayList<Bigram> digrams;
 	
-	public DigramsCollection() 
+	public BigramsCollection() 
 	{
 		this.digrams = new ArrayList<>();
 	}
@@ -62,7 +62,7 @@ public class DigramsCollection {
 			while(stringLine != null) {
 				String[] current_str = stringLine.split("\\s+");
 				if(alphabet.contains(current_str[0]) && alphabet.contains(current_str[1])) {
-					this.digrams.add(new Digram(current_str[0], current_str[1], Integer.parseInt(current_str[6])));
+					this.digrams.add(new Bigram(current_str[0], current_str[1], Integer.parseInt(current_str[6])));
 				}
 				stringLine = buf.readLine();
 			}
@@ -78,7 +78,7 @@ public class DigramsCollection {
 	public String printCollection()
 	{
 		String s = "";
-		for(Digram d : this.digrams)
+		for(Bigram d : this.digrams)
 		{
 			s += d.printDigram() + "\n";
 		}
@@ -91,7 +91,7 @@ public class DigramsCollection {
 		return Integer.toString(this.digrams.size());
 	}
 	
-	public ArrayList<Digram> getDigramCollection(){
+	public ArrayList<Bigram> getDigramCollection(){
 		return this.digrams;
 	}
 	
