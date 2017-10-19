@@ -8,14 +8,6 @@ import Cipher.InvalidKeyException;
 
 public class BruteAttack {
 	
-	//proprietà di una generica chiave di Hill:7
-	//determinante != 0
-	//determinante non deve avere fattori comuni con la base modulare. 
-	//tale rischio è scongiurato se il modulo è un numero primo (come accade in questo caso)
-	
-	//idea possibile --> una volta decodificato applicare le euristiche
-	//se euristica non è rispettata saltare alla prossima chaive
-	
 	private int num_keys = 0;
 	private Hill h = new Hill();
 	private String k = "";
