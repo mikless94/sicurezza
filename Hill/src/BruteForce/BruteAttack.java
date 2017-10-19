@@ -8,14 +8,6 @@ import Cipher.InvalidKeyException;
 
 public class BruteAttack {
 	
-	//proprietà di una generica chiave di Hill:7
-	//determinante != 0
-	//determinante non deve avere fattori comuni con la base modulare. 
-	//tale rischio è scongiurato se il modulo è un numero primo (come accade in questo caso)
-	
-	//idea possibile --> una volta decodificato applicare le euristiche
-	//se euristica non è rispettata saltare alla prossima chaive
-	
 	private int num_keys = 0;
 	private Hill h = new Hill();
 	private String k = "";
@@ -34,6 +26,7 @@ public class BruteAttack {
 	 */
 	public void setwordLength(int wordLength) {
 		this.wordLength = wordLength;
+		num_keys = 0;
 	}
 	
 	
@@ -50,10 +43,11 @@ public class BruteAttack {
 	 */
 	public void setSeqCons(int seqCons) {
 		this.seqCons = seqCons;
+		num_keys = 0;
 	}
 
 	public void attack (String cipherText) {
-		Pattern patternIta = Pattern.compile("(.)\\1{2,}|,\\S|'{2,}|\\s{2,}|[a-z&&[^aeiou]]{"+seqCons+",}|\\w{"+wordLength+",}\\b");
+		Pattern patternIta = Pattern.compile("(.)\\1{2,}|,\\S|'{2,}|\\s{2,}|[a-z&&[^aeiou]]{"+(seqCons+1)+",}|\\w{"+(wordLength+1)+",}\\b");
 		
 		for (int i=0; i<29; i++) {
 			for (int j=0; j<29; j++) {
@@ -76,14 +70,14 @@ public class BruteAttack {
 						Matcher matcherIta = patternIta.matcher(plainText);
 						if (!matcherIta.find()) {
 							num_keys++;
-							System.out.println(plainText);
+							System.out.println(plainText+"\t##"+k+"##");
 						}
 					}	
 				}
 			}
 		}
-		System.out.println("numero chiavi con lunghezza parola "+wordLength+" e numero massimo di consonanti consecutive "+seqCons+" :" +num_keys+"\n");
-		System.out.println("######################################################################");
+		System.out.println("numero chiavi con lunghezza parola "+(wordLength)+" e numero massimo di consonanti consecutive "+(seqCons)+" :" +num_keys+"\n");
+		System.out.println("------------------------------------------------------------------------");
 	}
 }
 
