@@ -15,17 +15,6 @@ public class BruteTest {
 	public static void main(String[] args) {
 		BruteAttack brute = new BruteAttack();
 		Object[] options = {"Yes", "No"};
-		/*int n = JOptionPane.showOptionDialog(null,"Would you choose maximum word length?\nWarning: Default word length is "+(DEFAULT_WORD_LENGTH),"Brute Force Attack",
-				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-		if (n == 0)
-			wordLength =Integer.parseInt( JOptionPane.showInputDialog("Insert maximum word length:"));
-		int m = JOptionPane.showOptionDialog(null,"Would you choose maximum number of consecutive consonants?\nWarning: Default value is "+(DEFAULT_CONSONANTS),"Brute Force Attack",
-				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-		if (m == 0)
-			seqCons =Integer.parseInt( JOptionPane.showInputDialog("Insert maximum number of consecutive consonants:"));
-		
-		brute.setwordLength(wordLength);
-		brute.setSeqCons(seqCons);*/
 		
 		for (String s: testStrings) {
 			System.out.println(("###########################################################\nAttacco di forza bruta alla stringa "+s+"\n###########################################################"));
