@@ -10,7 +10,7 @@ public class FreqTest {
 		ArrayList<String> decTexts = new ArrayList<String>();
 		FrequencyAnalysisAttack fq = new FrequencyAnalysisAttack();
 		String genStatsFile = "Jones2004_Bigram.txt";
-		String cipherTextFile = "ciphertext.txt";
+		String cipherTextFile = "ciphertext2.txt";
 		boolean flag = true;
 		Object[] options = {"Yes", "No"};
 		

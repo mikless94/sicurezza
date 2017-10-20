@@ -90,7 +90,6 @@ public class Hill implements ClassicCipher {
 			for (int i=0 ; i<lenKey; i++) {
 				int number = rand.nextInt(29);
 				k += reversedDict.get(number);
-				System.out.println(("numero casuale:"+number+ "\tcarattere:"+reversedDict.get(number)));
 			}
 		} while (!checkKey(k));
 		this.key = k;
