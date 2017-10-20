@@ -29,7 +29,7 @@ public class KnownPlaintext {
 				cipherMatrix[2] = Hill.getDict().get(Character.toString(cipherText.charAt(j)));
 				cipherMatrix[3] = Hill.getDict().get(Character.toString(cipherText.charAt(j+1)));
 				
-				if (plainMatrix[0]*plainMatrix[3] - plainMatrix[1]*plainMatrix[2] != 0)
+				if (((plainMatrix[0]*plainMatrix[3] - plainMatrix[1]*plainMatrix[2])%29) != 0)
 					comp = 0;				
 			}
 		}
