@@ -12,7 +12,7 @@ public class BruteTest {
 			"ushssoyvxiywkbb hsdmyhyee blhgg,,z, ,znznqywgggvhv'qkberjy",
 			"m bqhigabqkmawahofsbhx'frc'zavfqbntgxpo'r ckudiqrqrvexj,jtesllffo'i vttytwofhjgohtbays'i"};
 	
-	public static void main(String[] args) { 
+	public static void main(String[] args) {  
 		BruteAttack brute = new BruteAttack();
 		Object[] options = {"Yes", "No"};
 		
