@@ -12,9 +12,13 @@ public class BruteTest {
 			"ushssoyvxiywkbb hsdmyhyee blhgg,,z, ,znznqywgggvhv'qkberjy",
 			"m bqhigabqkmawahofsbhx'frc'zavfqbntgxpo'r ckudiqrqrvexj,jtesllffo'i vttytwofhjgohtbays'i"};
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) { 
 		BruteAttack brute = new BruteAttack();
 		Object[] options = {"Yes", "No"};
+		
+		System.out.println("Per trovare subito la soluzione per il dataset assegnato inserire le seguenti combinazioni");
+		System.out.println("massima lunghezza parola / massimo numero di consonanti");
+		System.out.println("9 / 3 \n9 / 2\n14 / 3\n9 / 3\n7 / 3\n8 / 2 \n");
 		
 		for (String s: testStrings) {
 			System.out.println(("###########################################################\nAttacco di forza bruta alla stringa "+s+"\n###########################################################"));
@@ -48,7 +52,9 @@ public class BruteTest {
 				}
 				
 			} while (n!=0);
+			
 		}
+		System.out.println("##### FINISH #####");
 
 	}
 
