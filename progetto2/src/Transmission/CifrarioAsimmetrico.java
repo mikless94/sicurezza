@@ -37,7 +37,7 @@ public class CifrarioAsimmetrico {
 		this.padding = padding;
 	}
 
-	public void ciao() {}
+	public void ciao() {System.out.println("sono ambrogio");}
 	
 	
 
