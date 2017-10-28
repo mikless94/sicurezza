@@ -21,18 +21,19 @@ public class KnownPlaintext {
 		for (int i = 0; (i < plainText.length() - cipher.getM()) && (comp == 1); i = i+cipher.getM()){
 			plainMatrix[0] = Hill.getDict().get(Character.toString(plainText.charAt(i)));
 			plainMatrix[1] = Hill.getDict().get(Character.toString(plainText.charAt(i+1)));
+			plainMatrix[2] = Hill.getDict().get(Character.toString(plainText.charAt(i+2)));
+			plainMatrix[3] = Hill.getDict().get(Character.toString(plainText.charAt(i+3)));
+			
 			cipherMatrix[0] = Hill.getDict().get(Character.toString(cipherText.charAt(i)));
 			cipherMatrix[1] = Hill.getDict().get(Character.toString(cipherText.charAt(i+1)));
-			for (int j = i + 2; (j < plainText.length()) && (comp == 1); j = j + cipher.getM()){
-				plainMatrix[2] = Hill.getDict().get(Character.toString(plainText.charAt(j)));
-				plainMatrix[3] = Hill.getDict().get(Character.toString(plainText.charAt(j+1)));
-				cipherMatrix[2] = Hill.getDict().get(Character.toString(cipherText.charAt(j)));
-				cipherMatrix[3] = Hill.getDict().get(Character.toString(cipherText.charAt(j+1)));
-				
-				if (((plainMatrix[0]*plainMatrix[3] - plainMatrix[1]*plainMatrix[2])%29) != 0)
+			cipherMatrix[2] = Hill.getDict().get(Character.toString(cipherText.charAt(i+2)));
+			cipherMatrix[3] = Hill.getDict().get(Character.toString(cipherText.charAt(i+3)));
+		
+			if (((plainMatrix[0]*plainMatrix[3] - plainMatrix[1]*plainMatrix[2])%29) != 0)
 					comp = 0;				
-			}
 		}
+			
+		
 		
 		if (((plainMatrix[0]*plainMatrix[3] - plainMatrix[1]*plainMatrix[2]) % 29) == 0)
 			throw new PlainTextException("Non esistono due digrammi nel plainText " + plainText + " tale per cui la matrice X sia invertibile!");
