@@ -1,5 +1,7 @@
 package CifrarioIbrido;
 
+import java.security.KeyPair;
+
 public class AsymmetricCipher {
 	
 	//
@@ -39,6 +41,10 @@ public class AsymmetricCipher {
 		this.padding = padding;
 	}
 	
+	public KeyPair genKeyPair() {
+		
+		return null;
+	}
 	
 
 }
