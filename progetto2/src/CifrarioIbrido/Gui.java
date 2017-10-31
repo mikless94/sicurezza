@@ -43,6 +43,14 @@ public class Gui extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+		
+		JButton btnCiao = new JButton("ciao");
+		btnCiao.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//inc.addUser(name, dimKey, padding);
+			}
+		});
+		btnCiao.setBounds(140, 126, 89, 23);
+		contentPane.add(btnCiao);
 	}
-
 }

@@ -12,17 +12,19 @@ public class KnownPlaintextAttack {
 			//Primo attacco:
 			
 			System.out.println("--------------------CHIAVE 1-------------------");
-			System.out.println("PLAINTEXT: attacco all'alba");
-			System.out.println("CIPHERTEXT: axiarpjuzhvizhz'");
-			String key1 = cipher.attack("attacco all'alba", "axiarpjuzhvizhz'");
+			//System.out.println("PLAINTEXT: attacco all'alba");
+			//System.out.println("CIPHERTEXT: axiarpjuzhvizhz'");
+			System.out.println("PLAINTEXT: sasasasaft");
+			System.out.println("CIPHERTEXT: zozozozoap");
+			String key1 = cipher.attack("sasasasaft", "zozozozoap");
 			System.out.println("La chiave utilizzata per il PRIMO testo è: " + key1);
 			
 			Hill hill1 = new Hill();
 			
 			try{
 				hill1.setKey(key1);
-				String cipherText1 = hill1.enc("attacco all'alba");
-				System.out.println(cipherText1.equals("axiarpjuzhvizhz'"));
+				String cipherText1 = hill1.enc("sasasasaft");
+				System.out.println(cipherText1.equals("zozozozoap"));
 				
 			} catch (InvalidKeyException ex){} catch (InvalidPlaintext ex){}
 			System.out.println("-----------------------------------------------");
@@ -31,17 +33,17 @@ public class KnownPlaintextAttack {
 			/*Secondo attacco:
 			*/
 			System.out.println("--------------------CHIAVE 2-------------------");
-			System.out.println("PLAINTEXT: sicurezza informatica");
-			System.out.println("CIPHERTEXT: xrjddqf,jgimyexebfyojg");
-			String key2 = cipher.attack("sicurezza informatica", "xrjddqf,jgimyexebfyojg");
+			System.out.println("PLAINTEXT: abffccceab");
+			System.out.println("CIPHERTEXT: lbjeeqp lb");
+			String key2 = cipher.attack("abffccceab", "lbjeeqp lb");
 			System.out.println("La chiave utilizzata per il SECONDO testo è: " + key2);
 			
 			Hill hill2 = new Hill();
 			
 			try{
 				hill2.setKey(key2);
-				String cipherText2 = hill2.enc("sicurezza informatica");
-				System.out.println(cipherText2.equals("xrjddqf,jgimyexebfyojg"));
+				String cipherText2 = hill2.enc("abffccceab");
+				System.out.println(cipherText2.equals("lbjeeqp lb"));
 				
 			} catch (InvalidKeyException ex){} catch (InvalidPlaintext ex){}
 			System.out.println("-----------------------------------------------");			

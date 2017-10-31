@@ -1,6 +1,9 @@
 package CifrarioIbrido;
 
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class AsymmetricCipher {
 	
@@ -41,9 +44,10 @@ public class AsymmetricCipher {
 		this.padding = padding;
 	}
 	
-	public KeyPair genKeyPair() {
-		
-		return null;
+	public KeyPair genKeyPair() throws NoSuchAlgorithmException {
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+		keyPairGenerator.initialize(dimKey, new SecureRandom());
+		return keyPairGenerator.generateKeyPair();
 	}
 	
 
