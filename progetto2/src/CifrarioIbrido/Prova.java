@@ -1,11 +1,11 @@
 package CifrarioIbrido;
 
 import java.io.IOException;
-import java.nio.file.*;
+
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
+
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -19,7 +19,10 @@ public class Prova {
 		
 		inc.addUser("Michele", 1024, "PKCS1Padding");
 		inc.addUser("Giuseppe", 2048, "PKCS1Padding");
-		System.out.println(Base64.getEncoder().encodeToString(inc.encodeSymmetricPrivateKey ("Giuseppe", "AES", "CBC")));
+		inc.messageToSend ("Michele", "Giuseppe", "AES", "CBC", "PKCS5Padding", true , "C:\\Users\\Michele\\Desktop\\messaggiopergiuseppe.txt");
+		//System.out.println("chiave simmetrica cifrata con RSA: "+inc.encodeSymmetricPrivateKey ("Giuseppe", "AES", "CBC"));
+		
+		//System.out.println("size chiave cifrata "+s.length());
 		/*Path fileLocation = Paths.get("C:\\Users\\Michele\\git\\sicurezza\\progetto2\\publicKeyFile.pub");
 		byte[] data = Files.readAllBytes(fileLocation);
 		String encodedPubKey = Base64.getEncoder().encodeToString(data);

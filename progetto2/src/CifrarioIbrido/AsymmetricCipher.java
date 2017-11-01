@@ -1,9 +1,18 @@
 package CifrarioIbrido;
 
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.util.Base64;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 public class AsymmetricCipher {
 	
@@ -15,9 +24,8 @@ public class AsymmetricCipher {
 	 * @param dimKey
 	 * @param padding
 	 */
-	public AsymmetricCipher(int dimKey, String padding) {
-		this.dimKey = dimKey;
-		this.padding = padding;
+	public AsymmetricCipher() {
+	
 	}
 	/**
 	 * @return the dimKey
@@ -49,6 +57,23 @@ public class AsymmetricCipher {
 		keyPairGenerator.initialize(dimKey, new SecureRandom());
 		return keyPairGenerator.generateKeyPair();
 	}
+	public String asymmetricEncoding(SecretKey secKey, PublicKey pubKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		Cipher c = Cipher.getInstance("RSA/ECB/"+padding);
+		c.init(Cipher.ENCRYPT_MODE, pubKey);
+		
+		//generiamo chiave privata del cifrario simmetrico
+		//secKey = symCipher.genSecretKey(cipherType, mode);
+		//cifro chiave privata appena generata con la chiave pubblica del cifrario RSA relativa al destinatario desiderato
+		byte [] cipheredKeyBytes = c.doFinal(secKey.getEncoded());
+		//System.out.println(Base64.getEncoder().encodeToString(cipheredKeyBytes));
+		
+		/*c.init(Cipher.DECRYPT_MODE, privateKey);
+		byte[] decodificato  = c.doFinal(ciphertext);
+		System.out.println("Testo decifrato: " + new String(decodificato,"UTF8"));*/
+		return Base64.getEncoder().encodeToString(cipheredKeyBytes);
+	}
+	
+	
 	
 
 }

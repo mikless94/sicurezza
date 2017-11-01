@@ -1,11 +1,17 @@
 package CifrarioIbrido;
 
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Base64;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
 public class SymmetricCipher {
@@ -39,9 +45,8 @@ public class SymmetricCipher {
 	 * @param cipherType
 	 * @param mode
 	 */
-	public SymmetricCipher(String cipherType, String mode) {
-		this.cipherType = cipherType;
-		this.mode = mode;
+	public SymmetricCipher() {
+	
 	}
 
 
@@ -119,6 +124,13 @@ public class SymmetricCipher {
 		
 		keyGenerator.init(this.getDimKey(), new SecureRandom()); 
 		return keyGenerator.generateKey();
+	}
+	
+	public String symmetricEncoding (byte[] data, SecretKey secKey ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
+		cipher.init(Cipher.ENCRYPT_MODE, secKey);
+		byte [] cipherMessage = cipher.doFinal(data);
+		return Base64.getEncoder().encodeToString(cipherMessage);
 	}
 
 }
