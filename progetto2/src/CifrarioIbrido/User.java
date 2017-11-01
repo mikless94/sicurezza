@@ -5,12 +5,30 @@ import java.security.*;
 public class User {
 	private String name;
 	private PrivateKey key;
+	private String padding;
 	
 	
-	public User(String name, PrivateKey key) {
+	/**
+	 * @return the padding
+	 */
+	public String getPadding() {
+		return padding;
+	}
+
+
+	/**
+	 * @param padding the padding to set
+	 */
+	public void setPadding(String padding) {
+		this.padding = padding;
+	}
+
+
+	public User(String name, PrivateKey key, String padding) {
 		super();
 		this.name = name;
 		this.key = key;
+		this.padding = padding;
 	}
 
 

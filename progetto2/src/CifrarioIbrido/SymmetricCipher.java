@@ -1,12 +1,9 @@
 package CifrarioIbrido;
 
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -39,7 +36,19 @@ public class SymmetricCipher {
 		this.dimKey = dimKey;
 	}
 
-
+	public void computeDimKey () {
+		switch (cipherType) {
+		case "AES" :
+			this.setDimKey(128);
+			break;
+		case "DES" :
+			this.setDimKey(56);
+			break;
+		case "DESede":
+			this.setDimKey(168);
+			break;
+		}
+	}
 
 	/**
 	 * @param cipherType
@@ -131,6 +140,21 @@ public class SymmetricCipher {
 		cipher.init(Cipher.ENCRYPT_MODE, secKey);
 		byte [] cipherMessage = cipher.doFinal(data);
 		return Base64.getEncoder().encodeToString(cipherMessage);
+	}
+
+
+	public byte[] symmetricDecoding(String cipherType, String mode, String padding, SecretKey secKey,
+			String message) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		// TODO Auto-generated method stub
+		System.out.println("tipo di cifrario: "+cipherType);
+		System.out.println("mode: "+mode);
+		System.out.println("padding: "+padding);
+		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
+		cipher.init(Cipher.DECRYPT_MODE, secKey);
+		System.out.println("message: "+message);
+		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
+		return decodedMessageBytes;
+		//return Base64.getEncoder().encodeToString(decodedMessageBytes);
 	}
 
 }

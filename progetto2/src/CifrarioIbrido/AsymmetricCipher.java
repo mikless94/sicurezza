@@ -4,6 +4,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -71,6 +72,13 @@ public class AsymmetricCipher {
 		byte[] decodificato  = c.doFinal(ciphertext);
 		System.out.println("Testo decifrato: " + new String(decodificato,"UTF8"));*/
 		return Base64.getEncoder().encodeToString(cipheredKeyBytes);
+	}
+	public byte[] asymmetricDecoding(String cipherSymmetricKey, String padding, PrivateKey pvtKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		// TODO Auto-generated method stub
+		Cipher c = Cipher.getInstance("RSA/ECB/"+padding);
+		c.init(Cipher.DECRYPT_MODE, pvtKey);
+		return c.doFinal(Base64.getDecoder().decode(cipherSymmetricKey));
+		
 	}
 	
 	
