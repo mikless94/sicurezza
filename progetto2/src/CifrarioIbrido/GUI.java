@@ -177,15 +177,16 @@ public class GUI {
 				String keyDimension = KeyComboBox.getSelectedItem().toString();
 				String padding = PaddingComboBox.getSelectedItem().toString();
 				try {
-					inc.addUser(username, Integer.parseInt(keyDimension), padding);
+					boolean success = inc.addUser(username, Integer.parseInt(keyDimension), padding);
+					if (success)
+						textArea.append(username + "\n");
 				} catch (NoSuchAlgorithmException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-				UsernameTextField.setText(null);
+				}			
 			}
 		});
 		btnAdd.setBounds(138, 210, 90, 28);
@@ -227,6 +228,12 @@ public class GUI {
 		btnDelete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String username = DeleteTextField.getText();
+				try {
+					boolean success = inc.deleteUser(username);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				if(inc.getUtenti().contains(username)){
 					textArea.setText(null);
 					inc.getUtenti().remove(username);

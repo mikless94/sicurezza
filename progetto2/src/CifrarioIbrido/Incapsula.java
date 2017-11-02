@@ -39,17 +39,20 @@ public class Incapsula {
 		return utenti;
 	}
 
-	public void addUser (String name, int dimKey, String padding) throws NoSuchAlgorithmException, IOException {
+	public boolean addUser (String name, int dimKey, String padding) throws NoSuchAlgorithmException, IOException {
 		asymCipher.setDimKey(dimKey);
 		asymCipher.setPadding(padding);
 		
 		KeyPair pair = asymCipher.genKeyPair();
 		User utente = new User(name, pair.getPrivate(), padding);
-		utenti.add(utente);
+		boolean success = utenti.add(utente);
 		/*byte pubblica[] = pair.getPublic().getEncoded(); 
 		String encodedPubKey = Base64.getEncoder().encodeToString(pubblica);
 		System.out.println("Pubblica Base64 prima di salvare: " + encodedPubKey);*/
-		FileManagement.savePublicKey(pubKeyFile, utente.getName(), pair.getPublic(), padding);
+		if (success)
+			FileManagement.savePublicKey(pubKeyFile, utente.getName(), pair.getPublic(), padding);
+		
+		return success;
 	}
 	
 	public void deleteUser (String name) throws IOException {
