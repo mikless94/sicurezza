@@ -1,8 +1,10 @@
 package CifrarioIbrido;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +17,6 @@ import java.util.Base64;
 import java.util.HashSet;
 
 import javax.crypto.BadPaddingException;
-
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
@@ -55,20 +56,35 @@ public class Incapsula {
 		return success;
 	}
 	
-	public void deleteUser (String name) throws IOException {
-		utenti.remove(new User (name));
-		BufferedReader in = new BufferedReader(new FileReader(pubKeyFile));
-	    String read = null;
-	    while ((read = in.readLine()) != null) {
-	        String[] splited = read.split("\\s+");
-	        if (splited[0].compareTo(name)==0) {
-	        	
-	        	//cancellare riga
-	        }
-	    }
-	    in.close();
-		
+	public boolean deleteUser (String name) throws IOException {
+		boolean success = utenti.remove(new User(name));
+		if (success){
+			String tempFile = "myTempFile.txt";
+		     BufferedReader in = new BufferedReader(new FileReader(pubKeyFile));
+		     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+		     String read = null;
+		     while ((read = in.readLine()) != null) {
+		    	 String[] splited = read.split("\\s+");
+		         if (splited[0].compareTo(name)==0)
+		        	 continue;
+		         writer.write(read + System.getProperty("line.separator"));
+		        }
+		     writer.close(); 
+		     in.close();
+		        
+		     BufferedWriter writer2 = new BufferedWriter(new FileWriter(pubKeyFile));
+		     BufferedReader in2 = new BufferedReader(new FileReader(tempFile));
+		     String read2 = null;
+		     while ((read2 = in2.readLine()) != null) {
+		    	 writer2.write(read2 + System.getProperty("line.separator"));
+		    
+		     }
+		     writer2.close();
+		     in2.close();
+		}
+	    return success;
 	}
+
 	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);

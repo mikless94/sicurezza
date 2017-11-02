@@ -167,6 +167,45 @@ public class GUI {
 		textArea.setBounds(20, 50, 247, 138);
 		ViewPanel.add(textArea);
 		
+		JPanel TransmissionPanel = new JPanel();
+		tabbedPane.addTab("Transmission", null, TransmissionPanel, "Click here in order to send a message");
+		TransmissionPanel.setLayout(null);
+		
+		JPanel SendPanel = new JPanel();
+		SendPanel.setBorder(new TitledBorder(null, "Send Message", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		SendPanel.setBounds(6, 6, 273, 322);
+		TransmissionPanel.add(SendPanel);
+		SendPanel.setLayout(null);
+		
+		JComboBox SenderComboBox = new JComboBox();
+		SenderComboBox.setBounds(116, 41, 119, 20);
+		SendPanel.add(SenderComboBox);
+		SenderComboBox.setEnabled(false);
+
+		
+		JComboBox ReceiverComboBox = new JComboBox();
+		ReceiverComboBox.setBounds(116, 89, 119, 20);
+		SendPanel.add(ReceiverComboBox);
+		ReceiverComboBox.setEnabled(false);
+
+		FileTextField = new JTextField();
+		FileTextField.setEditable(false);
+		FileTextField.setBounds(120, 263, 130, 28);
+		SendPanel.add(FileTextField);
+		FileTextField.setColumns(10);
+		
+		JButton btnSend = new JButton("SEND");
+		btnSend.setEnabled(false);
+		btnSend.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+			}
+		});
+		btnSend.setFont(new Font("SansSerif", Font.BOLD, 12));
+		btnSend.setToolTipText("Send Message");
+		btnSend.setBounds(425, 268, 90, 28);
+		TransmissionPanel.add(btnSend);
+		
 		JButton btnAdd = new JButton("ADD");
 		btnAdd.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnAdd.setToolTipText("Add user");
@@ -178,15 +217,29 @@ public class GUI {
 				String padding = PaddingComboBox.getSelectedItem().toString();
 				try {
 					boolean success = inc.addUser(username, Integer.parseInt(keyDimension), padding);
-					if (success)
+					if (success){
+						if (textArea.getText().equals(" "))
+							textArea.setText(null);
 						textArea.append(username + "\n");
+						SenderComboBox.addItem(username);
+						ReceiverComboBox.addItem(username);
+					
+						if(SenderComboBox.getItemCount() > 0)
+							SenderComboBox.setEnabled(true);
+							
+						if(ReceiverComboBox.getItemCount() > 0)
+							ReceiverComboBox.setEnabled(true);
+						
+						if(SenderComboBox.getItemCount() > 0 &&	!FileTextField.getText().equals(""))		
+							btnSend.setEnabled(true);
+					}
 				} catch (NoSuchAlgorithmException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}			
+				}
 			}
 		});
 		btnAdd.setBounds(138, 210, 90, 28);
@@ -230,21 +283,28 @@ public class GUI {
 				String username = DeleteTextField.getText();
 				try {
 					boolean success = inc.deleteUser(username);
+					if(success){
+						SenderComboBox.removeItem(username);
+						ReceiverComboBox.removeItem(username);
+						textArea.setText(null);
+						for(User i :inc.getUtenti()){
+							textArea.append(i.getName() + "\n");							
+						}
+					}
+					if(inc.getUtenti().size()==0)
+						textArea.setText(" ");
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				if(inc.getUtenti().contains(username)){
-					textArea.setText(null);
-					inc.getUtenti().remove(username);
-					for(User i :inc.getUtenti()){
-						textArea.append(i.getName() + "\n");							
-					}
-				}
-				if(inc.getUtenti().size()==0)
-					textArea.setText(" ");
-					
 				DeleteTextField.setText(null);
+				if(SenderComboBox.getItemCount() == 0){
+					SenderComboBox.setEnabled(false);
+					btnSend.setEnabled(false);
+				}
+				if(ReceiverComboBox.getItemCount() == 0)
+					ReceiverComboBox.setEnabled(false);
+
 			}
 		});
 		btnDelete.setBounds(193, 251, 90, 21);
@@ -257,16 +317,6 @@ public class GUI {
 		JLabel lblUserInNetwork = new JLabel("User in network :");
 		lblUserInNetwork.setBounds(20, 28, 111, 16);
 		ViewPanel.add(lblUserInNetwork);
-		
-		JPanel TransmissionPanel = new JPanel();
-		tabbedPane.addTab("Transmission", null, TransmissionPanel, "Click here in order to send a message");
-		TransmissionPanel.setLayout(null);
-		
-		JPanel SendPanel = new JPanel();
-		SendPanel.setBorder(new TitledBorder(null, "Send Message", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		SendPanel.setBounds(6, 6, 273, 322);
-		TransmissionPanel.add(SendPanel);
-		SendPanel.setLayout(null);
 		
 		JLabel lblSender = new JLabel("Sender : ");
 		lblSender.setBounds(19, 43, 59, 16);
@@ -299,12 +349,6 @@ public class GUI {
 		lblChooseMessage.setBounds(19, 235, 115, 16);
 		SendPanel.add(lblChooseMessage);
 		
-		FileTextField = new JTextField();
-		FileTextField.setEditable(false);
-		FileTextField.setBounds(120, 263, 130, 28);
-		SendPanel.add(FileTextField);
-		FileTextField.setColumns(10);
-		
 		JButton btnApriFile = new JButton("Open file");
 		btnApriFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -312,19 +356,16 @@ public class GUI {
 				OpenFile file = new OpenFile();
 				filename = file.pickMe();
 				FileTextField.setText(filename);
+				
+				if(SenderComboBox.getItemCount() > 0 &&	!FileTextField.getText().equals(""))		
+					btnSend.setEnabled(true);
+				if(FileTextField.getText().equals(""))
+					btnSend.setEnabled(false);
 			}
 		});
 		btnApriFile.setBounds(19, 263, 77, 28);
 		SendPanel.add(btnApriFile);
-		
-		Choice SenderChoice = new Choice();
-		SenderChoice.setBounds(106, 43, 140, 22);
-		SendPanel.add(SenderChoice);
-		
-		Choice ReceiverChoice = new Choice();
-		ReceiverChoice.setBounds(106, 85, 140, 22);
-		SendPanel.add(ReceiverChoice);
-		
+	
 		JPanel SignPanel = new JPanel();
 		SignPanel.setBorder(new TitledBorder(null, "Digital Sign", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		SignPanel.setBounds(291, 6, 312, 228);
@@ -392,18 +433,6 @@ public class GUI {
 		JLabel lblSendMessage = new JLabel("Send Message :");
 		lblSendMessage.setBounds(301, 274, 106, 16);
 		TransmissionPanel.add(lblSendMessage);
-		
-		JButton btnSend = new JButton("SEND");
-		btnSend.setEnabled(false);
-		btnSend.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-			}
-		});
-		btnSend.setFont(new Font("SansSerif", Font.BOLD, 12));
-		btnSend.setToolTipText("Send Message");
-		btnSend.setBounds(425, 268, 90, 28);
-		TransmissionPanel.add(btnSend);
 		
 		JLabel label_1 = new JLabel("");
 		label_1.setIcon(new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));

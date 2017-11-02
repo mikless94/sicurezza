@@ -17,7 +17,7 @@ public class OpenFile {
 			fileName = file_chooser.getSelectedFile().getAbsolutePath();
 		}
 		else{
-			fileName = null;
+			fileName = "";
 		}
 		return fileName;
 	}
