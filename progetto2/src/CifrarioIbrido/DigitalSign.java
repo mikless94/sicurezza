@@ -8,9 +8,11 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.Base64;
 
 public class DigitalSign {
 	
@@ -19,12 +21,9 @@ public class DigitalSign {
 	
 
 	/**
-	 * @param dimKey
-	 * @param type
 	 */
-	public DigitalSign(int dimKey, String type) {
-		this.dimKey = dimKey;
-		this.type = type;
+	public DigitalSign() {
+		
 	}
 
 
@@ -69,13 +68,14 @@ public class DigitalSign {
 	}
 
 
-	public void sign(String fileToSend, User sender) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+	public String sign(String messagePath, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
 		// TODO Auto-generated method stub
-		Signature dsa = Signature.getInstance("SHA1withDSA");
-		dsa.initSign(sender.getSignKey());
-		Path path = Paths.get(fileToSend);
+		Signature dsa = Signature.getInstance("signType");
+		dsa.initSign(privateKey);
+		Path path = Paths.get(messagePath);
 		dsa.update(Files.readAllBytes(path));
 		byte[] firma = dsa.sign();
+		return Base64.getEncoder().encodeToString(firma);
 	}
 
 }

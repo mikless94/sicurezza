@@ -34,6 +34,12 @@ public class FileManagement {
 		out.close();
 		
 	}
+
+	public static void createFileToSend(String fileToSend, String cipheredKey, String cipheredMessage, String sender,
+			String recipient, String cipherType, String mode, String padding, boolean b, String sign) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 }

@@ -76,13 +76,14 @@ public class Incapsula {
 		String cipheredKey = this.encodeSymmetricPrivateKey(recipient, cipherType, mode, secKey);
 		//z
 		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode);
-		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, false);
+		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding);
 		
 	}
 	
-	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath, int dimSignKey, String signType) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath, int dimSignKey, String signType) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);
+		
 		
 		SecretKey secKey = symCipher.genSecretKey(cipherType, mode);
 		System.out.println("Secret key generata dal destinatario: " + secKey.toString());
@@ -90,17 +91,18 @@ public class Incapsula {
 		String cipheredKey = this.encodeSymmetricPrivateKey(recipient, cipherType, mode, secKey);
 		//z
 		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode);
-		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, true);
 		
-		this.digitalSign(fileToSend, sender, dimSignKey, signType);
+		
+		String sign = this.digitalSign(messagePath, sender, dimSignKey, signType);
+		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, true, sign);
 	
 	}
 	
-	private void digitalSign(String fileToSend, String sender, int dimSignKey, String signType) {
+	private String digitalSign(String messagePath, String sender, int dimSignKey, String signType) throws NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException {
 		// TODO Auto-generated method stub
 		digSign.setDimKey(dimSignKey);
 		digSign.setType(signType);
-		User senderSign;
+		
 		
 		KeyPair pair = digSign.genKeyPair();
 		FileManagement.saveDigitalKeysFile(digKeysFile, sender , pair.getPublic(), signType );
@@ -108,12 +110,11 @@ public class Incapsula {
 		for (User utente : utenti) {
 			if (utente.getName().compareTo(sender)==0) {
 				utente.setSignKey(pair.getPrivate());
-				senderSign = utente;
 				break;
 			}
 		}
 		
-		digSign.sign (fileToSend, senderSign);
+		return digSign.sign (messagePath, pair.getPrivate());
 		
 	}
 
