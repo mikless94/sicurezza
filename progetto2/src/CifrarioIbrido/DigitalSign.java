@@ -70,7 +70,7 @@ public class DigitalSign {
 
 	public String sign(String messagePath, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
 		// TODO Auto-generated method stub
-		Signature dsa = Signature.getInstance("signType");
+		Signature dsa = Signature.getInstance(type);
 		dsa.initSign(privateKey);
 		Path path = Paths.get(messagePath);
 		dsa.update(Files.readAllBytes(path));
