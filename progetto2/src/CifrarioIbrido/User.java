@@ -4,10 +4,43 @@ import java.security.*;
 
 public class User {
 	private String name;
-	private PrivateKey key;
+	private PrivateKey asymmetricKey;
 	private String padding;
+	private PrivateKey signKey;
 	
 	
+	/**
+	 * @return the asymmetricKey
+	 */
+	public PrivateKey getAsymmetricKey() {
+		return asymmetricKey;
+	}
+
+
+	/**
+	 * @param asymmetricKey the asymmetricKey to set
+	 */
+	public void setAsymmetricKey(PrivateKey asymmetricKey) {
+		this.asymmetricKey = asymmetricKey;
+	}
+
+
+	/**
+	 * @return the signKey
+	 */
+	public PrivateKey getSignKey() {
+		return signKey;
+	}
+
+
+	/**
+	 * @param signKey the signKey to set
+	 */
+	public void setSignKey(PrivateKey signKey) {
+		this.signKey = signKey;
+	}
+
+
 	/**
 	 * @return the padding
 	 */
@@ -24,11 +57,12 @@ public class User {
 	}
 
 
-	public User(String name, PrivateKey key, String padding) {
+	public User(String name, PrivateKey asymmetricKey, String padding) {
 		super();
 		this.name = name;
-		this.key = key;
+		this.asymmetricKey = asymmetricKey;
 		this.padding = padding;
+
 	}
 
 
@@ -39,18 +73,5 @@ public class User {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-
-	public PrivateKey getKey() {
-		return key;
-	}
-
-
-	public void setKey(PrivateKey key) {
-		this.key = key;
-	}
-	
-	
-	
+	}	
 }

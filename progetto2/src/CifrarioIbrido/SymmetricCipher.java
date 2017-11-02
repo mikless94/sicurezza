@@ -1,5 +1,6 @@
 package CifrarioIbrido;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -10,16 +11,34 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 public class SymmetricCipher {
 	private String cipherType;
 	private String mode;
 	private String padding = "PKCS5Padding";
 	private int dimKey;
+	private IvParameterSpec iv;
 	
 	
-	
-	
+	/**
+	 * @return the iv
+	 */
+	public IvParameterSpec getIv() {
+		return iv;
+	}
+
+
+
+	/**
+	 * @param iv the iv to set
+	 */
+	public void setIv(IvParameterSpec iv) {
+		this.iv = iv;
+	}
+
+
+
 	/**
 	 * @return the dimKey
 	 */
@@ -135,9 +154,27 @@ public class SymmetricCipher {
 		return keyGenerator.generateKey();
 	}
 	
-	public String symmetricEncoding (byte[] data, SecretKey secKey ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public String symmetricEncoding (byte[] data, SecretKey secKey, String mode ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
-		cipher.init(Cipher.ENCRYPT_MODE, secKey);
+	
+		if (mode.compareTo("CBC")==0 || mode.compareTo("CFB")==0) {
+			SecureRandom random = new SecureRandom();
+			byte IVBytes[] = new byte[16];
+			random.nextBytes(IVBytes); 
+			IvParameterSpec iv = new IvParameterSpec(IVBytes);
+			this.setIv(iv);
+
+			
+			try {
+				cipher.init(Cipher.ENCRYPT_MODE, secKey, iv);
+			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			cipher.init(Cipher.ENCRYPT_MODE, secKey);
+		}
 		byte [] cipherMessage = cipher.doFinal(data);
 		return Base64.getEncoder().encodeToString(cipherMessage);
 	}
@@ -150,7 +187,20 @@ public class SymmetricCipher {
 		System.out.println("mode: "+mode);
 		System.out.println("padding: "+padding);
 		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
-		cipher.init(Cipher.DECRYPT_MODE, secKey);
+		
+		if (mode.compareTo("CBC")==0 || mode.compareTo("CFB")==0) {
+			
+			try {
+				cipher.init(Cipher.DECRYPT_MODE, secKey, iv);
+			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			cipher.init(Cipher.DECRYPT_MODE, secKey);
+		}
+		
 		System.out.println("message: "+message);
 		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
 		return decodedMessageBytes;

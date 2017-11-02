@@ -24,11 +24,20 @@ public class Incapsula {
 	
 	private String pubKeyFile = "publicKeyFile.txt";
 	private String fileToSend = "fileToSend.txt";
+	private String digKeysFile = "digKeysFile.txt";
 	
 	private ArrayList<User> utenti = new ArrayList<User>();
 	private SymmetricCipher symCipher = new SymmetricCipher();
 	private AsymmetricCipher asymCipher = new AsymmetricCipher();
+	private DigitalSign digSign = new DigitalSign();
 	
+	/**
+	 * @return the utenti
+	 */
+	public ArrayList<User> getUtenti() {
+		return utenti;
+	}
+
 	public void addUser (String name, int dimKey, String padding) throws NoSuchAlgorithmException, IOException {
 		asymCipher.setDimKey(dimKey);
 		asymCipher.setPadding(padding);
@@ -42,7 +51,7 @@ public class Incapsula {
 		FileManagement.savePublicKey(pubKeyFile, utente.getName(), pair.getPublic(), padding);
 	}
 	
-	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, boolean sign, String messagePath) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);
 		
@@ -51,16 +60,54 @@ public class Incapsula {
 		//y
 		String cipheredKey = this.encodeSymmetricPrivateKey(recipient, cipherType, mode, secKey);
 		//z
-		String cipheredMessage = this.encodeMessage (messagePath, secKey);
-		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
+		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode);
+		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, false);
+		
 	}
 	
-	private String encodeMessage(String messagePath, SecretKey secKey) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath, String dimSignKey, String signType) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+		symCipher.setCipherType(cipherType);
+		symCipher.setMode(mode);
+		
+		SecretKey secKey = symCipher.genSecretKey(cipherType, mode);
+		System.out.println("Secret key generata dal destinatario: " + secKey.toString());
+		//y
+		String cipheredKey = this.encodeSymmetricPrivateKey(recipient, cipherType, mode, secKey);
+		//z
+		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode);
+		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
+		
+		this.digitalSign(fileToSend, sender);
+	
+	}
+	
+	private void digitalSign(String fileToSend, String sender) {
+		// TODO Auto-generated method stub
+		KeyPair pair = digSign.genKeyPair();
+		FileManagement.saveDigitalKeysFile(digKeysFile, );
+		
+		for (User utente : utenti) {
+			if (utente.getName().compareTo(sender)==0) {
+				utente.setSignKey(pair.getPrivate());
+				break;
+			}
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+	}
+
+	private String encodeMessage(String messagePath, SecretKey secKey, String mode) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		//il messaggio in messagePath è un messaggio qualsiasi (testo, imnagine ecc)
 		//lo convertiamo in byte e poi lo cifriamo
 		Path path = Paths.get(messagePath);
 		byte[] data = Files.readAllBytes(path);
-		return symCipher.symmetricEncoding(data, secKey);	
+		return symCipher.symmetricEncoding(data, secKey, mode);	
 	}
 
 	private String encodeSymmetricPrivateKey (String destination, String cipherType, String mode, SecretKey secKey) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -93,14 +140,12 @@ public class Incapsula {
 	    	fields.add(in.readLine());
 	    in.close();
  
-	    /*if (fields.get(5).compareTo("1")==0)
-	    	this.verify();*/
+	    if (fields.get(5).compareTo("1")==0)
+	    	this.verify();
 	    
 	    SecretKey secKey = this.decodeSymmetricKey (fields.get(6), fields.get(1), fields.get(2));
 	    System.out.println("Secret key decifrata dal file: " + secKey.toString());
 	    obtainMessage (fields.get(2), fields.get(3), fields.get(4), fields.get(7), secKey);
-	    
-		
 	}
 
 	private void obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
@@ -123,7 +168,7 @@ public class Incapsula {
 				pvtKey = utente.getKey();
 				break;
 			}
-			}
+		}
 		byte [] decodedKey = asymCipher.asymmetricDecoding(cipherSymmetricKey, padding, pvtKey);
 		return new SecretKeySpec(decodedKey, 0, decodedKey.length, cipherType);
 		
