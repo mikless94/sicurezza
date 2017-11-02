@@ -94,7 +94,7 @@ public class Incapsula {
 		
 		
 		String sign = this.digitalSign(messagePath, sender, dimSignKey, signType);
-		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, true, sign);
+		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
 	
 	}
 	
