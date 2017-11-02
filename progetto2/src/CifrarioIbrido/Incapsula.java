@@ -92,7 +92,6 @@ public class Incapsula {
 		//z
 		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode);
 		
-		
 		String sign = this.digitalSign(messagePath, sender, dimSignKey, signType);
 		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
 	
@@ -154,17 +153,19 @@ public class Incapsula {
 	    ArrayList <String> fields = new ArrayList <String> ();
 	    for (int i=0; i<8 ; i++) 
 	    	fields.add(in.readLine());
-	    in.close();
- 
 	    if (fields.get(5).compareTo("1")==0)
-	    	this.verify();
-	    
+	    	fields.add(in.readLine());
+	    in.close();
+ 	    
 	    SecretKey secKey = this.decodeSymmetricKey (fields.get(6), fields.get(1), fields.get(2));
 	    System.out.println("Secret key decifrata dal file: " + secKey.toString());
-	    obtainMessage (fields.get(2), fields.get(3), fields.get(4), fields.get(7), secKey);
+	    String decodifiedMessagePath = obtainMessage (fields.get(2), fields.get(3), fields.get(4), fields.get(7), secKey);
+	    
+	    if (fields.get(5).compareTo("1")==0)
+	    	this.verify(decodifiedMessagePath, fields.get(8), fields.get(0));
 	}
 
-	private void obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+	private String obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		// TODO Auto-generated method stub
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);
@@ -172,6 +173,7 @@ public class Incapsula {
 		symCipher.computeDimKey();
 		byte [] decodedMessage = symCipher.symmetricDecoding (cipherType, mode, padding, secKey, message);
 		Files.write(Paths.get("C:\\Users\\Michele\\Desktop\\jameshardendecodificato.jpg"), decodedMessage);
+		return "C:\\Users\\Michele\\Desktop\\jameshardendecodificato.jpg";
 	}
 
 	private SecretKey decodeSymmetricKey (String cipherSymmetricKey, String recipient, String cipherType) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
@@ -190,7 +192,7 @@ public class Incapsula {
 		
 	}
 
-	private void verify() {
+	private void verify(String decodifiedMessagePath, String sign, String mittente) {
 		// TODO Auto-generated method stub
 		
 	}
