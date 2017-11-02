@@ -19,7 +19,7 @@ public class Prova {
 		
 		inc.addUser("Michele", 1024, "PKCS1Padding");
 		inc.addUser("Giuseppe", 2048, "PKCS1Padding");
-		inc.messageToSend ("Michele", "Giuseppe", "AES", "CBC", "PKCS5Padding", true , "C:\\Users\\Michele\\Desktop\\jamesharden.jpg");
+		inc.messageToSend ("Michele", "Giuseppe", "AES", "CBC", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\jamesharden.jpg");
 		inc.decodeMessage("C:\\Users\\Michele\\git\\sicurezza\\progetto2\\fileToSend.txt");
 	}
 

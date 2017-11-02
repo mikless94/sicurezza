@@ -10,11 +10,37 @@ public class User {
 	
 	
 	/**
+	 * @param name
+	 */
+	public User(String name) {
+		this.name = name;
+	}
+
+
+
+
+
+	/**
 	 * @return the asymmetricKey
 	 */
 	public PrivateKey getAsymmetricKey() {
 		return asymmetricKey;
 	}
+
+
+	
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(User obj) {
+		// TODO Auto-generated method stub
+		return name.compareTo(obj.getName())==0;
+	}
+
+
+
 
 
 	/**

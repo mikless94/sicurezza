@@ -28,7 +28,10 @@ public class FileManagement {
 		out.close();
 	}
 	
-	public static void saveDigitalKeysFile () {
+	public static void saveDigitalKeysFile (String file, String sender, PublicKey publicKey, String signType) throws IOException {
+		FileWriter out = new FileWriter(file,true);
+		out.write(sender+" "+Base64.getEncoder().encodeToString(publicKey.getEncoded())+" "+signType+System.lineSeparator());
+		out.close();
 		
 	}
 	

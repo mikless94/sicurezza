@@ -1,7 +1,7 @@
 package CifrarioIbrido;
 
 import java.io.BufferedReader;
-
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +12,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 
 import javax.crypto.BadPaddingException;
 
@@ -26,15 +27,15 @@ public class Incapsula {
 	private String fileToSend = "fileToSend.txt";
 	private String digKeysFile = "digKeysFile.txt";
 	
-	private ArrayList<User> utenti = new ArrayList<User>();
+	private HashSet<User> utenti = new HashSet<User>();
 	private SymmetricCipher symCipher = new SymmetricCipher();
 	private AsymmetricCipher asymCipher = new AsymmetricCipher();
-	private DigitalSign digSign = new DigitalSign();
+	//private DigitalSign digSign = new DigitalSign();
 	
 	/**
 	 * @return the utenti
 	 */
-	public ArrayList<User> getUtenti() {
+	public HashSet <User> getUtenti() {
 		return utenti;
 	}
 
@@ -51,6 +52,20 @@ public class Incapsula {
 		FileManagement.savePublicKey(pubKeyFile, utente.getName(), pair.getPublic(), padding);
 	}
 	
+	public void deleteUser (String name) throws IOException {
+		utenti.remove(new User (name));
+		BufferedReader in = new BufferedReader(new FileReader(pubKeyFile));
+	    String read = null;
+	    while ((read = in.readLine()) != null) {
+	        String[] splited = read.split("\\s+");
+	        if (splited[0].compareTo(name)==0) {
+	        	
+	        	//cancellare riga
+	        }
+	    }
+	    in.close();
+		
+	}
 	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);
@@ -65,7 +80,7 @@ public class Incapsula {
 		
 	}
 	
-	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath, String dimSignKey, String signType) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath, int dimSignKey, String signType) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);
 		
@@ -75,32 +90,32 @@ public class Incapsula {
 		String cipheredKey = this.encodeSymmetricPrivateKey(recipient, cipherType, mode, secKey);
 		//z
 		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode);
-		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
+		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, true);
 		
-		this.digitalSign(fileToSend, sender);
+		//this.digitalSign(fileToSend, sender, dimSignKey, signType);
 	
 	}
 	
-	private void digitalSign(String fileToSend, String sender) {
+	/*private void digitalSign(String fileToSend, String sender, int dimSignKey, String signType) {
 		// TODO Auto-generated method stub
+		digSign.setDimKey(dimSignKey);
+		digSign.setType(signType);
+		User senderSign;
+		
 		KeyPair pair = digSign.genKeyPair();
-		FileManagement.saveDigitalKeysFile(digKeysFile, );
+		FileManagement.saveDigitalKeysFile(digKeysFile, sender , pair.getPublic(), signType );
 		
 		for (User utente : utenti) {
 			if (utente.getName().compareTo(sender)==0) {
 				utente.setSignKey(pair.getPrivate());
+				senderSign = utente;
 				break;
 			}
 		}
 		
+		digSign.sign (fileToSend, senderSign);
 		
-		
-		
-		
-		
-		
-		
-	}
+	}*/
 
 	private String encodeMessage(String messagePath, SecretKey secKey, String mode) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		//il messaggio in messagePath è un messaggio qualsiasi (testo, imnagine ecc)
@@ -165,7 +180,7 @@ public class Incapsula {
 		for (User utente : utenti) {
 			if (utente.getName().compareTo(recipient)==0) {
 				padding += utente.getPadding();
-				pvtKey = utente.getKey();
+				pvtKey = utente.getAsymmetricKey();
 				break;
 			}
 		}
