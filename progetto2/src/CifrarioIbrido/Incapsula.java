@@ -30,7 +30,7 @@ public class Incapsula {
 	private HashSet<User> utenti = new HashSet<User>();
 	private SymmetricCipher symCipher = new SymmetricCipher();
 	private AsymmetricCipher asymCipher = new AsymmetricCipher();
-	//private DigitalSign digSign = new DigitalSign();
+	private DigitalSign digSign = new DigitalSign();
 	
 	/**
 	 * @return the utenti
@@ -92,11 +92,11 @@ public class Incapsula {
 		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode);
 		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, true);
 		
-		//this.digitalSign(fileToSend, sender, dimSignKey, signType);
+		this.digitalSign(fileToSend, sender, dimSignKey, signType);
 	
 	}
 	
-	/*private void digitalSign(String fileToSend, String sender, int dimSignKey, String signType) {
+	private void digitalSign(String fileToSend, String sender, int dimSignKey, String signType) {
 		// TODO Auto-generated method stub
 		digSign.setDimKey(dimSignKey);
 		digSign.setType(signType);
@@ -115,7 +115,7 @@ public class Incapsula {
 		
 		digSign.sign (fileToSend, senderSign);
 		
-	}*/
+	}
 
 	private String encodeMessage(String messagePath, SecretKey secKey, String mode) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		//il messaggio in messagePath è un messaggio qualsiasi (testo, imnagine ecc)

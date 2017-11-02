@@ -28,15 +28,28 @@ public class User {
 	}
 
 
-	
 
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
-	public boolean equals(User obj) {
+	@Override
+	public boolean equals(Object arg0) {
 		// TODO Auto-generated method stub
-		return name.compareTo(obj.getName())==0;
+		return (arg0 instanceof User) && (((User)arg0).getName()).equals(this.getName());
+	}
+
+
+
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return name.hashCode();
 	}
 
 
