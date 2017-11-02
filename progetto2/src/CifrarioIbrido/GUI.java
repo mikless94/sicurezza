@@ -176,7 +176,6 @@ public class GUI {
 				String username = UsernameTextField.getText();
 				String keyDimension = KeyComboBox.getSelectedItem().toString();
 				String padding = PaddingComboBox.getSelectedItem().toString();
-
 				try {
 					inc.addUser(username, Integer.parseInt(keyDimension), padding);
 				} catch (NoSuchAlgorithmException e) {
