@@ -2,7 +2,7 @@ package CifrarioIbrido;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -165,7 +165,7 @@ public class Incapsula {
 		return asymCipher.asymmetricEncoding (secKey, pubKey);
 	}
 	
-	public void decodeMessage (String fileToSend) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException {
+	public void decodeMessage (String fileToSend, String destinationPath) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException {
 		
 		BufferedReader in = new BufferedReader(new FileReader(fileToSend));
 
@@ -178,22 +178,22 @@ public class Incapsula {
  	    
 	    SecretKey secKey = this.decodeSymmetricKey (fields.get(6), fields.get(1), fields.get(2));
 	    System.out.println("Secret key decifrata dal file: " + secKey.toString());
-	    String decodifiedMessagePath = obtainMessage (fields.get(2), fields.get(3), fields.get(4), fields.get(7), secKey);
+	    obtainMessage (fields.get(2), fields.get(3), fields.get(4), fields.get(7), secKey, destinationPath);
 	    
 	    if (fields.get(5).compareTo("1")==0)
-	    	if (this.verify(decodifiedMessagePath, fields.get(8), fields.get(0)))
+	    	if (this.verify(destinationPath, fields.get(8), fields.get(0)))
 	    		System.out.println("verifica corretta");
 	}
 
-	private String obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
+	private void obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey, String destinationPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
 		// TODO Auto-generated method stub
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);
 		symCipher.setPadding(padding);
 		symCipher.computeDimKey();
 		byte [] decodedMessage = symCipher.symmetricDecoding (cipherType, mode, padding, secKey, message);
-		Files.write(Paths.get("C:\\Users\\Michele\\Desktop\\jameshardendecodificato.jpg"), decodedMessage);
-		return "C:\\Users\\Michele\\Desktop\\jameshardendecodificato.jpg";
+		Files.write(Paths.get(destinationPath), decodedMessage);
+
 	}
 
 	private SecretKey decodeSymmetricKey (String cipherSymmetricKey, String recipient, String cipherType) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
