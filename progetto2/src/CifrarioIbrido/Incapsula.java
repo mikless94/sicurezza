@@ -113,7 +113,7 @@ public class Incapsula {
 		
 		String sign = this.digitalSign(messagePath, sender, dimSignKey, signType);
 		FileManagement.createFileToSend (fileToSend, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
-	
+		
 	}
 	
 	private String digitalSign(String messagePath, String sender, int dimSignKey, String signType) throws NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException {
@@ -226,7 +226,6 @@ public class Incapsula {
 	        	}
 	    }
 	    in.close();
-	    
 	    //aggiungere eccezione per mittente non trovato
 	    
 		byte [] keyBytes = Base64.getDecoder().decode(key);
