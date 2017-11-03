@@ -158,11 +158,20 @@ public class SymmetricCipher {
 		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
 	
 		if (mode.compareTo("CBC")==0 || mode.compareTo("CFB")==0) {
-			SecureRandom random = new SecureRandom();
-			byte IVBytes[] = new byte[16];
-			random.nextBytes(IVBytes); 
-			IvParameterSpec iv = new IvParameterSpec(IVBytes);
-			this.setIv(iv);
+			if (cipherType.compareTo("DES")==0 || cipherType.compareTo("DESede")==0 ) {
+				SecureRandom random = new SecureRandom();
+				byte IVBytes[] = new byte[8];
+				random.nextBytes(IVBytes); 
+				IvParameterSpec iv = new IvParameterSpec(IVBytes);
+				this.setIv(iv);
+			}
+			else {
+				SecureRandom random = new SecureRandom();
+				byte IVBytes[] = new byte[16];
+				random.nextBytes(IVBytes); 
+				IvParameterSpec iv = new IvParameterSpec(IVBytes);
+				this.setIv(iv);
+			}
 
 			
 			try {

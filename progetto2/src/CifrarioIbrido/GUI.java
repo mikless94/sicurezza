@@ -67,6 +67,8 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.awt.Choice;
 
 public class GUI {
@@ -79,8 +81,13 @@ public class GUI {
 
 	/**
 	 * Launch the application.
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		Files.deleteIfExists(Paths.get("./publicKeyFile.txt"));
+		Files.deleteIfExists(Paths.get("./fileToSend.txt"));
+		Files.deleteIfExists(Paths.get("./digKeysFile.txt"));
+		Files.deleteIfExists(Paths.get("./myTempFile.txt"));
 		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -199,7 +206,7 @@ public class GUI {
 		btnSend.setEnabled(false);
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+			
 			}
 		});
 		btnSend.setFont(new Font("SansSerif", Font.BOLD, 12));
