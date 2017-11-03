@@ -10,7 +10,6 @@ public class OpenFile {
 	String fileName;
 	
 	public String pickMe() {
-		
 		File file;
 		if(file_chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
 			file = file_chooser.getSelectedFile();
