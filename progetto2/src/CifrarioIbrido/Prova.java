@@ -17,7 +17,7 @@ import javax.crypto.NoSuchPaddingException;
 
 
 public class Prova {
-	private static Incapsula inc = new Incapsula();
+	private static Incapsula inc = new Incapsula( );
 	
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException {
 		// TODO Auto-generated method stub
