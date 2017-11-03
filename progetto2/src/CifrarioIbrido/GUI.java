@@ -215,7 +215,9 @@ public class GUI {
 				String username = UsernameTextField.getText();
 				String keyDimension = KeyComboBox.getSelectedItem().toString();
 				String padding = PaddingComboBox.getSelectedItem().toString();
+
 				try {
+
 					boolean success = inc.addUser(username, Integer.parseInt(keyDimension), padding);
 					if (success){
 						if (textArea.getText().equals(" "))
@@ -297,6 +299,7 @@ public class GUI {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+
 				DeleteTextField.setText(null);
 				if(SenderComboBox.getItemCount() == 0){
 					SenderComboBox.setEnabled(false);

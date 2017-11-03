@@ -165,7 +165,7 @@ public class Incapsula {
 		return asymCipher.asymmetricEncoding (secKey, pubKey);
 	}
 	
-	public void decodeMessage (String fileToSend) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public void decodeMessage (String fileToSend) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException {
 		
 		BufferedReader in = new BufferedReader(new FileReader(fileToSend));
 
@@ -181,7 +181,8 @@ public class Incapsula {
 	    String decodifiedMessagePath = obtainMessage (fields.get(2), fields.get(3), fields.get(4), fields.get(7), secKey);
 	    
 	    if (fields.get(5).compareTo("1")==0)
-	    	this.verify(decodifiedMessagePath, fields.get(8), fields.get(0));
+	    	if (this.verify(decodifiedMessagePath, fields.get(8), fields.get(0)))
+	    		System.out.println("verifica corretta");
 	}
 
 	private String obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
@@ -211,8 +212,32 @@ public class Incapsula {
 		
 	}
 
-	private void verify(String decodifiedMessagePath, String sign, String mittente) {
+	private boolean verify(String decodifiedMessagePath, String sign, String sender) throws SignatureException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
 		// TODO Auto-generated method stub
+		String key="";
+		
+		BufferedReader in = new BufferedReader(new FileReader(digKeysFile));
+	    String read = null;
+	    while ((read = in.readLine()) != null) {
+	        String[] splited = read.split("\\s+");
+	        if (splited[0].compareTo(sender)==0) {
+	        	key = splited[1];
+	        	digSign.setType(splited[2]);
+	        	}
+	    }
+	    in.close();
+	    
+	    //aggiungere eccezione per mittente non trovato
+	    
+		byte [] keyBytes = Base64.getDecoder().decode(key);
+		X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
+		KeyFactory keyFactory = KeyFactory.getInstance("DSA");
+		PublicKey pubKey = keyFactory.generatePublic(pubKeySpec);
+		Signature dsa = Signature.getInstance(digSign.getType());
+		dsa.initVerify(pubKey);
+		Path path = Paths.get(decodifiedMessagePath);
+		dsa.update(Files.readAllBytes(path));
+		return dsa.verify(Base64.getDecoder().decode(sign));
 		
 	}
 	
