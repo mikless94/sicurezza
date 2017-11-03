@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.Box;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JSpinner;
@@ -76,12 +77,12 @@ public class GUI {
 	private JTextField DeleteTextField;
 	private JTextField FileTextField;
 	private Incapsula inc = new Incapsula();
+	private JTextField DestinationTextField;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -191,20 +192,29 @@ public class GUI {
 
 		FileTextField = new JTextField();
 		FileTextField.setEditable(false);
-		FileTextField.setBounds(120, 263, 130, 28);
+		FileTextField.setBounds(107, 267, 156, 20);
 		SendPanel.add(FileTextField);
 		FileTextField.setColumns(10);
+		
+		JButton btnBrowse = new JButton("Browse...");
+
 		
 		JButton btnSend = new JButton("SEND");
 		btnSend.setEnabled(false);
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if(DestinationTextField.getText().equals("")){
+					JOptionPane.showMessageDialog(null,"You must specifiy the destination folder.","Empty Destination Folder",JOptionPane.WARNING_MESSAGE);
+				}
+				else{
+
+				}
 				
 			}
 		});
 		btnSend.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnSend.setToolTipText("Send Message");
-		btnSend.setBounds(425, 268, 90, 28);
+		btnSend.setBounds(457, 293, 90, 28);
 		TransmissionPanel.add(btnSend);
 		
 		JButton btnAdd = new JButton("ADD");
@@ -367,12 +377,12 @@ public class GUI {
 					btnSend.setEnabled(false);
 			}
 		});
-		btnApriFile.setBounds(19, 263, 77, 28);
+		btnApriFile.setBounds(10, 265, 87, 25);
 		SendPanel.add(btnApriFile);
 	
 		JPanel SignPanel = new JPanel();
 		SignPanel.setBorder(new TitledBorder(null, "Digital Sign", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		SignPanel.setBounds(291, 6, 312, 228);
+		SignPanel.setBounds(291, 6, 312, 213);
 		TransmissionPanel.add(SignPanel);
 		SignPanel.setLayout(null);
 		
@@ -382,7 +392,7 @@ public class GUI {
 		
 		JPanel DSApanel = new JPanel();
 		DSApanel.setBorder(new TitledBorder(null, "DSA", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		DSApanel.setBounds(18, 113, 277, 107);
+		DSApanel.setBounds(18, 97, 277, 107);
 		SignPanel.add(DSApanel);
 		DSApanel.setLayout(null);
 		
@@ -405,7 +415,7 @@ public class GUI {
 				}
 			}
 		});
-		rdbtnYes.setBounds(18, 72, 65, 18);
+		rdbtnYes.setBounds(18, 60, 65, 18);
 		SignPanel.add(rdbtnYes);
 		
 		JRadioButton rdbtnNo = new JRadioButton("No");
@@ -420,7 +430,7 @@ public class GUI {
 		rdbtnNo.setSelected(true);
 		DSAKeyComboBox.setEnabled(false);
 		TypeComboBox.setEnabled(false);
-		rdbtnNo.setBounds(112, 72, 115, 18);
+		rdbtnNo.setBounds(112, 60, 115, 18);
 		SignPanel.add(rdbtnNo);
 		ButtonGroup group = new ButtonGroup();
 		group.add(rdbtnYes);
@@ -435,12 +445,33 @@ public class GUI {
 		DSApanel.add(lblType);
 		
 		JLabel lblSendMessage = new JLabel("Send Message :");
-		lblSendMessage.setBounds(301, 274, 106, 16);
+		lblSendMessage.setBounds(289, 300, 106, 16);
 		TransmissionPanel.add(lblSendMessage);
 		
 		JLabel label_1 = new JLabel("");
 		label_1.setIcon(new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
-		label_1.setBounds(537, 246, 39, 66);
+		label_1.setBounds(564, 290, 39, 39);
 		TransmissionPanel.add(label_1);
+		
+		JLabel lblDestinationfolder = new JLabel("Destination Folder :");
+		lblDestinationfolder.setBounds(289, 230, 116, 14);
+		TransmissionPanel.add(lblDestinationfolder);
+		
+		btnBrowse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String filename;
+				OpenFile file = new OpenFile();
+				filename = file.pickMe();
+				DestinationTextField.setText(filename);
+			}
+		});
+		btnBrowse.setBounds(289, 255, 90, 24);
+		TransmissionPanel.add(btnBrowse);
+		
+		DestinationTextField = new JTextField();
+		DestinationTextField.setEditable(false);
+		DestinationTextField.setBounds(389, 256, 202, 23);
+		TransmissionPanel.add(DestinationTextField);
+		DestinationTextField.setColumns(10);
 	}
 }
