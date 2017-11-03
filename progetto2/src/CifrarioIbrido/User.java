@@ -17,9 +17,6 @@ public class User {
 	}
 
 
-
-
-
 	/**
 	 * @return the asymmetricKey
 	 */
