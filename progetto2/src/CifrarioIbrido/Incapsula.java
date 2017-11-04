@@ -186,6 +186,8 @@ public class Incapsula {
 	    		JOptionPane.showMessageDialog(null,"Message verified! " ,"Digital Sign",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
 	    		System.out.println("verifica corretta");
 	    	}
+	    	else
+	    		JOptionPane.showMessageDialog(null,"Message NOT verified! " ,"Digital Sign",JOptionPane.ERROR_MESSAGE);
 	    }
 	
 	}
