@@ -2,7 +2,6 @@ package CifrarioIbrido;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,6 +20,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 public class Incapsula {
 	
@@ -137,7 +138,7 @@ public class Incapsula {
 	}
 
 	private String encodeMessage(String messagePath, SecretKey secKey, String mode) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		//il messaggio in messagePath è un messaggio qualsiasi (testo, imnagine ecc)
+		//il messaggio in messagePath è un messaggio qualsiasi (testo, immagine ecc)
 		//lo convertiamo in byte e poi lo cifriamo
 		Path path = Paths.get(messagePath);
 		byte[] data = Files.readAllBytes(path);
@@ -165,7 +166,7 @@ public class Incapsula {
 		return asymCipher.asymmetricEncoding (secKey, pubKey);
 	}
 	
-	public void decodeMessage (String fileToSend, String destinationPath) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException {
+	public void decodeMessage (String destinationPath) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException {
 		
 		BufferedReader in = new BufferedReader(new FileReader(fileToSend));
 
@@ -180,9 +181,13 @@ public class Incapsula {
 	    System.out.println("Secret key decifrata dal file: " + secKey.toString());
 	    obtainMessage (fields.get(2), fields.get(3), fields.get(4), fields.get(7), secKey, destinationPath);
 	    
-	    if (fields.get(5).compareTo("1")==0)
-	    	if (this.verify(destinationPath, fields.get(8), fields.get(0)))
+	    if (fields.get(5).compareTo("1")==0){
+	    	if (this.verify(destinationPath, fields.get(8), fields.get(0))){
+	    		JOptionPane.showMessageDialog(null,"Message verified! " ,"Digital Sign",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
 	    		System.out.println("verifica corretta");
+	    	}
+	    }
+	
 	}
 
 	private void obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey, String destinationPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
