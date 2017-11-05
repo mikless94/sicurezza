@@ -23,12 +23,9 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-<<<<<<< HEAD
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-=======
 import javax.crypto.spec.IvParameterSpec;
->>>>>>> branch 'master' of https://github.com/mikless94/sicurezza.git
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
