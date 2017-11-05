@@ -2,7 +2,6 @@ package CifrarioIbrido;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,6 +23,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 public class Incapsula {
 	
@@ -195,6 +196,7 @@ public class Incapsula {
 		
 	}
 
+
 	private String encodeMessage(String messagePath, SecretKey secKey, String mode, IvParameterSpec iv) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		//il messaggio in messagePath è un messaggio qualsiasi (testo, imnagine ecc)
 		//lo convertiamo in byte e poi lo cifriamo
@@ -207,11 +209,11 @@ public class Incapsula {
 		return asymCipher.asymmetricEncoding (secKey, pubKey);
 	}
 	
-	
+
 	
 	
 	// decoding
-	public void decodeMessage (String fileToSend, String destinationPath) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+	public void decodeMessage (String destinationPath) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, SignatureException, InvalidKeySpecException, InvalidAlgorithmParameterException {
 		
 		BufferedReader in = new BufferedReader(new FileReader(fileToSend));
 
@@ -244,9 +246,9 @@ public class Incapsula {
 	    
 	    if (fields.get(4).compareTo("1")==0)
 	    	if (this.verify(destinationPath, fields.get(6), fields.get(0)))
-	    		System.out.println("verifica corretta");
+	    		JOptionPane.showMessageDialog(null,"Message verified! " ,"Digital Sign",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
 	    	else
-	    		System.out.println("Fallito");
+	    		JOptionPane.showMessageDialog(null,"Message NOT verified! " ,"Digital Sign",JOptionPane.ERROR_MESSAGE);
 	}
 
 	private void obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey, String destinationPath, String iv) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, InvalidAlgorithmParameterException {
@@ -267,6 +269,7 @@ public class Incapsula {
 		String decodedInfoString = new String(decodedInfoBytes);
 		//String decodedInfoString = Base64.getEncoder().encodeToString(decodedInfoBytes);
 		return decodedInfoString.split("\\s+");
+
 	}
 
 	private void obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey, String destinationPath) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {

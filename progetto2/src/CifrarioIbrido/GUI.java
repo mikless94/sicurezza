@@ -2,6 +2,9 @@ package CifrarioIbrido;
 
 import java.awt.EventQueue;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.JFrame;
 
 import java.awt.BorderLayout;
@@ -17,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.Box;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JSpinner;
@@ -60,7 +64,11 @@ import javax.swing.JTextArea;
 
 import java.awt.ScrollPane;
 import java.awt.TextArea;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.LinkedList;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -78,17 +86,18 @@ public class GUI {
 	private JTextField DeleteTextField;
 	private JTextField FileTextField;
 	private Incapsula inc = new Incapsula();
+	private JTextField DestinationTextField;
 
 	/**
 	 * Launch the application.
 	 * @throws IOException 
 	 */
+
 	public static void main(String[] args) throws IOException {
 		Files.deleteIfExists(Paths.get("./publicKeyFile.txt"));
 		Files.deleteIfExists(Paths.get("./fileToSend.txt"));
 		Files.deleteIfExists(Paths.get("./digKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./myTempFile.txt"));
-		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -198,20 +207,105 @@ public class GUI {
 
 		FileTextField = new JTextField();
 		FileTextField.setEditable(false);
-		FileTextField.setBounds(120, 263, 130, 28);
+		FileTextField.setBounds(107, 267, 156, 20);
 		SendPanel.add(FileTextField);
 		FileTextField.setColumns(10);
+		
+		JPanel SignPanel = new JPanel();
+		SignPanel.setBorder(new TitledBorder(null, "Digital Sign", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		SignPanel.setBounds(291, 6, 312, 213);
+		TransmissionPanel.add(SignPanel);
+		SignPanel.setLayout(null);
+		
+		JPanel DSApanel = new JPanel();
+		DSApanel.setBorder(new TitledBorder(null, "DSA", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		DSApanel.setBounds(18, 97, 277, 107);
+		SignPanel.add(DSApanel);
+		DSApanel.setLayout(null);
+		
+		JComboBox AlgorithmComboBox = new JComboBox();
+		AlgorithmComboBox.setModel(new DefaultComboBoxModel(new String[] {"AES", "DES", "DESede"}));
+		AlgorithmComboBox.setToolTipText("Insert Algorithm");
+		AlgorithmComboBox.setBounds(120, 136, 115, 28);
+		SendPanel.add(AlgorithmComboBox);
+		
+		JComboBox OperationComboBox = new JComboBox();
+		OperationComboBox.setModel(new DefaultComboBoxModel(new String[] {"ECB", "CBC", "CFB"}));
+		OperationComboBox.setBounds(120, 185, 115, 28);
+		SendPanel.add(OperationComboBox);
+		
+		JComboBox DSAKeyComboBox = new JComboBox();
+		DSAKeyComboBox.setModel(new DefaultComboBoxModel(new String[] {"1024", "2048"}));
+		DSAKeyComboBox.setBounds(149, 24, 103, 26);
+		DSApanel.add(DSAKeyComboBox);
+		
+		JComboBox TypeComboBox = new JComboBox();
+		TypeComboBox.setModel(new DefaultComboBoxModel(new String[] {"SHA1withDSA", "SHA224withDSA", "SHA256withDSA"}));
+		TypeComboBox.setBounds(149, 58, 103, 26);
+		DSApanel.add(TypeComboBox);
+		
+		JButton btnBrowse = new JButton("Browse...");
+		JRadioButton rdbtnYes = new JRadioButton("Yes");
+		JRadioButton rdbtnNo = new JRadioButton("No");
 		
 		JButton btnSend = new JButton("SEND");
 		btnSend.setEnabled(false);
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-			
+				if(DestinationTextField.getText().equals("")){
+					JOptionPane.showMessageDialog(null,"You must specifiy the destination folder.","Empty Destination Folder",JOptionPane.WARNING_MESSAGE);
+				}
+				else{
+					String sender = SenderComboBox.getSelectedItem().toString();
+					String recipient = ReceiverComboBox.getSelectedItem().toString();
+					String cipherType = AlgorithmComboBox.getSelectedItem().toString();
+					String mode = OperationComboBox.getSelectedItem().toString();
+					String messagePath = FileTextField.getText();
+					if(rdbtnNo.isSelected()){
+						try {
+							inc.messageToSend(sender, recipient, cipherType, mode, "PKCS5Padding", messagePath);
+						} catch (InvalidKeyException | NoSuchAlgorithmException
+								| InvalidKeySpecException | NoSuchPaddingException
+								| IllegalBlockSizeException | BadPaddingException
+								| IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}	
+					}
+					else{
+						String dimSignKey = DSAKeyComboBox.getSelectedItem().toString();
+						String signType = TypeComboBox.getSelectedItem().toString();
+						try {
+							inc.messageToSend(sender, recipient, cipherType, mode, "PKCS5Padding", messagePath, Integer.parseInt(dimSignKey), signType);
+						} catch (InvalidKeyException | NumberFormatException
+								| NoSuchAlgorithmException
+								| InvalidKeySpecException
+								| NoSuchPaddingException
+								| IllegalBlockSizeException
+								| BadPaddingException | SignatureException
+								| IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
+					}
+					try {
+						inc.decodeMessage(DestinationTextField.getText());
+						JOptionPane.showMessageDialog(null,"You can find the decrypted file at " + DestinationTextField.getText(),"Decrypted file",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
+					} catch (InvalidKeyException | NoSuchAlgorithmException
+							| NoSuchPaddingException
+							| IllegalBlockSizeException | BadPaddingException
+							| SignatureException | InvalidKeySpecException
+							| IOException | InvalidAlgorithmParameterException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
 		btnSend.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnSend.setToolTipText("Send Message");
-		btnSend.setBounds(425, 268, 90, 28);
+		btnSend.setBounds(457, 293, 90, 28);
 		TransmissionPanel.add(btnSend);
 		
 		JButton btnAdd = new JButton("ADD");
@@ -334,27 +428,16 @@ public class GUI {
 		SendPanel.add(lblSender);
 		
 		JLabel lblReceiver = new JLabel("Receiver :");
-		lblReceiver.setBounds(19, 91, 55, 16);
+		lblReceiver.setBounds(19, 91, 87, 16);
 		SendPanel.add(lblReceiver);
 		
 		JLabel lblAlgorithm = new JLabel("Algorithm : ");
 		lblAlgorithm.setBounds(19, 142, 69, 16);
 		SendPanel.add(lblAlgorithm);
 		
-		JComboBox AlgorithmComboBox = new JComboBox();
-		AlgorithmComboBox.setModel(new DefaultComboBoxModel(new String[] {"AES", "DES", "DESede"}));
-		AlgorithmComboBox.setToolTipText("Insert Algorithm");
-		AlgorithmComboBox.setBounds(120, 136, 115, 28);
-		SendPanel.add(AlgorithmComboBox);
-		
 		JLabel lblOperationMode = new JLabel("Operation Mode : ");
 		lblOperationMode.setBounds(19, 190, 99, 16);
 		SendPanel.add(lblOperationMode);
-		
-		JComboBox OperationComboBox = new JComboBox();
-		OperationComboBox.setModel(new DefaultComboBoxModel(new String[] {"ECB", "CBC", "CFB"}));
-		OperationComboBox.setBounds(120, 185, 115, 28);
-		SendPanel.add(OperationComboBox);
 		
 		JLabel lblChooseMessage = new JLabel("Choose Message :");
 		lblChooseMessage.setBounds(19, 235, 115, 16);
@@ -374,36 +457,13 @@ public class GUI {
 					btnSend.setEnabled(false);
 			}
 		});
-		btnApriFile.setBounds(19, 263, 77, 28);
+		btnApriFile.setBounds(10, 265, 87, 25);
 		SendPanel.add(btnApriFile);
-	
-		JPanel SignPanel = new JPanel();
-		SignPanel.setBorder(new TitledBorder(null, "Digital Sign", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		SignPanel.setBounds(291, 6, 312, 228);
-		TransmissionPanel.add(SignPanel);
-		SignPanel.setLayout(null);
 		
 		JLabel lblDoYouWant = new JLabel("Do you want  to sign your message?");
 		lblDoYouWant.setBounds(18, 37, 209, 16);
 		SignPanel.add(lblDoYouWant);
 		
-		JPanel DSApanel = new JPanel();
-		DSApanel.setBorder(new TitledBorder(null, "DSA", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		DSApanel.setBounds(18, 113, 277, 107);
-		SignPanel.add(DSApanel);
-		DSApanel.setLayout(null);
-		
-		JComboBox DSAKeyComboBox = new JComboBox();
-		DSAKeyComboBox.setModel(new DefaultComboBoxModel(new String[] {"1024", "2048"}));
-		DSAKeyComboBox.setBounds(149, 24, 103, 26);
-		DSApanel.add(DSAKeyComboBox);
-		
-		JComboBox TypeComboBox = new JComboBox();
-		TypeComboBox.setModel(new DefaultComboBoxModel(new String[] {"SHA1", "SHA224", "SHA256"}));
-		TypeComboBox.setBounds(149, 58, 103, 26);
-		DSApanel.add(TypeComboBox);
-		
-		JRadioButton rdbtnYes = new JRadioButton("Yes");
 		rdbtnYes.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if(rdbtnYes.isSelected()){
@@ -412,10 +472,9 @@ public class GUI {
 				}
 			}
 		});
-		rdbtnYes.setBounds(18, 72, 65, 18);
+		rdbtnYes.setBounds(18, 60, 65, 18);
 		SignPanel.add(rdbtnYes);
 		
-		JRadioButton rdbtnNo = new JRadioButton("No");
 		rdbtnNo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(rdbtnNo.isSelected()){
@@ -427,7 +486,7 @@ public class GUI {
 		rdbtnNo.setSelected(true);
 		DSAKeyComboBox.setEnabled(false);
 		TypeComboBox.setEnabled(false);
-		rdbtnNo.setBounds(112, 72, 115, 18);
+		rdbtnNo.setBounds(112, 60, 115, 18);
 		SignPanel.add(rdbtnNo);
 		ButtonGroup group = new ButtonGroup();
 		group.add(rdbtnYes);
@@ -442,12 +501,33 @@ public class GUI {
 		DSApanel.add(lblType);
 		
 		JLabel lblSendMessage = new JLabel("Send Message :");
-		lblSendMessage.setBounds(301, 274, 106, 16);
+		lblSendMessage.setBounds(289, 300, 106, 16);
 		TransmissionPanel.add(lblSendMessage);
 		
 		JLabel label_1 = new JLabel("");
 		label_1.setIcon(new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
-		label_1.setBounds(537, 246, 39, 66);
+		label_1.setBounds(564, 290, 39, 39);
 		TransmissionPanel.add(label_1);
+		
+		JLabel lblDestinationfolder = new JLabel("Destination Folder :");
+		lblDestinationfolder.setBounds(289, 230, 116, 14);
+		TransmissionPanel.add(lblDestinationfolder);
+		
+		btnBrowse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String filename;
+				OpenFile file = new OpenFile();
+				filename = file.pickMe();
+				DestinationTextField.setText(filename);
+			}
+		});
+		btnBrowse.setBounds(289, 255, 90, 24);
+		TransmissionPanel.add(btnBrowse);
+		
+		DestinationTextField = new JTextField();
+		DestinationTextField.setEditable(false);
+		DestinationTextField.setBounds(389, 256, 202, 23);
+		TransmissionPanel.add(DestinationTextField);
+		DestinationTextField.setColumns(10);
 	}
 }
