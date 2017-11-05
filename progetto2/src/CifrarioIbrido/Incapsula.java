@@ -13,7 +13,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Base64;
 import java.util.HashSet;
 
@@ -124,7 +124,6 @@ public class Incapsula {
 		String cipheredKey = this.encodeSymmetricPrivateKey(pubKey, recipient, cipherType, mode, padding, secKey, iv);
 		//z
 		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode, iv);
-		
 		
 		FileManagement.createFileToSend (fileToSend, cipheredInfo, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding);
 		
