@@ -72,5 +72,10 @@ public class FileManagement {
 			Files.deleteIfExists(Paths.get("./"+tempFile));
 		}
 		}
+
+	public static void savePrivateKey(String pvtKeysFile, String name, String pvtKeyString) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

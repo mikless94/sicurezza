@@ -28,9 +28,9 @@ public class Prova {
 		Files.deleteIfExists(Paths.get("./digKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./myTempFile.txt"));
 		
-		inc.addUser("Michele", 1024, "PKCS1Padding"); 
-		inc.addUser("Giuseppe", 2048, "PKCS1Padding");
-		inc.addUser("Giovanni", 2048, "PKCS1Padding");
+		inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
+		inc.addUser("Giuseppe", 2048, "PKCS1Padding", "ciao");
+		inc.addUser("Giovanni", 2048, "PKCS1Padding", "ciao");
 		//inc.deleteUser("Giovanni");
 		
 		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\jamesharden.jpg"/*, 1024, "SHA1withDSA"*/);

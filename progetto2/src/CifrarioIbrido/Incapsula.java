@@ -14,10 +14,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-
 import java.util.Base64;
 import java.util.HashSet;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -35,6 +33,7 @@ public class Incapsula {
 	private String pubKeyFile = "publicKeyFile.txt";
 	private String fileToSend = "fileToSend.txt";
 	private String digKeysFile = "digKeysFile.txt";
+	public String pvtKeysFile = "pvtKeysFile.txt";
 	
 	private HashSet<User> utenti = new HashSet<User>();
 	private SymmetricCipher symCipher = new SymmetricCipher();
@@ -48,16 +47,17 @@ public class Incapsula {
 		return utenti;
 	}
 
-	public boolean addUser (String name, int dimKey, String padding) throws NoSuchAlgorithmException, IOException {
+	public boolean addUser (String name, int dimKey, String padding, String password) throws NoSuchAlgorithmException, IOException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		asymCipher.setDimKey(dimKey);
 		asymCipher.setPadding(padding);
 		
 		KeyPair pair = asymCipher.genKeyPair();
-		User utente = new User(name, pair.getPrivate(), padding);
+		User utente = new User(name, password);
+		String pvtKeyString = keyRingEncoding(utente, pair.getPrivate());
+		
+		FileManagement.savePrivateKey(pvtKeysFile, utente.getName(), pvtKeyString);
 		boolean success = utenti.add(utente);
-		/*byte pubblica[] = pair.getPublic().getEncoded(); 
-		String encodedPubKey = Base64.getEncoder().encodeToString(pubblica);
-		System.out.println("Pubblica Base64 prima di salvare: " + encodedPubKey);*/
+		
 		if (success)
 			FileManagement.savePublicKey(pubKeyFile, utente.getName(), pair.getPublic(), padding);
 		
@@ -68,7 +68,6 @@ public class Incapsula {
 		boolean success = utenti.remove(new User(name));
 		String tempFile = "myTempFile.txt";
 		if (success){
-			
 		     BufferedReader in = new BufferedReader(new FileReader(pubKeyFile));
 		     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 		     String read = null;
@@ -166,6 +165,7 @@ public class Incapsula {
 		String cipheredMessage = this.encodeMessage (messagePath, secKey, mode, iv);
 		
 		String sign = this.digitalSign(messagePath, sender, dimSignKey, signType);
+		
 		FileManagement.createFileToSend (fileToSend, cipheredInfo, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
 		
 	}
@@ -184,21 +184,28 @@ public class Incapsula {
 		digSign.setDimKey(dimSignKey);
 		digSign.setType(signType);
 		
-		
 		KeyPair pair = digSign.genKeyPair();
+		
+		this.signKeyRing (sender, pair.getPrivate());
+
 		FileManagement.saveDigitalKeysFile(digKeysFile, sender , pair.getPublic(), signType );
 		
-		for (User utente : utenti) {
+		/*for (User utente : utenti) {
 			if (utente.getName().compareTo(sender)==0) {
 				utente.setSignKey(pair.getPrivate());
 				break;
 			}
-		}
+		}*/
 		
 		return digSign.sign (messagePath, pair.getPrivate());
 		
 	}
 
+
+	private void signKeyRing(String sender, PrivateKey private1) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	private String encodeMessage(String messagePath, SecretKey secKey, String mode, IvParameterSpec iv) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		//il messaggio in messagePath è un messaggio qualsiasi (testo, imnagine ecc)
@@ -227,12 +234,13 @@ public class Incapsula {
 	    	fields.add(in.readLine());
 	    in.close();
  	    
+	    User user = new User (fields.get(1));
+	    PrivateKey pvtKey = this.keyRingDecoding(user);
+	    
 	    String padding = "";
-		PrivateKey pvtKey = null;
 		for (User utente : utenti) {
 			if (utente.getName().compareTo(fields.get(1))==0) {
 				padding += utente.getPadding();
-				pvtKey = utente.getAsymmetricKey();
 				break;
 			}
 		}
@@ -322,12 +330,11 @@ public class Incapsula {
 		
 	}
 	
-	private String keyRingEncoding(User user, String privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {
+	private String keyRingEncoding(User user, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {
 		
 		char[] pass = user.getPassword().toCharArray();
 		SecureRandom random = new SecureRandom();
 		byte[] salt = new byte[8];
-		
 		random.nextBytes(salt);
 		
 		user.setSalt(salt);
@@ -342,13 +349,14 @@ public class Incapsula {
 		ciph.init(Cipher.ENCRYPT_MODE, secretKey);
 		
 		
-		byte[] symKey = privateKey.getBytes("UTF-8");
+		byte[] symKey = privateKey.getEncoded();
 		byte[] cipheredKey = ciph.doFinal(symKey);
 		
+		//metti cipheredKey sul file
 		return Base64.getEncoder().encodeToString(symKey);
 	}
 	
-	private String keyRingDecoding(User user, SecretKey cipheredKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, UnsupportedEncodingException{
+	private PrivateKey keyRingDecoding(User user) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, UnsupportedEncodingException{
 		
 		char[] pass = user.getPassword().toCharArray();
 		
@@ -357,12 +365,17 @@ public class Incapsula {
 		SecretKey tmp = factory.generateSecret(spec);
 		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 		
-		byte[] ciphKey = cipheredKey.getEncoded();
+		//prendi cipheredKey da file
+		byte[] ciphKey = Base64.getDecoder().decode(cipheredKey);
 		Cipher ciph = Cipher.getInstance("AES");
 		ciph.init(Cipher.DECRYPT_MODE, secretKey);
 		
-		byte[] decryptedText=null;
-		decryptedText = ciph.doFinal(Base64.getDecoder().decode(ciphKey));
+		byte [] decryptedText = ciph.doFinal(ciphKey);
+		
+		//a x509 sostituire la codifica per la chiave privata PKCS8
+		X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
+		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		PublicKey pubKey = keyFactory.generatePublic(pubKeySpec);
 		
 		String output = new String(decryptedText,"UTF8");
 		
