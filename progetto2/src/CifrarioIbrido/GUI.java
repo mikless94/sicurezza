@@ -64,6 +64,7 @@ import javax.swing.JTextArea;
 
 import java.awt.ScrollPane;
 import java.awt.TextArea;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -295,7 +296,7 @@ public class GUI {
 							| NoSuchPaddingException
 							| IllegalBlockSizeException | BadPaddingException
 							| SignatureException | InvalidKeySpecException
-							| IOException e1) {
+							| IOException | InvalidAlgorithmParameterException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}

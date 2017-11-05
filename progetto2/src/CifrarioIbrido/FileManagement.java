@@ -1,6 +1,9 @@
 package CifrarioIbrido;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.*;
 import java.util.Base64;
 
@@ -12,33 +15,62 @@ public class FileManagement {
 		out.close();
 	}
 
-	public static void createFileToSend(String fileToSend, String cipheredKey, String cipheredMessage, String sender, String recipient,
+	public static void createFileToSend(String fileToSend, String cipheredInfo, String cipheredKey, String cipheredMessage, String sender, String recipient,
 			String cipherType, String mode, String padding) throws IOException {
 		
 		FileWriter out = new FileWriter(fileToSend);
-		out.write(sender+System.lineSeparator()+recipient+System.lineSeparator()+cipherType+System.lineSeparator()+
-				mode+System.lineSeparator()+padding+System.lineSeparator()+"0"+System.lineSeparator()+cipheredKey+System.lineSeparator()
-				+cipheredMessage);
+		out.write(sender+System.lineSeparator()+recipient+System.lineSeparator()+cipheredInfo+System.lineSeparator()+
+				cipheredKey+System.lineSeparator()
+		+"0"+System.lineSeparator()+cipheredMessage+System.lineSeparator());
 		out.close();
 	}
 	
-	public static void saveDigitalKeysFile (String file, String sender, PublicKey publicKey, String signType) throws IOException {
-		FileWriter out = new FileWriter(file,true);
-		out.write(sender+" "+Base64.getEncoder().encodeToString(publicKey.getEncoded())+" "+signType+System.lineSeparator());
-		out.close();
-		
-	}
-
-	public static void createFileToSend(String fileToSend, String cipheredKey, String cipheredMessage, String sender,
+	public static void createFileToSend(String fileToSend, String cipheredInfo, String cipheredKey, String cipheredMessage, String sender,
 			String recipient, String cipherType, String mode, String padding, String sign) throws IOException {
 		// TODO Auto-generated method stub
 		FileWriter out = new FileWriter(fileToSend);
-		out.write(sender+System.lineSeparator()+recipient+System.lineSeparator()+cipherType+System.lineSeparator()+
-				mode+System.lineSeparator()+padding+System.lineSeparator()+"1"+System.lineSeparator()+cipheredKey+System.lineSeparator()
-				+cipheredMessage+System.lineSeparator()+sign);
+		out.write(sender+System.lineSeparator()+recipient+System.lineSeparator()+cipheredInfo+System.lineSeparator()+
+				cipheredKey+System.lineSeparator()
+		+"1"+System.lineSeparator()+cipheredMessage+System.lineSeparator()+sign);
 		out.close();
 		
 	}
 	
+	public static void saveDigitalKeysFile (String file, String sender, PublicKey publicKey, String signType) throws IOException {
+		Path path = Paths.get(file);
+
+		if (!Files.exists(path)) {
+			FileWriter out = new FileWriter(file,true);
+			out.write(sender +" "+Base64.getEncoder().encodeToString(publicKey.getEncoded())+" "+signType+System.lineSeparator());
+			out.close();
+		}
+		
+		else {
+			String tempFile = "myTempFile.txt";
+			BufferedReader in = new BufferedReader(new FileReader(file));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+			String read = null;
+			
+			while ((read = in.readLine()) != null) {
+				String[] splited = read.split("\\s+");
+				if (splited[0].compareTo(sender)!=0) 
+					writer.write(read + System.lineSeparator());
+				else 
+					writer.write(sender +" "+Base64.getEncoder().encodeToString(publicKey.getEncoded())+" "+signType+System.lineSeparator()); 
+		    }
+			writer.close();
+			in.close();
+			
+			BufferedWriter writer2 = new BufferedWriter(new FileWriter(file));
+			BufferedReader in2 = new BufferedReader(new FileReader(tempFile));
+			String read2 = null;
+			while ((read2 = in2.readLine()) != null) {
+		    	 writer2.write(read2 + System.getProperty("line.separator"));
+		    }
+			writer2.close();
+			in2.close();
+			Files.deleteIfExists(Paths.get("./"+tempFile));
+		}
+		}
 	
 }

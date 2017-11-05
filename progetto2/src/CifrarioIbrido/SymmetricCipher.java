@@ -18,25 +18,10 @@ public class SymmetricCipher {
 	private String mode;
 	private String padding = "PKCS5Padding";
 	private int dimKey;
-	private IvParameterSpec iv;
+	//private IvParameterSpec iv;
 	
 	
-	/**
-	 * @return the iv
-	 */
-	public IvParameterSpec getIv() {
-		return iv;
-	}
-
-
-
-	/**
-	 * @param iv the iv to set
-	 */
-	public void setIv(IvParameterSpec iv) {
-		this.iv = iv;
-	}
-
+	
 
 
 	/**
@@ -154,24 +139,10 @@ public class SymmetricCipher {
 		return keyGenerator.generateKey();
 	}
 	
-	public String symmetricEncoding (byte[] data, SecretKey secKey, String mode ) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+	public String symmetricEncoding (byte[] data, SecretKey secKey, String mode, IvParameterSpec iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
 	
-		if (mode.compareTo("CBC")==0 || mode.compareTo("CFB")==0) {
-			if (cipherType.compareTo("DES")==0 || cipherType.compareTo("DESede")==0 ) {
-				SecureRandom random = new SecureRandom();
-				byte IVBytes[] = new byte[8];
-				random.nextBytes(IVBytes); 
-				IvParameterSpec iv = new IvParameterSpec(IVBytes);
-				this.setIv(iv);
-			}
-			else {
-				SecureRandom random = new SecureRandom();
-				byte IVBytes[] = new byte[16];
-				random.nextBytes(IVBytes); 
-				IvParameterSpec iv = new IvParameterSpec(IVBytes);
-				this.setIv(iv);
-			}
+		if (iv!=null) {
 
 			
 			try {
@@ -192,23 +163,14 @@ public class SymmetricCipher {
 	public byte[] symmetricDecoding(String cipherType, String mode, String padding, SecretKey secKey,
 			String message) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		// TODO Auto-generated method stub
-		System.out.println("tipo di cifrario: "+cipherType);
+		/*System.out.println("tipo di cifrario: "+cipherType);
 		System.out.println("mode: "+mode);
-		System.out.println("padding: "+padding);
+		System.out.println("padding: "+padding);*/
 		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
 		
-		if (mode.compareTo("CBC")==0 || mode.compareTo("CFB")==0) {
-			
-			try {
-				cipher.init(Cipher.DECRYPT_MODE, secKey, iv);
-			} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else {
-			cipher.init(Cipher.DECRYPT_MODE, secKey);
-		}
+		
+		cipher.init(Cipher.DECRYPT_MODE, secKey);
+		
 		
 		System.out.println("message: "+message);
 		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
@@ -216,4 +178,44 @@ public class SymmetricCipher {
 		//return Base64.getEncoder().encodeToString(decodedMessageBytes);
 	}
 
+
+
+	public IvParameterSpec genIV(String cipherType, String mode) {
+		// TODO Auto-generated method stub
+		IvParameterSpec iv;
+		if (mode.compareTo("CBC")==0 || mode.compareTo("CFB")==0) {
+			if (cipherType.compareTo("DES")==0 || cipherType.compareTo("DESede")==0 ) {
+				SecureRandom random = new SecureRandom();
+				byte IVBytes[] = new byte[8];
+				random.nextBytes(IVBytes); 
+				iv = new IvParameterSpec(IVBytes);
+				
+			}
+			else {
+				SecureRandom random = new SecureRandom();
+				byte IVBytes[] = new byte[16];
+				random.nextBytes(IVBytes); 
+				iv = new IvParameterSpec(IVBytes);
+				
+			}
+			return iv;
+			}
+		return null;
+	}
+
+
+	public byte[] symmetricDecoding(String cipherType, String mode, String padding, SecretKey secKey,
+			String message, String ivString) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+		// TODO Auto-generated method stub
+		
+		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
+		byte [] IVBytes = Base64.getDecoder().decode(ivString);
+		IvParameterSpec iv = new IvParameterSpec(IVBytes);
+		cipher.init(Cipher.DECRYPT_MODE, secKey, iv);
+			
+		System.out.println("message: "+message);
+		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
+		return decodedMessageBytes;
+		//return Base64.getEncoder().encodeToString(decodedMessageBytes);
+	}
 }
