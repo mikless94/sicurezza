@@ -5,20 +5,25 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -247,5 +252,51 @@ public class Incapsula {
 		
 	}
 	
+	private String keyRingEncoding(User user, String privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {
+		
+		char[] pass = user.getPassword().toCharArray();
+		SecureRandom random = new SecureRandom();
+		byte[] salt = new byte[8];
+		
+		random.nextBytes(salt);
+		
+		user.setSalt(salt);
+		
+		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+		KeySpec keySpec = new PBEKeySpec(pass, salt, 65536, 128);
+		SecretKey tmp = factory.generateSecret(keySpec);
+		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+		
+		
+		Cipher ciph = Cipher.getInstance("AES");
+		ciph.init(Cipher.ENCRYPT_MODE, secretKey);
+		
+		
+		byte[] symKey = privateKey.getBytes("UTF-8");
+		byte[] cipheredKey = ciph.doFinal(symKey);
+		
+		return Base64.getEncoder().encodeToString(symKey);
+	}
+	
+	private String keyRingDecoding(User user, SecretKey cipheredKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, UnsupportedEncodingException{
+		
+		char[] pass = user.getPassword().toCharArray();
+		
+		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+		KeySpec spec = new PBEKeySpec(pass, user.getSalt(), 65536, 128);
+		SecretKey tmp = factory.generateSecret(spec);
+		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+		
+		byte[] ciphKey = cipheredKey.getEncoded();
+		Cipher ciph = Cipher.getInstance("AES");
+		ciph.init(Cipher.DECRYPT_MODE, secretKey);
+		
+		byte[] decryptedText=null;
+		decryptedText = ciph.doFinal(Base64.getDecoder().decode(ciphKey));
+		
+		String output = new String(decryptedText,"UTF8");
+		
+		return output;
+	}
 	
 }

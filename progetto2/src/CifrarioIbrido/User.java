@@ -7,6 +7,8 @@ public class User {
 	private PrivateKey asymmetricKey;
 	private String padding;
 	private PrivateKey signKey;
+	private byte[] salt;
+	private String password;
 	
 	
 	/**
@@ -109,5 +111,27 @@ public class User {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+
+	public byte[] getSalt() {
+		return salt;
+	}
+
+
+	public void setSalt(byte[] salt) {
+		this.salt = salt;
+	}
+
+
+	public String getPassword() {
+		return password;
+	}
+
+
+	public void setPassword(String password) {
+		this.password = password;
 	}	
+	
+	
 }
