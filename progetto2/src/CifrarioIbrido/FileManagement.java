@@ -73,9 +73,34 @@ public class FileManagement {
 		}
 		}
 
-	public static void savePrivateKey(String pvtKeysFile, String name, String pvtKeyString) {
-		// TODO Auto-generated method stub
+	public static void savePrivateKey(String pvtKeysFile, String userName, String pvtKeyString) throws IOException {
 		
+		FileWriter out = new FileWriter(pvtKeysFile, true);
+		out.write(userName + " " + pvtKeyString + " "+ System.lineSeparator());
+		out.close();
 	}
+	
+	public static String readPrivateKey(String fileName, User user) throws IOException {
+		Path path = Paths.get(fileName);
+		String cipheredKey = null;
+		
+		if (!Files.exists(path)) {
+			return null;
+		}
+		else {
+			BufferedReader in = new BufferedReader(new FileReader(fileName));
+			String read = null;
+			
+			while ((read = in.readLine()) != null) {
+				String[] splited = read.split("\\s+");
+				if (splited[0].compareTo(user.getName())==0) {
+					cipheredKey = splited[1];
+					break;
+				}
+		}
+			in.close();
+	}
+		return cipheredKey;
+ } 
 	
 }

@@ -2,6 +2,7 @@ package CifrarioIbrido;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -85,14 +87,14 @@ public class Incapsula {
 		     String read2 = null;
 		     while ((read2 = in2.readLine()) != null) {
 		    	 writer2.write(read2 + System.getProperty("line.separator"));
-		    
 		     }
 		     writer2.close();
 		     in2.close();
-		}
+
+	}
 		Files.deleteIfExists(Paths.get("./"+tempFile));
 	    return success;
-	}
+}
 	
 	
 	//encoding
@@ -186,7 +188,7 @@ public class Incapsula {
 		
 		KeyPair pair = digSign.genKeyPair();
 		
-		this.signKeyRing (sender, pair.getPrivate());
+		this.signKeyRing(sender, pair.getPrivate());
 
 		FileManagement.saveDigitalKeysFile(digKeysFile, sender , pair.getPublic(), signType );
 		
@@ -235,16 +237,19 @@ public class Incapsula {
 	    in.close();
  	    
 	    User user = new User (fields.get(1));
-	    PrivateKey pvtKey = this.keyRingDecoding(user);
 	    
 	    String padding = "";
 		for (User utente : utenti) {
 			if (utente.getName().compareTo(fields.get(1))==0) {
 				padding += utente.getPadding();
+				user.setPassword(utente.getPassword());
+				user.setSalt(utente.getSalt());
 				break;
 			}
 		}
 	    
+		PrivateKey pvtKey = this.keyRingDecoding(user);
+		
 	    String [] info = obtainInfo (fields.get(2), padding, pvtKey);
 	    SecretKey secKey = this.decodeSymmetricKey (fields.get(3), fields.get(1), info [0], pvtKey);
 	    //System.out.println("Secret key decifrata dal file: " + secKey.toString());
@@ -330,7 +335,7 @@ public class Incapsula {
 		
 	}
 	
-	private String keyRingEncoding(User user, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {
+	private String keyRingEncoding(User user, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
 		
 		char[] pass = user.getPassword().toCharArray();
 		SecureRandom random = new SecureRandom();
@@ -352,11 +357,12 @@ public class Incapsula {
 		byte[] symKey = privateKey.getEncoded();
 		byte[] cipheredKey = ciph.doFinal(symKey);
 		
-		//metti cipheredKey sul file
-		return Base64.getEncoder().encodeToString(symKey);
+		String codifiedKey = Base64.getEncoder().encodeToString(cipheredKey);
+		
+		return codifiedKey;
 	}
 	
-	private PrivateKey keyRingDecoding(User user) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, UnsupportedEncodingException{
+	private PrivateKey keyRingDecoding(User user) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, IOException{
 		
 		char[] pass = user.getPassword().toCharArray();
 		
@@ -365,21 +371,18 @@ public class Incapsula {
 		SecretKey tmp = factory.generateSecret(spec);
 		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 		
-		//prendi cipheredKey da file
-		byte[] ciphKey = Base64.getDecoder().decode(cipheredKey);
+		//prendo cipheredKey da file (come stringa) e la converto in array di byte
+		byte[] ciphKey = Base64.getDecoder().decode(FileManagement.readPrivateKey(pvtKeysFile, user));
 		Cipher ciph = Cipher.getInstance("AES");
 		ciph.init(Cipher.DECRYPT_MODE, secretKey);
 		
 		byte [] decryptedText = ciph.doFinal(ciphKey);
 		
-		//a x509 sostituire la codifica per la chiave privata PKCS8
-		X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
+		PKCS8EncodedKeySpec pubKeySpec = new PKCS8EncodedKeySpec(decryptedText);
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-		PublicKey pubKey = keyFactory.generatePublic(pubKeySpec);
+		PrivateKey pvtKey = keyFactory.generatePrivate(pubKeySpec);
 		
-		String output = new String(decryptedText,"UTF8");
-		
-		return output;
+		return pvtKey;
 	}
 	
 }
