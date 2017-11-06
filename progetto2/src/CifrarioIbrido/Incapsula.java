@@ -18,6 +18,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -55,13 +56,15 @@ public class Incapsula {
 		
 		KeyPair pair = asymCipher.genKeyPair();
 		User utente = new User(name, password);
-		String pvtKeyString = keyRingEncoding(utente, pair.getPrivate());
-		
-		FileManagement.savePrivateKey(pvtKeysFile, utente.getName(), pvtKeyString);
 		boolean success = utenti.add(utente);
 		
-		if (success)
+		if (success){
+			System.out.println(password);
+
 			FileManagement.savePublicKey(pubKeyFile, utente.getName(), pair.getPublic(), padding);
+			String pvtKeyString = keyRingEncoding(utente, pair.getPrivate());
+			FileManagement.savePrivateKey(pvtKeysFile, utente.getName(), pvtKeyString);
+		}
 		
 		return success;
 	}
@@ -260,11 +263,12 @@ public class Incapsula {
 	    else
 	    	obtainMessage (info[0], info[1], info[2], fields.get(5), secKey, destinationPath);
 	    
-	    if (fields.get(4).compareTo("1")==0)
+	    if (fields.get(4).compareTo("1")==0){
 	    	if (this.verify(destinationPath, fields.get(6), fields.get(0)))
 	    		JOptionPane.showMessageDialog(null,"Message verified! " ,"Digital Sign",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
 	    	else
 	    		JOptionPane.showMessageDialog(null,"Message NOT verified! " ,"Digital Sign",JOptionPane.ERROR_MESSAGE);
+	    }
 	}
 
 	private void obtainMessage(String cipherType, String mode, String padding, String message, SecretKey secKey, String destinationPath, String iv) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, InvalidAlgorithmParameterException {

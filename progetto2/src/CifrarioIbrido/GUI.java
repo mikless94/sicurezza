@@ -79,6 +79,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.awt.Choice;
 
+import javax.swing.JPasswordField;
+
 public class GUI {
 
 	private JFrame frmCifrarioIbrido;
@@ -87,6 +89,7 @@ public class GUI {
 	private JTextField FileTextField;
 	private Incapsula inc = new Incapsula();
 	private JTextField DestinationTextField;
+	private JPasswordField passwordField;
 
 	/**
 	 * Launch the application.
@@ -123,7 +126,7 @@ public class GUI {
 	private void initialize() {
 		frmCifrarioIbrido = new JFrame();
 		frmCifrarioIbrido.setTitle("Cifrario Ibrido");
-		frmCifrarioIbrido.setBounds(100, 100, 634, 403);
+		frmCifrarioIbrido.setBounds(100, 100, 634, 443);
 		frmCifrarioIbrido.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmCifrarioIbrido.getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -136,7 +139,7 @@ public class GUI {
 		
 		JPanel InsertUserPanel = new JPanel();
 		InsertUserPanel.setBorder(new TitledBorder(null, "Insert User", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		InsertUserPanel.setBounds(6, 6, 285, 302);
+		InsertUserPanel.setBounds(6, 6, 285, 359);
 		UserPanel.add(InsertUserPanel);
 		InsertUserPanel.setLayout(null);
 		
@@ -145,11 +148,11 @@ public class GUI {
 		InsertUserPanel.add(lblUsername);
 		
 		JLabel lblKeyDimension = new JLabel("Key Dimension :");
-		lblKeyDimension.setBounds(18, 106, 93, 16);
+		lblKeyDimension.setBounds(18, 158, 93, 16);
 		InsertUserPanel.add(lblKeyDimension);
 		
 		JLabel lblPadding = new JLabel("Padding :");
-		lblPadding.setBounds(18, 156, 55, 16);
+		lblPadding.setBounds(18, 208, 55, 16);
 		InsertUserPanel.add(lblPadding);
 		
 		UsernameTextField = new JTextField();		
@@ -164,24 +167,24 @@ public class GUI {
 		JComboBox PaddingComboBox = new JComboBox();
 		PaddingComboBox.setToolTipText("Padding mode");
 		PaddingComboBox.setModel(new DefaultComboBoxModel(new String[] {"PKCS1Padding", "OAEPPadding"}));
-		PaddingComboBox.setBounds(115, 151, 124, 26);
+		PaddingComboBox.setBounds(115, 203, 124, 26);
 		InsertUserPanel.add(PaddingComboBox);
 		
 		JComboBox KeyComboBox = new JComboBox();
 		KeyComboBox.setToolTipText("Key dimension");
 		KeyComboBox.setModel(new DefaultComboBoxModel(new String[] {"1024", "2048"}));
-		KeyComboBox.setBounds(115, 101, 124, 26);
+		KeyComboBox.setBounds(115, 153, 124, 26);
 		InsertUserPanel.add(KeyComboBox);
 		
 		JPanel ViewPanel = new JPanel();
 		ViewPanel.setBorder(new TitledBorder(null, "User view", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		ViewPanel.setBounds(303, 6, 300, 302);
+		ViewPanel.setBounds(303, 6, 300, 359);
 		UserPanel.add(ViewPanel);
 		ViewPanel.setLayout(null);
 		
 		TextArea textArea = new TextArea();
 		textArea.setEditable(false);
-		textArea.setBounds(20, 50, 247, 138);
+		textArea.setBounds(20, 50, 247, 185);
 		ViewPanel.add(textArea);
 		
 		JPanel TransmissionPanel = new JPanel();
@@ -190,7 +193,7 @@ public class GUI {
 		
 		JPanel SendPanel = new JPanel();
 		SendPanel.setBorder(new TitledBorder(null, "Send Message", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		SendPanel.setBounds(6, 6, 273, 322);
+		SendPanel.setBounds(12, 7, 273, 359);
 		TransmissionPanel.add(SendPanel);
 		SendPanel.setLayout(null);
 		
@@ -207,7 +210,7 @@ public class GUI {
 
 		FileTextField = new JTextField();
 		FileTextField.setEditable(false);
-		FileTextField.setBounds(107, 267, 156, 20);
+		FileTextField.setBounds(107, 293, 156, 20);
 		SendPanel.add(FileTextField);
 		FileTextField.setColumns(10);
 		
@@ -243,6 +246,15 @@ public class GUI {
 		TypeComboBox.setModel(new DefaultComboBoxModel(new String[] {"SHA1withDSA", "SHA224withDSA", "SHA256withDSA"}));
 		TypeComboBox.setBounds(149, 58, 103, 26);
 		DSApanel.add(TypeComboBox);
+		
+		JLabel lblPassword = new JLabel("Password :");
+		lblPassword.setBounds(18, 109, 68, 14);
+		InsertUserPanel.add(lblPassword);
+		
+		passwordField = new JPasswordField();
+		passwordField.setEchoChar('*');
+		passwordField.setBounds(98, 105, 152, 22);
+		InsertUserPanel.add(passwordField);
 		
 		JButton btnBrowse = new JButton("Browse...");
 		JRadioButton rdbtnYes = new JRadioButton("Yes");
@@ -305,7 +317,7 @@ public class GUI {
 		});
 		btnSend.setFont(new Font("SansSerif", Font.BOLD, 12));
 		btnSend.setToolTipText("Send Message");
-		btnSend.setBounds(457, 293, 90, 28);
+		btnSend.setBounds(463, 320, 90, 28);
 		TransmissionPanel.add(btnSend);
 		
 		JButton btnAdd = new JButton("ADD");
@@ -317,10 +329,13 @@ public class GUI {
 				String username = UsernameTextField.getText();
 				String keyDimension = KeyComboBox.getSelectedItem().toString();
 				String padding = PaddingComboBox.getSelectedItem().toString();
-
+				char[] pass = passwordField.getPassword();
+				String password = "";
+				for(char i : pass)
+					password += i;
 				try {
 
-					boolean success = inc.addUser(username, Integer.parseInt(keyDimension), padding);
+					boolean success = inc.addUser(username, Integer.parseInt(keyDimension), padding, password);
 					if (success){
 						if (textArea.getText().equals(" "))
 							textArea.setText(null);
@@ -336,6 +351,9 @@ public class GUI {
 						
 						if(SenderComboBox.getItemCount() > 0 &&	!FileTextField.getText().equals(""))		
 							btnSend.setEnabled(true);
+						
+						UsernameTextField.setText(null);
+						passwordField.setText(null);
 					}
 				} catch (NoSuchAlgorithmException e) {
 					// TODO Auto-generated catch block
@@ -343,10 +361,28 @@ public class GUI {
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (InvalidKeyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvalidKeySpecException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchPaddingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalBlockSizeException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (BadPaddingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		});
-		btnAdd.setBounds(138, 210, 90, 28);
+		btnAdd.setBounds(138, 262, 90, 28);
 		InsertUserPanel.add(btnAdd);
 		
 		UsernameTextField.getDocument().addDocumentListener(new DocumentListener() {
@@ -362,21 +398,41 @@ public class GUI {
 			}
 		
 		public void enableButton(){
-			if (UsernameTextField.getText().equals(""))
-				btnAdd.setEnabled(false);
-			else
+			if (!UsernameTextField.getText().equals("") && passwordField.getPassword().length > 0)
 				btnAdd.setEnabled(true);
+			else
+				btnAdd.setEnabled(false);
+		}
+	});
+		
+		passwordField.getDocument().addDocumentListener(new DocumentListener() {
+			
+			public void changedUpdate(DocumentEvent e) {
+				enableButton();
+			}
+			public void removeUpdate(DocumentEvent e) {
+				enableButton();
+			}
+			public void insertUpdate(DocumentEvent e) {
+				enableButton();
+			}
+		
+		public void enableButton(){
+			if (passwordField.getPassword().length > 0 && !UsernameTextField.getText().equals(""))
+				btnAdd.setEnabled(true);
+			else
+				btnAdd.setEnabled(false);
 		}
 	});
 		
 		JLabel label = new JLabel("");
 		label.setIcon(new ImageIcon(GUI.class.getResource("/progetto2/resources/utente.png")));
-		label.setBounds(23, 189, 103, 107);
+		label.setBounds(23, 241, 103, 107);
 		InsertUserPanel.add(label);
 		
 		DeleteTextField = new JTextField();
 		DeleteTextField.setToolTipText("Delete User");
-		DeleteTextField.setBounds(20, 250, 161, 21);
+		DeleteTextField.setBounds(20, 301, 161, 21);
 		ViewPanel.add(DeleteTextField);
 		DeleteTextField.setColumns(10);
 		
@@ -412,11 +468,11 @@ public class GUI {
 
 			}
 		});
-		btnDelete.setBounds(193, 251, 90, 21);
+		btnDelete.setBounds(193, 302, 90, 21);
 		ViewPanel.add(btnDelete);
 		
 		JLabel lblDeleteUser = new JLabel("Delete User :");
-		lblDeleteUser.setBounds(20, 222, 117, 16);
+		lblDeleteUser.setBounds(20, 273, 117, 16);
 		ViewPanel.add(lblDeleteUser);
 		
 		JLabel lblUserInNetwork = new JLabel("User in network :");
@@ -440,7 +496,7 @@ public class GUI {
 		SendPanel.add(lblOperationMode);
 		
 		JLabel lblChooseMessage = new JLabel("Choose Message :");
-		lblChooseMessage.setBounds(19, 235, 115, 16);
+		lblChooseMessage.setBounds(19, 261, 115, 16);
 		SendPanel.add(lblChooseMessage);
 		
 		JButton btnApriFile = new JButton("Open file");
@@ -457,7 +513,7 @@ public class GUI {
 					btnSend.setEnabled(false);
 			}
 		});
-		btnApriFile.setBounds(10, 265, 87, 25);
+		btnApriFile.setBounds(10, 291, 87, 25);
 		SendPanel.add(btnApriFile);
 		
 		JLabel lblDoYouWant = new JLabel("Do you want  to sign your message?");
@@ -501,16 +557,16 @@ public class GUI {
 		DSApanel.add(lblType);
 		
 		JLabel lblSendMessage = new JLabel("Send Message :");
-		lblSendMessage.setBounds(289, 300, 106, 16);
+		lblSendMessage.setBounds(295, 327, 106, 16);
 		TransmissionPanel.add(lblSendMessage);
 		
 		JLabel label_1 = new JLabel("");
 		label_1.setIcon(new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
-		label_1.setBounds(564, 290, 39, 39);
+		label_1.setBounds(564, 309, 39, 39);
 		TransmissionPanel.add(label_1);
 		
 		JLabel lblDestinationfolder = new JLabel("Destination Folder :");
-		lblDestinationfolder.setBounds(289, 230, 116, 14);
+		lblDestinationfolder.setBounds(295, 242, 116, 14);
 		TransmissionPanel.add(lblDestinationfolder);
 		
 		btnBrowse.addActionListener(new ActionListener() {
@@ -521,12 +577,12 @@ public class GUI {
 				DestinationTextField.setText(filename);
 			}
 		});
-		btnBrowse.setBounds(289, 255, 90, 24);
+		btnBrowse.setBounds(295, 267, 90, 24);
 		TransmissionPanel.add(btnBrowse);
 		
 		DestinationTextField = new JTextField();
 		DestinationTextField.setEditable(false);
-		DestinationTextField.setBounds(389, 256, 202, 23);
+		DestinationTextField.setBounds(395, 268, 202, 23);
 		TransmissionPanel.add(DestinationTextField);
 		DestinationTextField.setColumns(10);
 	}
