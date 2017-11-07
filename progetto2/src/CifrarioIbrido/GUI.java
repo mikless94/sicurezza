@@ -101,6 +101,9 @@ public class GUI {
 		Files.deleteIfExists(Paths.get("./fileToSend.txt"));
 		Files.deleteIfExists(Paths.get("./digKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./myTempFile.txt"));
+		Files.deleteIfExists(Paths.get("./pvtKeysFile.txt"));
+		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt"));
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

@@ -27,17 +27,21 @@ public class Prova {
 		Files.deleteIfExists(Paths.get("./fileToSend.txt"));
 		Files.deleteIfExists(Paths.get("./digKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./myTempFile.txt"));
+		Files.deleteIfExists(Paths.get("./pvtKeysFile.txt"));
+		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt"));
 		
 		inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
-		inc.addUser("Giuseppe", 2048, "PKCS1Padding", "ciao");
-		inc.addUser("Giovanni", 2048, "PKCS1Padding", "ciao");
+		inc.addUser("Giuseppe", 2048, "PKCS1Padding", "lol");
+		inc.addUser("Giovanni", 2048, "PKCS1Padding", "ccoierow54");
 		//inc.deleteUser("Giovanni");
 		
-		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\jamesharden.jpg"/*, 1024, "SHA1withDSA"*/);
-		inc.decodeMessage("C:\\Users\\Michele\\Desktop\\jameshardendec.jpg" );
+		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "C:\\Users\\Giu67890\\Desktop\\Message.txt", 1024, "SHA1withDSA");
+		inc.decodeMessage("C:\\Users\\Giu67890\\Desktop\\MessageDecoded.txt" );
 		
-		inc.messageToSend ("Michele", "Giovanni", "DESede", "CBC", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\messaggio.txt", 2048, "SHA224withDSA");
-		inc.decodeMessage("C:\\Users\\Michele\\Desktop\\messaggiodec.txt" );
+		inc.deleteUser("Michele");
+		
+		//inc.messageToSend ("Michele", "Giovanni", "DESede", "CBC", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\messaggio.txt", 2048, "SHA224withDSA");
+		//inc.decodeMessage("C:\\Users\\Michele\\Desktop\\messaggiodec.txt" );
 
 	}
 
