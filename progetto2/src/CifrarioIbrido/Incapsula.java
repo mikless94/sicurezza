@@ -124,26 +124,30 @@ public class Incapsula {
 	    
 	    String tempFile3 = "myTempFile.txt";
 		if (success){
-		     BufferedReader in = new BufferedReader(new FileReader(pvtDigitalKeysFile));
-		     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile3));
-		     String read = null;
-		     while ((read = in.readLine()) != null) {
-		    	 String[] splited = read.split("\\s+");
-		         if (splited[0].compareTo(name)==0)
-		        	 continue;
-		         writer.write(read + System.getProperty("line.separator"));
-		        }
-		     writer.close(); 
-		     in.close();
-		        
-		     BufferedWriter writer2 = new BufferedWriter(new FileWriter(pvtDigitalKeysFile));
-		     BufferedReader in2 = new BufferedReader(new FileReader(tempFile3));
-		     String read2 = null;
-		     while ((read2 = in2.readLine()) != null) {
-		    	 writer2.write(read2 + System.getProperty("line.separator"));
-		     }
-		     writer2.close();
-		     in2.close();
+			Path path = Paths.get(pvtKeysFile);
+
+			if (!Files.exists(path)) {
+			     BufferedReader in = new BufferedReader(new FileReader(pvtDigitalKeysFile));
+			     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile3));
+			     String read = null;
+			     while ((read = in.readLine()) != null) {
+			    	 String[] splited = read.split("\\s+");
+			         if (splited[0].compareTo(name)==0)
+			        	 continue;
+			         writer.write(read + System.getProperty("line.separator"));
+			        }
+			     writer.close(); 
+			     in.close();
+			        
+			     BufferedWriter writer2 = new BufferedWriter(new FileWriter(pvtDigitalKeysFile));
+			     BufferedReader in2 = new BufferedReader(new FileReader(tempFile3));
+			     String read2 = null;
+			     while ((read2 = in2.readLine()) != null) {
+			    	 writer2.write(read2 + System.getProperty("line.separator"));
+			     }
+			     writer2.close();
+			     in2.close();
+			}
 
 	}
 		Files.deleteIfExists(Paths.get("./"+tempFile3));
@@ -308,7 +312,7 @@ public class Incapsula {
 	    SecretKey secKey = this.decodeSymmetricKey (fields.get(3), fields.get(1), info [0], pvtKey);
 	    //System.out.println("Secret key decifrata dal file: " + secKey.toString());
 	    if (info[1].compareTo("CBC")==0 || info[1].compareTo("CFB")==0) {
-	    	System.out.println(info[2]);
+	    	//System.out.println(info[2]);
 	    	obtainMessage (info[0], info[1], info[2], fields.get(4), secKey, destinationPath, info[3]);
 	    }
 	    else

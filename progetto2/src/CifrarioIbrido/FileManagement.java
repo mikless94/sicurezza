@@ -103,9 +103,42 @@ public class FileManagement {
 	
 public static void saveDigitalPrivateKey(String pvtKeysFile, String userName, String pvtKeyString) throws IOException {
 		
+	
+	Path path = Paths.get(pvtKeysFile);
+
+	if (!Files.exists(path)) {
 		FileWriter out = new FileWriter(pvtKeysFile, true);
-		out.write(userName + " " + pvtKeyString + " "+ System.lineSeparator());
+		out.write(userName + " " + pvtKeyString + System.lineSeparator());
 		out.close();
+	}
+	
+	else {
+		String tempFile = "myTempFile.txt";
+		BufferedReader in = new BufferedReader(new FileReader(pvtKeysFile));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+		String read = null;
+		
+		while ((read = in.readLine()) != null) {
+			String[] splited = read.split("\\s+");
+			if (splited[0].compareTo(userName)!=0) 
+				writer.write(read + System.lineSeparator());
+			else 
+				writer.write(userName +" "+ pvtKeyString + System.lineSeparator()); 
+	    }
+		writer.close();
+		in.close();
+		
+		BufferedWriter writer2 = new BufferedWriter(new FileWriter(pvtKeysFile));
+		BufferedReader in2 = new BufferedReader(new FileReader(tempFile));
+		String read2 = null;
+		while ((read2 = in2.readLine()) != null) {
+	    	 writer2.write(read2 + System.getProperty("line.separator"));
+	    }
+		writer2.close();
+		in2.close();
+		Files.deleteIfExists(Paths.get("./"+tempFile));
+	}
+		
 	}
 
 public static String readDigitalPrivateKey(String fileName, User user) throws IOException {
