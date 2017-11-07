@@ -20,8 +20,7 @@ public class FileManagement {
 		
 		FileWriter out = new FileWriter(fileToSend);
 		out.write(sender+System.lineSeparator()+recipient+System.lineSeparator()+cipheredInfo+System.lineSeparator()+
-				cipheredKey+System.lineSeparator()
-		+"0"+System.lineSeparator()+cipheredMessage+System.lineSeparator());
+				cipheredKey+System.lineSeparator()+cipheredMessage+System.lineSeparator());
 		out.close();
 	}
 	
@@ -30,8 +29,7 @@ public class FileManagement {
 		// TODO Auto-generated method stub
 		FileWriter out = new FileWriter(fileToSend);
 		out.write(sender+System.lineSeparator()+recipient+System.lineSeparator()+cipheredInfo+System.lineSeparator()+
-				cipheredKey+System.lineSeparator()
-		+"1"+System.lineSeparator()+cipheredMessage+System.lineSeparator()+sign);
+				cipheredKey+System.lineSeparator()+cipheredMessage+System.lineSeparator()+sign);
 		out.close();
 		
 	}

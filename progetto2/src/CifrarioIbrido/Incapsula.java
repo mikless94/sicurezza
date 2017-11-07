@@ -228,11 +228,12 @@ public class Incapsula {
 		BufferedReader in = new BufferedReader(new FileReader(fileToSend));
 
 	    ArrayList <String> fields = new ArrayList <String> ();
-	    for (int i=0; i<6 ; i++) 
+	    String read = null;
+	    while ((read = in.readLine())!=null)
+	    	fields.add(read);
+	    /*if (fields.get(4).compareTo("1")==0)
 	    	fields.add(in.readLine());
-	    if (fields.get(4).compareTo("1")==0)
-	    	fields.add(in.readLine());
-	    in.close();
+	    in.close();*/
  	    
 	    User user = new User (fields.get(1));
 	    PrivateKey pvtKey = this.keyRingDecoding(user);
@@ -255,8 +256,8 @@ public class Incapsula {
 	    else
 	    	obtainMessage (info[0], info[1], info[2], fields.get(5), secKey, destinationPath);
 	    
-	    if (fields.get(4).compareTo("1")==0)
-	    	if (this.verify(destinationPath, fields.get(6), fields.get(0)))
+	    if (fields.size() >= 6)
+	    	if (this.verify(destinationPath, fields.get(5), fields.get(0)))
 	    		JOptionPane.showMessageDialog(null,"Message verified! " ,"Digital Sign",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
 	    	else
 	    		JOptionPane.showMessageDialog(null,"Message NOT verified! " ,"Digital Sign",JOptionPane.ERROR_MESSAGE);
@@ -317,7 +318,6 @@ public class Incapsula {
 	    }
 	    in.close();
 	    //aggiungere eccezione per mittente non trovato
-	    
 		byte [] keyBytes = Base64.getDecoder().decode(key);
 		X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance("DSA");
