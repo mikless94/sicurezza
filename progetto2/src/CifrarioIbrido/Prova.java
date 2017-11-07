@@ -33,11 +33,10 @@ public class Prova {
 		inc.addUser("Giovanni", 2048, "PKCS1Padding", "ciao");
 		//inc.deleteUser("Giovanni");
 		
-		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\jamesharden.jpg"/*, 1024, "SHA1withDSA"*/);
-		inc.decodeMessage("C:\\Users\\Michele\\Desktop\\jameshardendec.jpg" );
 		
-		inc.messageToSend ("Michele", "Giovanni", "DESede", "CBC", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\messaggio.txt", 2048, "SHA224withDSA");
-		inc.decodeMessage("C:\\Users\\Michele\\Desktop\\messaggiodec.txt" );
+		
+		inc.messageToSend ("Michele", "Giovanni", "DESede", "CBC", "PKCS5Padding", "C:\\Users\\Demetrio Laveglia\\Desktop\\Isee.pdf", 2048, "SHA1withDSA");
+		inc.decodeMessage("C:\\Users\\Demetrio Laveglia\\Desktop\\messaggiodec.pdf" );
 
 	}
 
