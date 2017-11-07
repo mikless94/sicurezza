@@ -28,7 +28,7 @@ public class Prova {
 		Files.deleteIfExists(Paths.get("./digKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./myTempFile.txt"));
 		Files.deleteIfExists(Paths.get("./pvtKeysFile.txt"));
-		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt"));
+		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt")) ;
 		
 		inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
 		inc.addUser("Giuseppe", 2048, "PKCS1Padding", "lol");
