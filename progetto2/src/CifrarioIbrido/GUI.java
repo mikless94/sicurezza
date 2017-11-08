@@ -69,6 +69,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -336,53 +337,69 @@ public class GUI {
 				String password = "";
 				for(char i : pass)
 					password += i;
-				try {
-
-					boolean success = inc.addUser(username, Integer.parseInt(keyDimension), padding, password);
-					if (success){
-						if (textArea.getText().equals(" "))
-							textArea.setText(null);
-						textArea.append(username + "\n");
-						SenderComboBox.addItem(username);
-						ReceiverComboBox.addItem(username);
-					
-						if(SenderComboBox.getItemCount() > 0)
-							SenderComboBox.setEnabled(true);
-							
-						if(ReceiverComboBox.getItemCount() > 0)
-							ReceiverComboBox.setEnabled(true);
-						
-						if(SenderComboBox.getItemCount() > 0 &&	!FileTextField.getText().equals(""))		
-							btnSend.setEnabled(true);
-						
-						UsernameTextField.setText(null);
-						passwordField.setText(null);
-					}
-				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidKeyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NumberFormatException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidKeySpecException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalBlockSizeException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (BadPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				
+				HashSet<User> user = inc.getUtenti();
+				int exist = 0;
+				for(User i : user){
+					if(i.getPassword().equals(password))
+						exist=1;
 				}
+				if (exist==1){
+					JOptionPane.showMessageDialog(null,"Password already exist!\n Select another Password." ,"User not added",JOptionPane.ERROR_MESSAGE);
+					passwordField.setText(null);
+				}
+				else{
+					try {
+						boolean success = inc.addUser(username, Integer.parseInt(keyDimension), padding, password);
+						if (success){
+							if (textArea.getText().equals(" "))
+								textArea.setText(null);
+							textArea.append(username + "\n");
+							SenderComboBox.addItem(username);
+							ReceiverComboBox.addItem(username);
+						
+							if(SenderComboBox.getItemCount() > 0)
+								SenderComboBox.setEnabled(true);
+								
+							if(ReceiverComboBox.getItemCount() > 0)
+								ReceiverComboBox.setEnabled(true);
+							
+							if(SenderComboBox.getItemCount() > 0 &&	!FileTextField.getText().equals(""))		
+								btnSend.setEnabled(true);
+							
+							UsernameTextField.setText(null);
+							passwordField.setText(null);
+						}
+						else{
+							JOptionPane.showMessageDialog(null,"User already exist!\n Select another User." ,"User not added",JOptionPane.ERROR_MESSAGE);
+						}
+					} catch (NoSuchAlgorithmException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidKeyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NumberFormatException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidKeySpecException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchPaddingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalBlockSizeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (BadPaddingException e){
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
 			}
 		});
 		btnAdd.setBounds(138, 262, 90, 28);
