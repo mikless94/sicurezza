@@ -36,7 +36,8 @@ public class Incapsula {
 	private String pubKeyFile = "publicKeyFile.txt";
 	private String fileToSend = "fileToSend.txt";
 	private String digKeysFile = "digKeysFile.txt";
-	public String pvtKeysFile = "pvtKeysFile.txt";
+	private String pvtKeysFile = "pvtKeysFile.txt";
+	private String pvtDigitalKeysFile = "pvtDigitalKeysFile.txt";
 	
 	private HashSet<User> utenti = new HashSet<User>();
 	private SymmetricCipher symCipher = new SymmetricCipher();
@@ -59,8 +60,6 @@ public class Incapsula {
 		boolean success = utenti.add(utente);
 		
 		if (success){
-			System.out.println(password);
-
 			FileManagement.savePublicKey(pubKeyFile, utente.getName(), pair.getPublic(), padding);
 			String pvtKeyString = keyRingEncoding(utente, pair.getPrivate());
 			FileManagement.savePrivateKey(pvtKeysFile, utente.getName(), pvtKeyString);
@@ -96,7 +95,60 @@ public class Incapsula {
 
 	}
 		Files.deleteIfExists(Paths.get("./"+tempFile));
+	    
+		String tempFile2 = "myTempFile.txt";
+		if (success){
+		     BufferedReader in = new BufferedReader(new FileReader(pvtKeysFile));
+		     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile2));
+		     String read = null;
+		     while ((read = in.readLine()) != null) {
+		    	 String[] splited = read.split("\\s+");
+		         if (splited[0].compareTo(name)==0)
+		        	 continue;
+		         writer.write(read + System.getProperty("line.separator"));
+		        }
+		     writer.close(); 
+		     in.close();
+		        
+		     BufferedWriter writer2 = new BufferedWriter(new FileWriter(pvtKeysFile));
+		     BufferedReader in2 = new BufferedReader(new FileReader(tempFile2));
+		     String read2 = null;
+		     while ((read2 = in2.readLine()) != null) {
+		    	 writer2.write(read2 + System.getProperty("line.separator"));
+		     }
+		     writer2.close();
+		     in2.close();
+
+	}
+		Files.deleteIfExists(Paths.get("./"+tempFile2));
+	    
+	    String tempFile3 = "myTempFile.txt";
+		if (success){
+		     BufferedReader in = new BufferedReader(new FileReader(pvtDigitalKeysFile));
+		     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile3));
+		     String read = null;
+		     while ((read = in.readLine()) != null) {
+		    	 String[] splited = read.split("\\s+");
+		         if (splited[0].compareTo(name)==0)
+		        	 continue;
+		         writer.write(read + System.getProperty("line.separator"));
+		        }
+		     writer.close(); 
+		     in.close();
+		        
+		     BufferedWriter writer2 = new BufferedWriter(new FileWriter(pvtDigitalKeysFile));
+		     BufferedReader in2 = new BufferedReader(new FileReader(tempFile3));
+		     String read2 = null;
+		     while ((read2 = in2.readLine()) != null) {
+		    	 writer2.write(read2 + System.getProperty("line.separator"));
+		     }
+		     writer2.close();
+		     in2.close();
+
+	}
+		Files.deleteIfExists(Paths.get("./"+tempFile3));
 	    return success;
+
 }
 	
 	
@@ -121,7 +173,7 @@ public class Incapsula {
 	        	}
 	    }
 	    in.close();
-	    //aggiungere eccezione per destinatario non trovato
+
 		byte [] keyBytes = Base64.getDecoder().decode(key);
 		X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -184,33 +236,30 @@ public class Incapsula {
 		return asymCipher.asymmetricEncoding (symmetricCipherInfo, pubKey);
 	}
 
-	private String digitalSign(String messagePath, String sender, int dimSignKey, String signType) throws NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException {
+	private String digitalSign(String messagePath, String sender, int dimSignKey, String signType) throws NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		// TODO Auto-generated method stub
 		digSign.setDimKey(dimSignKey);
 		digSign.setType(signType);
 		
 		KeyPair pair = digSign.genKeyPair();
 		
-		this.signKeyRing(sender, pair.getPrivate());
-
-		FileManagement.saveDigitalKeysFile(digKeysFile, sender , pair.getPublic(), signType );
-		
-		/*for (User utente : utenti) {
-			if (utente.getName().compareTo(sender)==0) {
-				utente.setSignKey(pair.getPrivate());
+		for(User utente: utenti) {
+			if(utente.getName().compareTo(sender)==0) {
+				this.DigitalkeyRingEncoding(utente, pair.getPrivate());
 				break;
 			}
-		}*/
+		}
+		
+		
+		FileManagement.saveDigitalPrivateKey(pvtDigitalKeysFile, sender, Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded()));
+		
+		FileManagement.saveDigitalKeysFile(digKeysFile, sender , pair.getPublic(), signType );
+
 		
 		return digSign.sign (messagePath, pair.getPrivate());
 		
 	}
 
-
-	private void signKeyRing(String sender, PrivateKey private1) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	private String encodeMessage(String messagePath, SecretKey secKey, String mode, IvParameterSpec iv) throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		//il messaggio in messagePath è un messaggio qualsiasi (testo, imnagine ecc)
@@ -254,15 +303,16 @@ public class Incapsula {
 	    
 		PrivateKey pvtKey = this.keyRingDecoding(user);
 		
+		
 	    String [] info = obtainInfo (fields.get(2), padding, pvtKey);
 	    SecretKey secKey = this.decodeSymmetricKey (fields.get(3), fields.get(1), info [0], pvtKey);
 	    //System.out.println("Secret key decifrata dal file: " + secKey.toString());
 	    if (info[1].compareTo("CBC")==0 || info[1].compareTo("CFB")==0) {
 	    	System.out.println(info[2]);
-	    	obtainMessage (info[0], info[1], info[2], fields.get(5), secKey, destinationPath, info[3]);
+	    	obtainMessage (info[0], info[1], info[2], fields.get(4), secKey, destinationPath, info[3]);
 	    }
 	    else
-	    	obtainMessage (info[0], info[1], info[2], fields.get(5), secKey, destinationPath);
+	    	obtainMessage (info[0], info[1], info[2], fields.get(4), secKey, destinationPath);
 	    
 
 	    if (fields.size() >= 6)
@@ -388,6 +438,33 @@ public class Incapsula {
 		PrivateKey pvtKey = keyFactory.generatePrivate(pubKeySpec);
 		
 		return pvtKey;
+	}
+	
+private String DigitalkeyRingEncoding(User user, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
+		
+		char[] pass = user.getPassword().toCharArray();
+		SecureRandom random = new SecureRandom();
+		byte[] salt = new byte[8];
+		random.nextBytes(salt);
+		
+		user.setSalt(salt);
+		
+		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+		KeySpec keySpec = new PBEKeySpec(pass, salt, 65536, 128);
+		SecretKey tmp = factory.generateSecret(keySpec);
+		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+		
+		
+		Cipher ciph = Cipher.getInstance("AES");
+		ciph.init(Cipher.ENCRYPT_MODE, secretKey);
+		
+		
+		byte[] symKey = privateKey.getEncoded();
+		byte[] cipheredKey = ciph.doFinal(symKey);
+		
+		String codifiedKey = Base64.getEncoder().encodeToString(cipheredKey);
+		
+		return codifiedKey;
 	}
 	
 }
