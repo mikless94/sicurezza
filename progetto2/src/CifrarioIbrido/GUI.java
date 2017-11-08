@@ -394,7 +394,7 @@ public class GUI {
 					} catch (IllegalBlockSizeException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					} catch (BadPaddingException e) {
+					} catch (BadPaddingException e){
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
