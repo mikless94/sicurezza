@@ -1,6 +1,6 @@
 package CifrarioIbrido;
 
-
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -10,11 +10,13 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-
+import java.util.ArrayList;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+
+import org.apache.commons.io.FileUtils;
 
 
 public class Prova {
@@ -30,23 +32,79 @@ public class Prova {
 		Files.deleteIfExists(Paths.get("./pvtKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt")) ;
 		
-		inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
-		inc.addUser("Giuseppe", 2048, "PKCS1Padding", "lol");
-		inc.addUser("Giovanni", 2048, "OAEPPadding", "ccoierow54");
-		//inc.deleteUser("Giovanni");
+		ArrayList <String> asymPaddings = new ArrayList <String> (); 
+		asymPaddings.add("PKCS1Padding"); 
+		asymPaddings.add("OAEPPadding"); 
 		
-		inc.messageToSend ("Michele", "Giuseppe", "AES", "ECB", "PKCS5Padding", "C:\\Users\\Giu67890\\Desktop\\Message.txt"/*, 1024, "SHA1withDSA"*/);
-		inc.decodeMessage("C:\\Users\\Giu67890\\Desktop\\MessageDecoded.txt" );
+		ArrayList <Integer> asymKeyDims = new ArrayList <Integer> ();
+		asymKeyDims.add(1024);
+		asymKeyDims.add(2048);
 		
-		Files.deleteIfExists(Paths.get("C:\\Users\\Giu67890\\Desktop\\MessageDecoded.txt")) ;
+		ArrayList <String> types = new ArrayList <String> (); 
+		types.add("AES"); 
+		types.add("DES"); 
+		types.add("DESede");
 		
-		inc.messageToSend ("Michele", "Giuseppe", "AES", "ECB", "PKCS5Padding", "C:\\Users\\Giu67890\\Desktop\\Message.txt"/*, 1024, "SHA1withDSA"*/);
-		inc.decodeMessage("C:\\Users\\Giu67890\\Desktop\\MessageDecoded.txt" );
+		ArrayList <String> modes = new ArrayList <String> ();
+		modes.add("ECB");
+		modes.add("CBC");
+		modes.add("CFB");
+		
+		System.out.println ("############PROVA TRASMISSIONE#################\n");
+		
+		for (String asymPadding: asymPaddings) {
+			for(Integer asymKeyDim : asymKeyDims ) {
+				inc.addUser("Michele", asymKeyDim, asymPadding, "ciao"); 
+				inc.addUser("Giuseppe",asymKeyDim , asymPadding, "hello");
+				System.out.println ("###################################################################");
+				System.out.println ("Trasmissione verso utente con cifrario RSA "+asymKeyDim+" e padding " +asymPadding);
+				System.out.println ("###################################################################");
+				for (String type: types) {
+					for (String mode: modes) {
+						inc.messageToSend ("Michele", "Giuseppe", type, mode, "PKCS5Padding", "./message.txt");
+						inc.decodeMessage("./messageDec.txt" );
+						File file1 = new File("./message.txt");
+						File file2 = new File("./messageDec.txt");
+						if ( FileUtils.contentEquals(file1, file2) ) {
+							System.out.println ("-----------------------------------------------------------------");
+							System.out.println ("Trasmissione con tipo "+type+" e modo operativo " +mode+" avvenuta con successo\n");
+							System.out.println ("-----------------------------------------------------------------");
+						}
+						Files.deleteIfExists(Paths.get("./messageDec.txt"));
+					}
+				}
+				
+			}
+			
+		}
 		
 		
-		//inc.messageToSend ("Michele", "Giovanni", "DESede", "CBC", "PKCS5Padding", "C:\\Users\\Michele\\Desktop\\messaggio.txt", 2048, "SHA224withDSA");
-		//inc.decodeMessage("C:\\Users\\Michele\\Desktop\\messaggiodec.txt" );
-
+		ArrayList <Integer> dims = new ArrayList <Integer> (); 
+		dims.add(1024); 
+		dims.add(2048); 
+		
+		ArrayList <String> signTypes = new ArrayList <String> ();
+		//signTypes.add("SHA1withDSA");
+		signTypes.add("SHA224withDSA");
+		signTypes.add("SHA256withDSA");
+		
+		System.out.println ("\n############PROVA FIRMA#################\n");
+		
+		//prova combinazioni firma
+		
+		for (String type: signTypes) {
+			for (Integer dim: dims) {
+				inc.messageToSend ("Michele", "Giuseppe", "AES", "CBC", "PKCS5Padding", "./message.txt", dim, type);
+				inc.decodeMessage("./messageDec.txt");
+				File file1 = new File("./message.txt");
+				File file2 = new File("./messageDec.txt");
+				if ( FileUtils.contentEquals(file1, file2) ) {
+					System.out.println ("Trasmissione con tipo di firma "+type+" e dimensione chiave " +dim+" avvenuta con successo\n");
+					System.out.println ("---------------------------------------------------------");
+				}
+				Files.deleteIfExists(Paths.get("./messageDec.txt"));
+			}
+		}
 	}
 
 }

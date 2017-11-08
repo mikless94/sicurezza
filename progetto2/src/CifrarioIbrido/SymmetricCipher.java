@@ -213,7 +213,7 @@ public class SymmetricCipher {
 		IvParameterSpec iv = new IvParameterSpec(IVBytes);
 		cipher.init(Cipher.DECRYPT_MODE, secKey, iv);
 			
-		System.out.println("message: "+message);
+		//System.out.println("message: "+message);
 		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
 		return decodedMessageBytes;
 		//return Base64.getEncoder().encodeToString(decodedMessageBytes);

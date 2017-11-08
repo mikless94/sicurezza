@@ -228,7 +228,6 @@ public class Incapsula {
 		String sign = this.digitalSign(messagePath, sender, dimSignKey, signType);
 		
 		FileManagement.createFileToSend (fileToSend, cipheredInfo, cipheredKey, cipheredMessage, sender, recipient, cipherType, mode, padding, sign);
-		
 	}
 	
 	private String encodeInfo(PublicKey pubKey, String cipherType, String mode, String padding, IvParameterSpec iv) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
@@ -320,10 +319,14 @@ public class Incapsula {
 	    
 
 	    if (fields.size() >= 6)
-	    	if (this.verify(destinationPath, fields.get(5), fields.get(0)))
-	    		JOptionPane.showMessageDialog(null,"Message verified! " ,"Digital Sign",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
-	    	else
-	    		JOptionPane.showMessageDialog(null,"Message NOT verified! " ,"Digital Sign",JOptionPane.ERROR_MESSAGE);
+	    	if (this.verify(destinationPath, fields.get(5), fields.get(0))) {
+	    		System.out.println("Message verified");
+	    		//JOptionPane.showMessageDialog(null,"Message verified! " ,"Digital Sign",JOptionPane.INFORMATION_MESSAGE, new ImageIcon(GUI.class.getResource("/progetto2/resources/Ok-icon.png")));
+	    	}
+	    	else {
+	    		System.out.println("Message NOT verified");
+	    		//JOptionPane.showMessageDialog(null,"Message NOT verified! " ,"Digital Sign",JOptionPane.ERROR_MESSAGE);
+	    	}
 	    }
 	
 
