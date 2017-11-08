@@ -32,11 +32,10 @@ public class Prova {
 		
 		inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
 		inc.addUser("Giuseppe", 2048, "PKCS1Padding", "lol");
-		inc.addUser("Giovanni", 2048, "PKCS1Padding", "ccoierow54");
+		inc.addUser("Giovanni", 2048, "OAEPPadding", "ccoierow54");
 		//inc.deleteUser("Giovanni");
-
-		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "C:\\Users\\Demetrio Laveglia\\Desktop\\Isee.pdf", 2048, "SHA1withDSA");
-		inc.decodeMessage("C:\\Users\\Demetrio Laveglia\\Desktop\\Iseedec.pdf" );
+		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "C:\\Users\\Demetrio Laveglia\\Desktop\\isee.pdf", 2048, "SHA1withDSA");
+		inc.decodeMessage("C:\\Users\\Demetrio Laveglia\\Desktop\\is.pdf" );
 
 	}
 

@@ -172,7 +172,7 @@ public class SymmetricCipher {
 		cipher.init(Cipher.DECRYPT_MODE, secKey);
 		
 		
-		System.out.println("message: "+message);
+		//System.out.println("message: "+message);
 		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
 		return decodedMessageBytes;
 		//return Base64.getEncoder().encodeToString(decodedMessageBytes);
