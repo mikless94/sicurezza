@@ -70,6 +70,12 @@ public class Prova {
 							System.out.println ("Trasmissione con tipo "+type+" e modo operativo " +mode+" avvenuta con successo\n");
 							System.out.println ("-----------------------------------------------------------------");
 						}
+						else {
+							System.out.println ("-----------------------------------------------------------------");
+							System.out.println ("Trasmissione con tipo "+type+" e modo operativo " +mode+" fallita\n");
+							System.out.println ("-----------------------------------------------------------------");
+						}
+							
 						Files.deleteIfExists(Paths.get("./messageDec.txt"));
 					}
 				}
@@ -99,6 +105,10 @@ public class Prova {
 				File file1 = new File("./message.txt");
 				File file2 = new File("./messageDec.txt");
 				if ( FileUtils.contentEquals(file1, file2) ) {
+					System.out.println ("Trasmissione con tipo di firma "+type+" e dimensione chiave " +dim+" avvenuta con successo\n");
+					System.out.println ("---------------------------------------------------------");
+				}
+				else {
 					System.out.println ("Trasmissione con tipo di firma "+type+" e dimensione chiave " +dim+" avvenuta con successo\n");
 					System.out.println ("---------------------------------------------------------");
 				}

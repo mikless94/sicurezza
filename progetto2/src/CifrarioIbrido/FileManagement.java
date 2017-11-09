@@ -162,6 +162,37 @@ public static String readDigitalPrivateKey(String fileName, User user) throws IO
 		in.close();
 }
 	return cipheredKey;
+}
+
+public static void removeUserFromFile(String name, String filePath) throws IOException {
+	Path path = Paths.get(filePath);
+	String tempFile = "myTempFile.txt";
+	
+	if (Files.exists(path)) {
+	     BufferedReader in = new BufferedReader(new FileReader(filePath));
+	     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+	     String read = null;
+	     while ((read = in.readLine()) != null) {
+	    	 String[] splited = read.split("\\s+");
+	         if (splited[0].compareTo(name)==0)
+	        	 continue;
+	         writer.write(read + System.getProperty("line.separator"));
+	        }
+	     writer.close(); 
+	     in.close();
+	        
+	     BufferedWriter writer2 = new BufferedWriter(new FileWriter(filePath));
+	     BufferedReader in2 = new BufferedReader(new FileReader(tempFile));
+	     String read2 = null;
+	     while ((read2 = in2.readLine()) != null) {
+	    	 writer2.write(read2 + System.getProperty("line.separator"));
+	     }
+	     writer2.close();
+	     in2.close();
+	}
+	Files.deleteIfExists(Paths.get("./"+tempFile));
+}
+
+	
 } 
 	
-}
