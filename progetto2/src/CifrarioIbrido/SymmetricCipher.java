@@ -18,7 +18,6 @@ public class SymmetricCipher {
 	private String mode;
 	private String padding = "PKCS5Padding";
 	private int dimKey;
-	//private IvParameterSpec iv;
 	
 	
 	
@@ -40,19 +39,6 @@ public class SymmetricCipher {
 		this.dimKey = dimKey;
 	}
 
-	public void computeDimKey () {
-		switch (cipherType) {
-		case "AES" :
-			this.setDimKey(128);
-			break;
-		case "DES" :
-			this.setDimKey(56);
-			break;
-		case "DESede":
-			this.setDimKey(168);
-			break;
-		}
-	}
 
 	/**
 	 * @param cipherType
@@ -118,11 +104,18 @@ public class SymmetricCipher {
 
 
 
-	public SecretKey genSecretKey(String cipherType,String  mode) throws NoSuchAlgorithmException {
+	public SecretKey genSecretKey() throws NoSuchAlgorithmException {
 		
 		KeyGenerator keyGenerator = null;
 		keyGenerator = KeyGenerator.getInstance(cipherType);
 		
+		this.computeDimKey();
+		
+		keyGenerator.init(this.getDimKey(), new SecureRandom()); 
+		return keyGenerator.generateKey();
+	}
+	
+	public void computeDimKey () {
 		switch (cipherType) {
 		case "AES" :
 			this.setDimKey(128);
@@ -134,9 +127,6 @@ public class SymmetricCipher {
 			this.setDimKey(168);
 			break;
 		}
-		
-		keyGenerator.init(this.getDimKey(), new SecureRandom()); 
-		return keyGenerator.generateKey();
 	}
 	
 	public String symmetricEncoding (byte[] data, SecretKey secKey, String mode, IvParameterSpec iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -160,27 +150,18 @@ public class SymmetricCipher {
 	}
 
 
-	public byte[] symmetricDecoding(String cipherType, String mode, String padding, SecretKey secKey,
+	public byte[] symmetricDecoding(SecretKey secKey,
 			String message) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		// TODO Auto-generated method stub
-		/*System.out.println("tipo di cifrario: "+cipherType);
-		System.out.println("mode: "+mode);
-		System.out.println("padding: "+padding);*/
+		
 		Cipher cipher = Cipher.getInstance(cipherType+"/"+mode+"/"+padding);
-		
-		
 		cipher.init(Cipher.DECRYPT_MODE, secKey);
-		
-		
-		//System.out.println("message: "+message);
 		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
 		return decodedMessageBytes;
-		//return Base64.getEncoder().encodeToString(decodedMessageBytes);
 	}
 
 
 
-	public IvParameterSpec genIV(String cipherType, String mode) {
+	public IvParameterSpec genIV() {
 		// TODO Auto-generated method stub
 		IvParameterSpec iv;
 		if (mode.compareTo("CBC")==0 || mode.compareTo("CFB")==0) {
@@ -204,7 +185,7 @@ public class SymmetricCipher {
 	}
 
 
-	public byte[] symmetricDecoding(String cipherType, String mode, String padding, SecretKey secKey,
+	public byte[] symmetricDecoding(SecretKey secKey,
 			String message, String ivString) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
 		// TODO Auto-generated method stub
 		
@@ -212,10 +193,8 @@ public class SymmetricCipher {
 		byte [] IVBytes = Base64.getDecoder().decode(ivString);
 		IvParameterSpec iv = new IvParameterSpec(IVBytes);
 		cipher.init(Cipher.DECRYPT_MODE, secKey, iv);
-			
-		System.out.println("message: "+message);
+		
 		byte [] decodedMessageBytes = cipher.doFinal(Base64.getDecoder().decode(message));
 		return decodedMessageBytes;
-		//return Base64.getEncoder().encodeToString(decodedMessageBytes);
 	}
 }
