@@ -15,6 +15,7 @@ import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashSet;
 
@@ -99,6 +100,7 @@ public class Incapsula {
 	        if (splited[0].compareTo(recipient)==0) {
 	        	key = splited[1];
 	        	asymCipher.setPadding(splited[2]);
+	        	break;
 	        	}
 	    }
 	    in.close();
@@ -119,6 +121,8 @@ public class Incapsula {
 	}
 	
 	public void messageToSend (String sender, String recipient, String cipherType, String mode, String padding, String messagePath, int dimSignKey, String signType) throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, SignatureException {
+		
+		
 		symCipher.setCipherType(cipherType);
 		symCipher.setMode(mode);
 		
@@ -134,6 +138,7 @@ public class Incapsula {
 	        if (splited[0].compareTo(recipient)==0) {
 	        	key = splited[1];
 	        	asymCipher.setPadding(splited[2]);
+	        	break;
 	        	}
 	    }
 	    in.close();
@@ -169,16 +174,16 @@ public class Incapsula {
 		digSign.setType(signType);
 		
 		KeyPair pair = digSign.genKeyPair();
+		String cipheredDigitalKey = "";
 		
 		for(User utente: utenti) {
 			if(utente.getName().compareTo(sender)==0) {
-				this.DigitalkeyRingEncoding(utente, pair.getPrivate());
+				cipheredDigitalKey += this.DigitalkeyRingEncoding(utente, pair.getPrivate());
 				break;
 			}
 		}
 		
-		
-		FileManagement.saveDigitalPrivateKey(pvtDigitalKeysFile, sender, Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded()));
+		FileManagement.saveDigitalPrivateKey(pvtDigitalKeysFile, sender, cipheredDigitalKey);
 		
 		FileManagement.saveDigitalKeysFile(digKeysFile, sender , pair.getPublic(), signType );
 
@@ -221,13 +226,12 @@ public class Incapsula {
 			if (utente.getName().compareTo(fields.get(1))==0) {
 				padding += utente.getPadding();
 				user.setPassword(utente.getPassword());
-				user.setSalt(utente.getSalt());
+				user.setSaltRSA(utente.getSaltRSA());
 				break;
 			}
 		}
-	    
+
 		PrivateKey pvtKey = this.keyRingDecoding(user);
-		
 		
 	    String [] info = obtainInfo (fields.get(2), padding, pvtKey);
 	    SecretKey secKey = this.decodeSymmetricKey (fields.get(3), fields.get(1), info [0], pvtKey);
@@ -313,7 +317,6 @@ public class Incapsula {
 		Path path = Paths.get(decodifiedMessagePath);
 		dsa.update(Files.readAllBytes(path));
 		return dsa.verify(Base64.getDecoder().decode(sign));
-		
 	}
 	
 	private String keyRingEncoding(User user, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, IOException {
@@ -323,13 +326,11 @@ public class Incapsula {
 		byte[] salt = new byte[8];
 		random.nextBytes(salt);
 		
-		user.setSalt(salt);
-		
+		user.setSaltRSA(salt);
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 		KeySpec keySpec = new PBEKeySpec(pass, salt, 65536, 128);
 		SecretKey tmp = factory.generateSecret(keySpec);
 		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
-		
 		
 		Cipher ciph = Cipher.getInstance("AES");
 		ciph.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -337,9 +338,7 @@ public class Incapsula {
 		
 		byte[] symKey = privateKey.getEncoded();
 		byte[] cipheredKey = ciph.doFinal(symKey);
-		
 		String codifiedKey = Base64.getEncoder().encodeToString(cipheredKey);
-		
 		return codifiedKey;
 	}
 	
@@ -348,16 +347,15 @@ public class Incapsula {
 		char[] pass = user.getPassword().toCharArray();
 		
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-		KeySpec spec = new PBEKeySpec(pass, user.getSalt(), 65536, 128);
+		KeySpec spec = new PBEKeySpec(pass, user.getSaltRSA(), 65536, 128);
 		SecretKey tmp = factory.generateSecret(spec);
 		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 		
 		byte[] ciphKey = Base64.getDecoder().decode(FileManagement.readPrivateKey(pvtKeysFile, user));
 		Cipher ciph = Cipher.getInstance("AES");
 		ciph.init(Cipher.DECRYPT_MODE, secretKey);
-		
 		byte [] decryptedText = ciph.doFinal(ciphKey);
-		
+
 		PKCS8EncodedKeySpec pubKeySpec = new PKCS8EncodedKeySpec(decryptedText);
 		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 		PrivateKey pvtKey = keyFactory.generatePrivate(pubKeySpec);
@@ -372,13 +370,12 @@ private String DigitalkeyRingEncoding(User user, PrivateKey privateKey) throws N
 		byte[] salt = new byte[8];
 		random.nextBytes(salt);
 		
-		user.setSalt(salt);
+		user.setSaltDSA(salt);
 		
 		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 		KeySpec keySpec = new PBEKeySpec(pass, salt, 65536, 128);
 		SecretKey tmp = factory.generateSecret(keySpec);
 		SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
-		
 		
 		Cipher ciph = Cipher.getInstance("AES");
 		ciph.init(Cipher.ENCRYPT_MODE, secretKey);

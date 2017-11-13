@@ -35,6 +35,7 @@ public class FileManagement {
 	}
 	
 	public static void saveDigitalKeysFile (String file, String sender, PublicKey publicKey, String signType) throws IOException {
+		
 		Path path = Paths.get(file);
 
 		if (!Files.exists(path)) {
@@ -49,13 +50,19 @@ public class FileManagement {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 			String read = null;
 			
+			boolean flag = true;
 			while ((read = in.readLine()) != null) {
 				String[] splited = read.split("\\s+");
 				if (splited[0].compareTo(sender)!=0) 
 					writer.write(read + System.lineSeparator());
-				else 
+				else {
+					flag = false;
 					writer.write(sender +" "+Base64.getEncoder().encodeToString(publicKey.getEncoded())+" "+signType+System.lineSeparator()); 
+				}
 		    }
+			if (flag==true)
+				writer.write(sender +" "+Base64.getEncoder().encodeToString(publicKey.getEncoded())+" "+signType+System.lineSeparator());
+			
 			writer.close();
 			in.close();
 			
@@ -74,7 +81,7 @@ public class FileManagement {
 	public static void savePrivateKey(String pvtKeysFile, String userName, String pvtKeyString) throws IOException {
 		
 		FileWriter out = new FileWriter(pvtKeysFile, true);
-		out.write(userName + " " + pvtKeyString + " "+ System.lineSeparator());
+		out.write(userName + " " + pvtKeyString + System.lineSeparator());
 		out.close();
 	}
 	
@@ -118,13 +125,18 @@ public static void saveDigitalPrivateKey(String pvtKeysFile, String userName, St
 		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 		String read = null;
 		
+		boolean flag = true;
 		while ((read = in.readLine()) != null) {
 			String[] splited = read.split("\\s+");
 			if (splited[0].compareTo(userName)!=0) 
 				writer.write(read + System.lineSeparator());
-			else 
-				writer.write(userName +" "+ pvtKeyString + System.lineSeparator()); 
+			else  {
+				flag = false;
+				writer.write(userName +" "+ pvtKeyString + System.lineSeparator());
+			}
 	    }
+		if (flag==true)
+			writer.write(userName +" "+ pvtKeyString + System.lineSeparator());
 		writer.close();
 		in.close();
 		

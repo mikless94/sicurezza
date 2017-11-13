@@ -31,7 +31,7 @@ public class Prova {
 		Files.deleteIfExists(Paths.get("./myTempFile.txt"));
 		Files.deleteIfExists(Paths.get("./pvtKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt")) ;
-
+		
 		ArrayList <String> asymPaddings = new ArrayList <String> (); 
 		asymPaddings.add("PKCS1Padding"); 
 		asymPaddings.add("OAEPPadding"); 
@@ -49,6 +49,7 @@ public class Prova {
 		modes.add("ECB");
 		modes.add("CBC");
 		modes.add("CFB");
+		
 		
 		System.out.println ("############PROVA TRASMISSIONE#################\n");
 		

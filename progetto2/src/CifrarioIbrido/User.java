@@ -5,7 +5,8 @@ import java.security.*;
 public class User {
 	private String name;
 	private String padding;
-	private byte[] salt;
+	private byte[] saltRSA;
+	private byte[] saltDSA;
 	private String password;
 	
 	
@@ -100,16 +101,6 @@ public class User {
 	}
 
 
-	public byte[] getSalt() {
-		return salt;
-	}
-
-
-	public void setSalt(byte[] salt) {
-		this.salt = salt;
-	}
-
-
 	public String getPassword() {
 		return password;
 	}
@@ -117,7 +108,52 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+
+
+
+
+	/**
+	 * @return the saltRSA
+	 */
+	public byte[] getSaltRSA() {
+		return saltRSA;
+	}
+
+
+
+
+
+	/**
+	 * @param saltRSA the saltRSA to set
+	 */
+	public void setSaltRSA(byte[] saltRSA) {
+		this.saltRSA = saltRSA;
+	}
+
+
+
+
+
+	/**
+	 * @return the saltDSA
+	 */
+	public byte[] getSaltDSA() {
+		return saltDSA;
+	}
+
+
+
+
+
+	/**
+	 * @param saltDSA the saltDSA to set
+	 */
+	public void setSaltDSA(byte[] saltDSA) {
+		this.saltDSA = saltDSA;
 	}	
+	
 	
 	
 }
