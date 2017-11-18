@@ -37,7 +37,7 @@ public class Prova {
 		Files.deleteIfExists(Paths.get("./pvtKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt")) ;
 		
-		inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
+		/*inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
 		inc.addUser("Giuseppe", 2048, "OAEPPadding", "hello");
 		
 		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "./message.txt");
@@ -76,9 +76,9 @@ public class Prova {
 		}
 		Files.deleteIfExists(Paths.get("./"+tempFile));
 		
-		inc.decodeMessage("./messageDec.txt" );
+		inc.decodeMessage("./messageDec.txt" );*/
 		
-		/*ArrayList <String> asymPaddings = new ArrayList <String> (); 
+		ArrayList <String> asymPaddings = new ArrayList <String> (); 
 		asymPaddings.add("PKCS1Padding"); 
 		asymPaddings.add("OAEPPadding"); 
 		
@@ -162,7 +162,7 @@ public class Prova {
 				Files.deleteIfExists(Paths.get("./messageDec.txt"));
 			}
 		}
-*/
+
 	}
 
 }
