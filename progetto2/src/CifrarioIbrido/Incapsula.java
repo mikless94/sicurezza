@@ -380,7 +380,6 @@ private String DigitalkeyRingEncoding(User user, PrivateKey privateKey) throws N
 		Cipher ciph = Cipher.getInstance("AES");
 		ciph.init(Cipher.ENCRYPT_MODE, secretKey);
 		
-		
 		byte[] symKey = privateKey.getEncoded();
 		byte[] cipheredKey = ciph.doFinal(symKey);
 		

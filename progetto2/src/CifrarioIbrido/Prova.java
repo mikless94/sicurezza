@@ -1,9 +1,13 @@
 package CifrarioIbrido;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -15,6 +19,7 @@ import java.util.ArrayList;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 
@@ -32,7 +37,48 @@ public class Prova {
 		Files.deleteIfExists(Paths.get("./pvtKeysFile.txt"));
 		Files.deleteIfExists(Paths.get("./pvtDigitalKeysFile.txt")) ;
 		
-		ArrayList <String> asymPaddings = new ArrayList <String> (); 
+		inc.addUser("Michele", 1024, "PKCS1Padding", "ciao"); 
+		inc.addUser("Giuseppe", 2048, "OAEPPadding", "hello");
+		
+		inc.messageToSend ("Michele", "Giuseppe", "AES", "CFB", "PKCS5Padding", "./message.txt");
+		
+		Path path = Paths.get("./fileToSend.txt");
+		String tempFile = "myTempFile.txt";
+		
+		int i = 1;
+		
+		if (Files.exists(path)) {
+		     BufferedReader in = new BufferedReader(new FileReader("./fileToSend.txt"));
+		     BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+		     String read = null;
+		     while ((read = in.readLine()) != null) {
+		    	 if (i!=5) {
+		    		 writer.write(read + System.getProperty("line.separator"));
+		    	 }
+		    	 else {
+		    		 System.out.println(read);
+		    		 read = JOptionPane.showInputDialog(read);
+		    		 writer.write(read + System.getProperty("line.separator"));
+		    	 }
+		    	 i++;
+		        }
+		     writer.close(); 
+		     in.close();
+		        
+		     BufferedWriter writer2 = new BufferedWriter(new FileWriter("./fileToSend.txt"));
+		     BufferedReader in2 = new BufferedReader(new FileReader(tempFile));
+		     String read2 = null;
+		     while ((read2 = in2.readLine()) != null) {
+		    	 writer2.write(read2 + System.getProperty("line.separator"));
+		     }
+		     writer2.close();
+		     in2.close();
+		}
+		Files.deleteIfExists(Paths.get("./"+tempFile));
+		
+		inc.decodeMessage("./messageDec.txt" );
+		
+		/*ArrayList <String> asymPaddings = new ArrayList <String> (); 
 		asymPaddings.add("PKCS1Padding"); 
 		asymPaddings.add("OAEPPadding"); 
 		
@@ -116,7 +162,7 @@ public class Prova {
 				Files.deleteIfExists(Paths.get("./messageDec.txt"));
 			}
 		}
-
+*/
 	}
 
 }
