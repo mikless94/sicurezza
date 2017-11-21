@@ -8,7 +8,7 @@ public class Client {
 	private ArrayList <String> markedDocuments;
 	private String keyRing = "Keyring"+ID+".rng";
 	
-	public sendQuery (String fileName) {
+	/*public sendQuery (String fileName) {
 		
 	}
 	
@@ -22,6 +22,6 @@ public class Client {
 	
 	public KeyRing.addToKeyring () {
 		
-	}
+	}*/
 
 }
