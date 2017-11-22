@@ -3,26 +3,76 @@ package progetto3.timestamping;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class TSA {
 	
-	private ArrayList <byte[]> rootHash;
-	private ArrayList <byte[]> superHash;
-	private String rootHashFile = "rootHashFile.pub";
-	private String superHashFile = "superHashFile.pub";
+	private static TSA instance = null;
+	
+	//costanti
 	public static final int MERKLE_TREE_DIM = 15;
 	public static final int TIMEFRAME_DIM = 8;
 	public static final int CLIENT_DIGEST_LENGTH = 416/8;
+	
+	//strutture dati
+	private ArrayList <byte[]> rootHash = new ArrayList <byte[]> ();
+	private ArrayList <byte[]> superHash = new ArrayList <byte[]> () ;
+	private ArrayList <Query> queries = new ArrayList <Query> ();
 	private Query[] merkleTree = new Query[MERKLE_TREE_DIM];
+	private String newsPaper = "newsPaper.pub";
+	
+	//numero seriale e di timeframe
 	private static int serialNumber = 0; 
+	private static int timeframeNumber = 0; 
 	private String hashAlg = "SHA-256";
 	
-	public void generateReply (ArrayList <String> queries) {
-		
+	//pattern singleton TSA
+	public static TSA getInstance() {
+	      if(instance == null) {
+	         instance = new TSA();
+	      }
+	      return instance;
+	   }
+	
+	/**
+	 * @return the rootHash
+	 */
+	public ArrayList<byte[]> getRootHash() {
+		return rootHash;
+	}
+
+
+	/**
+	 * @return the queries
+	 */
+	public ArrayList<Query> getQueries() {
+		return queries;
+	}
+
+
+	public void generateReply () {
+		int timeframeDimension = 0;
+		ArrayList <Query> queriesToTree = new ArrayList <Query> ();
+		for (Query q: queries) {
+			if (timeframeDimension < 8) {
+				queriesToTree.add(q);
+				timeframeDimension++;
+			}
+			else {
+				generateTimestamp (queriesToTree);
+				timeframeNumber++;
+				timeframeDimension = 0;
+			}
+		}
 		
 	}
 	
-	public void generateMerkelTree (ArrayList <Query> queries) {
+	private void generateTimestamp(ArrayList<Query> queriesToTree) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void generateMerkelTree (ArrayList <Query> queries) {
 		
 		//ArrayList <Query> requests = null;
 		int i;
@@ -71,5 +121,20 @@ public class TSA {
 		for (int i = 0; i<merkleTree.length; i++) {
 			System.out.println( merkleTree[i].getHash().length);
 		}
+	}
+	
+	public void addQuery (Query query) {
+		//TSA aggiunge timestamp una volta ricevuta la query dal client
+		Calendar calendar = Calendar.getInstance();
+		java.util.Date now = calendar.getTime();
+		java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+		query.setTimestamp(currentTimestamp);
+		
+		//aggiunta query al buffer
+		queries.add(query);
+	}
+	
+	public void serializeTSA () {
+		
 	}
 }
