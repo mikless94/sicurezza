@@ -1,5 +1,6 @@
 package progetto3.timestamping;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -7,9 +8,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.crypto.Cipher;
+import javax.swing.JOptionPane;
 
 public class Client {
 	private String ID;
@@ -17,20 +20,33 @@ public class Client {
 	private HashMap <String, String> map;
 	//keyring utente
 	private KeyRing keyR;
+	private String filename = "KeyRing"+ID+".txt";
 	private String hashAlg = "SHA-256";
 	private TSA tsa;
+	private byte[] hashPassword;
+	boolean validated = false;
 
 	
 	/**
 	 * @param iD
 	 * @param map
 	 */
-	public Client(String iD) {
+	public Client(String iD, String password) {
+		MessageDigest digest = null;
+		try {
+			digest = MessageDigest.getInstance(hashAlg);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		this.hashPassword = digest.digest(password.getBytes());
 		ID = iD;
 		this.map = new HashMap <String, String> ();
 		
 		//ottengo l'istanza univoca di TSA
 		this.tsa = TSA.getInstance();
+		
+		//creo il KeyRing per l'utente
+		this.keyR = new KeyRing(filename);
 	}
 
 	public void sendQuery (String fileName) {
@@ -43,7 +59,13 @@ public class Client {
 		}
 		
 		Path path = Paths.get(fileName);
-		byte[] data = Files.readAllBytes(path);
+		byte[] data = null;
+		try {
+			data = Files.readAllBytes(path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		byte [] hash = digest.digest(data);
 		//hash del documento cifrato con la chiave pubblica della TSA
 		byte [] encryptedHash = encryptHash (hash);
@@ -64,16 +86,50 @@ public class Client {
 		return c.doFinal(hash);
 	}
 
-	public verifyTimeStamp () {
+	public void verifyTimeStamp () {
 		
 	}
 	
-	public markDocument() {
+	public void markDocument() {
 		
 	}
 	
-	public KeyRing.addToKeyring () {
+	public void userValidation(String password){
+		MessageDigest digest = null;
+		try {
+			digest = MessageDigest.getInstance(hashAlg);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
+			validated = true;
+		else
+			JOptionPane.showMessageDialog(null,"Incorrect Password","Warning!",JOptionPane.WARNING_MESSAGE);
 		
-	}*/
-
+	}
+	
+	public void addToKeyring (String role, String type, String param3, String param4, ArrayList<byte[]> array) {
+		
+		if(validated)
+			keyR.addToKeyring(role, type, param3, param4, array);
+	}
+	
+	public ArrayList<byte[]> getValueFromKeyRing(String role, String type, String param3, String param4){
+		
+		if(validated){
+			return keyR.getValueFromKeyRing(role, type, param3, param4);
+		}
+	}
+	
+	public void saveKeyRing(){
+		
+		if(validated)
+			keyR.saveKeyRing();		
+	}
+	
+	public void restoreKeyRing(){
+		
+		if(validated)
+			keyR.restoreKeyRing();
+	}
 }
