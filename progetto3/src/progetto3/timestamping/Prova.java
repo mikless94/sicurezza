@@ -17,7 +17,7 @@ public class Prova {
 
 	public static void main(String[] args) {
 		
-		Client c = new Client ("Michele");
+		Client c = new Client ("Michele", "fdfddfgfd");
 		try {
 			c.sendQuery("C:\\Users\\Michele\\Desktop\\messaggio.txt");
 		} catch (IOException e) {
