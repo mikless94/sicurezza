@@ -3,43 +3,80 @@ package progetto3.timestamping;
 import java.security.Timestamp;
 
 public class Query {
+
 	//hash del documento criptato con la chiave pubblica della TSA
 	byte [] encryptedHash;
 	String ID;
-	java.sql.Timestamp timestamp;
+	String timestamp;
+	//informazioni utili all'invio delle marche (client/server)
+	Client client;
+	String doc;
 	
+	/**
+	 * @param encryptedHash
+	 * @param iD
+	 * @param client
+	 * @param doc
+	 */
+	public Query(byte[] encryptedHash, String iD, Client client, String doc) {
+		this.encryptedHash = encryptedHash;
+		ID = iD;
+		this.client = client;
+		this.doc = doc;
+	}
 	
 	/**
 	 * @return the timestamp
 	 */
-	public java.sql.Timestamp getTimestamp() {
+	public String getTimestamp() {
 		return timestamp;
 	}
 	/**
 	 * @param currentTimestamp the timestamp to set
 	 */
-	public void setTimestamp(java.sql.Timestamp currentTimestamp) {
+	public void setTimestamp(String currentTimestamp) {
 		this.timestamp = currentTimestamp;
 	}
+	
+	
+	
+	
+	
 	/**
-	 * @param hash
-	 * @param iD
+	 * @return the client
 	 */
-	public Query(byte[] hash, String iD) {
-		this.encryptedHash = hash;
-		ID = iD;
+	public Client getClient() {
+		return client;
 	}
 	/**
-	 * @return the hash
+	 * @param client the client to set
 	 */
-	public byte[] getHash() {
+	public void setClient(Client client) {
+		this.client = client;
+	}
+	/**
+	 * @return the doc
+	 */
+	public String getDoc() {
+		return doc;
+	}
+	/**
+	 * @param doc the doc to set
+	 */
+	public void setDoc(String doc) {
+		this.doc = doc;
+	}
+	/**
+	 * @return the encryptedHash
+	 */
+	public byte[] getEncryptedHash() {
 		return encryptedHash;
 	}
 	/**
-	 * @param hash the hash to set
+	 * @param encryptedHash the encryptedHash to set
 	 */
-	public void setHash(byte[] hash) {
-		this.encryptedHash = hash;
+	public void setEncryptedHash(byte[] encryptedHash) {
+		this.encryptedHash = encryptedHash;
 	}
 	/**
 	 * @return the iD
