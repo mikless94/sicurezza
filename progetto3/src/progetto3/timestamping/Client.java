@@ -116,20 +116,22 @@ public class Client {
 	
 	public ArrayList<byte[]> getValueFromKeyRing(String role, String type, String param3, String param4){
 		
+		ArrayList<byte[]> array= null;
 		if(validated){
-			return keyR.getValueFromKeyRing(role, type, param3, param4);
+			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
 		}
+		return array;
 	}
 	
-	public void saveKeyRing(){
+	public void saveKeyRing(String password){
 		
 		if(validated)
-			keyR.saveKeyRing();		
+			keyR.encodeData(password);		
 	}
 	
-	public void restoreKeyRing(){
+	public void restoreKeyRing(String password){
 		
 		if(validated)
-			keyR.restoreKeyRing();
+			keyR.decodeData(password);
 	}
 }
