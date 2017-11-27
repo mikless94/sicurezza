@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,9 +28,7 @@ import javax.crypto.NoSuchPaddingException;
 
 
 
-public class TSA {
-	
-	
+public class TSA implements Serializable{
 	
 	private KeyPair kpSign ;
 	private KeyPair kpRSA;

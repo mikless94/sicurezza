@@ -22,15 +22,11 @@ public class ProvaKeyRing {
     prova.add(b);
     
     System.out.println("INIZIO ENCODING\n");
-    
+
     key.addToKeyring("Giuseppe", "Key", "AES/CBC", "128", prova);
     key.addToKeyring("Demetrio", "Pass", "lollazza", "null", prova);
-    
-    System.out.println("FINE ENCODING\n");
-    
-    System.out.println("INIZIO DECODING\n");
-    
-    key.decodeData("ciao");
+   
+    key.decodeData("ehi");
     
     key.printMap();
     
