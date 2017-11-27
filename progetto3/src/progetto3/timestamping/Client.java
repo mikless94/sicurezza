@@ -34,7 +34,7 @@ public class Client implements Serializable{
 	private HashMap <String, String> map;
 	//keyring utente
 	private KeyRing keyR;
-	private String filename = "KeyRing"+ID+".txt";
+	private String filename;
 	private String hashAlg = "SHA-256";
 	private TSA tsa;
 	private byte[] hashPassword;
@@ -53,13 +53,15 @@ public class Client implements Serializable{
 			e.printStackTrace();
 		}
 		this.hashPassword = digest.digest(password.getBytes());
-		ID = iD;
+		this.ID = iD;
+		System.out.println(iD);
 		this.map = new HashMap <String, String> ();
 		
 		//ottengo l'istanza univoca di TSA
 		this.tsa = TSA.getInstance();
 		
 		//creo il KeyRing per l'utente
+		this.filename = "KeyRing"+ID+".txt";
 		this.keyR = new KeyRing(filename);
 	}
 	
@@ -290,6 +292,62 @@ public class Client implements Serializable{
 		return array;
 	}
 	
+	/*public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
+		
+		ArrayList<byte[]> array= null;
+		ArrayList<String> value = null;
+		if(validated){
+			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else{
+				//Si ritorna una stringa nel caso si è richiesto una password.
+				if(param4.equals("null")){
+					String pass = new String(array.get(0));
+					value.add(pass);
+				}
+				else {
+					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
+						
+					}
+					
+				}
+			}
+		}
+		else{
+			System.out.println("User not validated!");
+		}
+		return value;
+	}
+	
+	public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
+		
+		ArrayList<byte[]> array= null;
+		ArrayList<String> value = null;
+		if(validated){
+			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else{
+				//Si ritorna una stringa nel caso si è richiesto una password.
+				if(param4.equals("null")){
+					String pass = new String(array.get(0));
+					value.add(pass);
+				}
+				else {
+					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
+						
+					}
+					
+				}
+			}
+		}
+		else{
+			System.out.println("User not validated!");
+		}
+		return value;
+	}*/
+	
 	public void saveKeyRing(String password){
 		
 		if(validated){
@@ -327,6 +385,18 @@ public class Client implements Serializable{
 			System.out.println("User not validated!");
 		}
 	}
+
+	public KeyRing getKeyR() {
+		return keyR;
+	}
+
+
+
+	public void setKeyR(KeyRing keyR) {
+		this.keyR = keyR;
+	}
+
+
 
 	public boolean isValidated() {
 		return validated;

@@ -36,6 +36,11 @@ public class KeyRingTest {
 		ArrayList<byte[]> x = demetrio.getValueFromKeyRing("Studente", "Key", "AES", "128");
 		System.out.println(x.get(0));
 		
+		for(String s : demetrio.getKeyR().getMap().keySet()){
+					System.out.println("idbefore"+s);
+					System.out.println("valore before" + demetrio.getKeyR().getMap().get(s));
+		}
+		
 		demetrio.saveKeyRing("1");
 				
 		KeyRingTest.saveUser(user);*/
@@ -45,12 +50,15 @@ public class KeyRingTest {
 			if(c.getID().equals("Demetrio")){
 				c.userValidation("1");
 				c.restoreKeyRing("1");
+				for(String s : c.getKeyR().getMap().keySet()){
+					System.out.println("idbefore"+s);
+					System.out.println("valore before" + c.getKeyR().getMap().get(s));
+				}
+				
 				ArrayList<byte[]> x = c.getValueFromKeyRing("Studente", "Key", "AES", "128");
 				System.out.println(x.get(0));				
 			}
 		}
-		
-
 	}
 	
 	private static void saveUser(HashSet<Client> user){

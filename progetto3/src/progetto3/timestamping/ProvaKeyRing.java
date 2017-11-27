@@ -11,27 +11,36 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class ProvaKeyRing {
+	private static KeyRing instance = null;
 
-  public static void main(String[] args) {
     
-    System.out.println("******Test di prova per il keyring.******");
-    KeyRing key = new KeyRing("prova.txt");
+    public static KeyRing getInstance() {
+	      if(instance == null) {
+	         instance = new KeyRing("prova.txt");
+	      }
+	      return instance;
+	   }
     
-    byte[] b = new byte[10];
-    ArrayList<byte[]> prova = new ArrayList<byte[]>();
-    prova.add(b);
+    public static void main(String[] args) {
     
-    System.out.println("INIZIO ENCODING\n");
+    	System.out.println("******Test di prova per il keyring.******");
+    
+    	KeyRing k = ProvaKeyRing.getInstance();
+    	
+    
+    	byte[] b = new byte[10];
+    	ArrayList<byte[]> prova = new ArrayList<byte[]>();
+    	prova.add(b);
+    	System.out.println(b);
 
-    key.addToKeyring("Giuseppe", "Key", "AES/CBC", "128", prova);
-    key.addToKeyring("Demetrio", "Pass", "lollazza", "null", prova);
-   
-    key.decodeData("ehi");
+    	k.addToKeyring("Giuseppe", "Key", "AES/CBC", "128", prova);
+    	k.addToKeyring("Demetrio", "Pass", "lollazza", "null", prova);
     
-    key.printMap();
-    
-    System.out.println("FINE DECODING\n");
-    
+    	k.encodeData("ehi");
+	  
+    	k.decodeData("ehi");
+		ArrayList<byte[]> x = k.getValueFromKeyRing("Giuseppe", "Key", "AES/CBC", "128");
+		System.out.println(x.get(0));      
   }
   
 }

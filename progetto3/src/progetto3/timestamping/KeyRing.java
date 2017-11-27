@@ -87,7 +87,7 @@ public class KeyRing implements Serializable{
     
     String idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase() +
         "/" + dim.toUpperCase();
-    
+
       return this.map.get(idMap);
     }
   
@@ -124,13 +124,25 @@ public class KeyRing implements Serializable{
 	      //scrivo la map su file
 	      out.writeObject(data);
 	      
+	      this.map = null;
+	      
 	      out.close();
 	    }catch(IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
 	      e.printStackTrace();
 	    }
 	  }
 	  
-	  public void decodeData(String password) {
+	  public HashMap<String, ArrayList<byte[]>> getMap() {
+	return map;
+}
+
+
+public void setMap(HashMap<String, ArrayList<byte[]>> map) {
+	this.map = map;
+}
+
+
+	public void decodeData(String password) {
 	    
 	    byte[] salt = new byte[SALT_DIM];
 	    byte IVBytes[] = new byte[IV_DIM];
@@ -154,7 +166,7 @@ public class KeyRing implements Serializable{
 	      
 	      ciph.init(Cipher.DECRYPT_MODE, secretKey, iv);
 	      
-	      this.map = (HashMap<String, ArrayList< byte []>>) sealedObject.getObject(ciph);
+	      this.map = (HashMap<String, ArrayList<byte []>>) sealedObject.getObject(ciph);
 	      
 	      in.close();
 	    } catch(EOFException eof){
