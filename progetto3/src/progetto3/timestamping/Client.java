@@ -66,12 +66,146 @@ public class Client implements Serializable{
 		this.map = new HashMap <String, String> ();
 		
 		//ottengo l'istanza univoca di TSA
-		this.tsa = TSA.getInstance();
-		
-		//creo il KeyRing per l'utente
-		this.filename = "./Keyrings/KeyRing"+ID+".txt";
-		this.keyR = new KeyRing(filename);
+				this.tsa = TSA.getInstance();
+				
+				//creo il KeyRing per l'utente
+				this.filename = "./Keyrings/KeyRing"+ID+".txt";
+				this.keyR = new KeyRing(filename);
 	}
+
+	/*private ReplyToSend deserializeReply(String marca) {
+		ReplyToSend replyReceived = null;
+		try {
+			FileInputStream fileIn = new FileInputStream(marca);
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			replyReceived = (ReplyToSend) in.readObject();
+			in.close();
+			fileIn.close();
+			} catch (IOException i) {
+				i.printStackTrace();
+				} 
+			catch (ClassNotFoundException c) {
+			c.printStackTrace();
+			}
+		return replyReceived;
+	}*/
+
+	/*public boolean verifyOffline(String doc) {		
+		//si presuppone che la firma sia verificata per verificare il root value all'interno della marca
+		if (verifySign(doc)) {
+			ReplyToSend replyReceived = deserializeReply (map.get(doc));
+			Reply reply = replyReceived.getReply();
+			byte [] computedRootHash = computeRootHash (reply.getLinkingInfo(), reply.getTSAHash());
+			return Arrays.equals(computedRootHash, reply.getRootHash());
+		}
+		return false;
+	}
+	 */
+	/*private byte[] computeRootHash(ArrayList<Info> linkingInfo, String TSAHash) {
+		byte [] result = linkingInfo.get(0).getHash();
+		
+		for (int i=1; i<linkingInfo.size(); i++) {
+			byte[] concatenated = new byte[result.length + linkingInfo.get(i).getHash().length];
+			//moltiplica a sinistra
+			if (linkingInfo.get(i).getPosition() == -1) {
+				System.arraycopy(linkingInfo.get(i).getHash(), 0, concatenated, 0, linkingInfo.get(i).getHash().length);
+				System.arraycopy(result, 0, concatenated, linkingInfo.get(i).getHash().length, result.length );
+			}
+			//moltiplica a destra
+			else {
+				System.arraycopy(result, 0, concatenated, 0, result.length);
+				System.arraycopy(linkingInfo.get(i).getHash(), 0, concatenated, result.length, linkingInfo.get(i).getHash().length);
+			}
+			
+			MessageDigest digest = null;
+			try {
+				digest = MessageDigest.getInstance(TSAHash);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			result = digest.digest(concatenated);
+		}
+		return result;
+	}*/
+
+	/*public boolean verifyOnline(String doc) {
+		//si presuppone verifica firma e verifica offline
+		if (verifyOffline(doc)) {
+			ReplyToSend replyReceived = deserializeReply (map.get(doc));
+			Reply reply = replyReceived.getReply();
+			byte [] computedRootHash = computeRootHash (reply.getLinkingInfo(), reply.getTSAHash());
+			
+			byte [] SHVprec = null;
+			if (reply.getTimeframeNumber()==0)
+				SHVprec = tsa.getShv0();
+			else
+				SHVprec = tsa.getSuperHash().get(reply.getTimeframeNumber()-1);
+			byte [] SHVcurr = tsa.getSuperHash().get(reply.getTimeframeNumber());
+			return Arrays.equals(SHVcurr, hashConcatenate(SHVprec, computedRootHash, reply.getTSAHash()));
+			}
+		return false; 
+	}*/
+	
+	public boolean verifyChain (String doc, int range) {
+		if (verifyOnline (doc)) {
+			ReplyToSend replyReceived = deserializeReply (map.get(doc));
+			Reply reply = replyReceived.getReply();
+			ArrayList <byte[]> superHashValues = tsa.getSuperHash();
+			ArrayList <byte[]> rootHashValues = tsa.getRootHash();
+			
+			byte [] SHVStart = null;
+			
+			//range <= 0 --> verifico intera catena
+			if (range <= 0) {
+				SHVStart = tsa.getShv0();
+				for (int i=0; i<superHashValues.size(); i++) {
+					if (!Arrays.equals(superHashValues.get(i), hashConcatenate(SHVStart, rootHashValues.get(i), reply.getTSAHash())))
+						return false;
+					SHVStart = superHashValues.get(i);
+				}
+				return true;
+			}
+			
+			//verifico porzione della catena identificata dal parametro range
+			else {
+				int start = 0;
+				int end = superHashValues.size()-1;
+				
+				if (reply.getTimeframeNumber()-range>0)
+					start = reply.getTimeframeNumber()-range;
+				if (reply.getTimeframeNumber()+range<superHashValues.size()-1)
+					end = reply.getTimeframeNumber()+range;
+				
+				for (int i=start; i<end; i++) {
+					if (i==0) 
+						SHVStart = tsa.getShv0();
+					else
+						SHVStart = superHashValues.get(i-1);
+					
+					if (!Arrays.equals(superHashValues.get(i), hashConcatenate(SHVStart, rootHashValues.get(i), reply.getTSAHash())))
+						return false;
+					SHVStart = superHashValues.get(i);
+				}
+				return true;
+			}
+		} 
+		return false;
+	}
+	
+	
+	/*private byte[] hashConcatenate(byte [] byte1 , byte [] byte2, String TSAHash) {
+		byte[] concatenated = new byte[byte1.length + byte2.length];
+		System.arraycopy(byte1, 0, concatenated, 0, byte1.length);
+		System.arraycopy(byte2, 0, concatenated, byte1.length, byte2.length );
+		MessageDigest digest = null;
+		try {
+			digest = MessageDigest.getInstance(TSAHash);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return digest.digest(concatenated);
+	}
+*/
 	
 	
 	
