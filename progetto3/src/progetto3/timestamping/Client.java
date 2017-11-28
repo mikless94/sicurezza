@@ -231,7 +231,7 @@ public class Client {
 
 	public boolean verifyOnline(String doc) {
 		//si presuppone verifica firma e verifica offline
-		if (verifySign(doc) && verifyOffline(doc)) {
+		if (verifyOffline(doc)) {
 			ReplyToSend replyReceived = deserializeReply (map.get(doc));
 			Reply reply = replyReceived.getReply();
 			byte [] computedRootHash = computeRootHash (reply.getLinkingInfo(), reply.getTSAHash());
@@ -247,7 +247,53 @@ public class Client {
 		return false; 
 	}
 	
-
+	public boolean verifyChain (String doc, int range) {
+		if (verifyOnline (doc)) {
+			ReplyToSend replyReceived = deserializeReply (map.get(doc));
+			Reply reply = replyReceived.getReply();
+			ArrayList <byte[]> superHashValues = tsa.getSuperHash();
+			ArrayList <byte[]> rootHashValues = tsa.getRootHash();
+			
+			byte [] SHVStart = null;
+			
+			//range <= 0 --> verifico intera catena
+			if (range <= 0) {
+				SHVStart = tsa.getShv0();
+				for (int i=0; i<superHashValues.size(); i++) {
+					if (!Arrays.equals(superHashValues.get(i), hashConcatenate(SHVStart, rootHashValues.get(i), reply.getTSAHash())))
+						return false;
+					SHVStart = superHashValues.get(i);
+				}
+				return true;
+			}
+			
+			//verifico porzione della catena identificata dal parametro range
+			else {
+				int start = 0;
+				int end = superHashValues.size()-1;
+				
+				if (reply.getTimeframeNumber()-range>0)
+					start = reply.getTimeframeNumber()-range;
+				if (reply.getTimeframeNumber()+range<superHashValues.size()-1)
+					end = reply.getTimeframeNumber()+range;
+				
+				for (int i=start; i<end; i++) {
+					if (i==0) 
+						SHVStart = tsa.getShv0();
+					else
+						SHVStart = superHashValues.get(i-1);
+					
+					if (!Arrays.equals(superHashValues.get(i), hashConcatenate(SHVStart, rootHashValues.get(i), reply.getTSAHash())))
+						return false;
+					SHVStart = superHashValues.get(i);
+				}
+				return true;
+			}
+		} 
+		return false;
+	}
+	
+	
 	private byte[] hashConcatenate(byte [] byte1 , byte [] byte2, String TSAHash) {
 		byte[] concatenated = new byte[byte1.length + byte2.length];
 		System.arraycopy(byte1, 0, concatenated, 0, byte1.length);

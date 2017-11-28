@@ -12,6 +12,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -37,6 +38,7 @@ public class TSA {
 	 * 
 	 */
 	public TSA() {
+		//genero chiavi di firma DSA per la TSA
 		KeyPairGenerator keyPairGenerator = null;
 		try {
 			keyPairGenerator = KeyPairGenerator.getInstance("DSA");
@@ -44,10 +46,13 @@ public class TSA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		keyPairGenerator.initialize(1024, new SecureRandom());
+		//sicurezza DSA 1024 non ottima ---> uso 2048
+		keyPairGenerator.initialize(2048, new SecureRandom());
 		kpSign = keyPairGenerator.generateKeyPair();
+		savePublicKey (kpSign.getPublic(), pubKeySignFile);
 		
 		
+		//genero chiavi RSA per la TSA
 		KeyPairGenerator keyPairGenerator2 = null;
 		try {
 			keyPairGenerator2 = KeyPairGenerator.getInstance("RSA");
@@ -55,10 +60,18 @@ public class TSA {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		keyPairGenerator.initialize(1024, new SecureRandom());
+		//2048 ha una sicurezza di 103 bits
+		keyPairGenerator.initialize(2048, new SecureRandom());
 		kpRSA = keyPairGenerator2.generateKeyPair();
+		savePublicKey (kpRSA.getPublic(), pubKeyAsymFile);
 	}
 	
+
+	private void savePublicKey(PublicKey public1, String pubkeysignfile2) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 	/**
 	 * @return the kpSign
@@ -98,13 +111,14 @@ public class TSA {
 	private String signType = "SHA224withDSA";
 	public static final int DIGEST_LENGTH = 32;
 	public static final byte [] SHV0 = new byte [DIGEST_LENGTH];
+	public static final String pubKeySignFile = "pubKeySignFile.txt";
+	public static final String pubKeyAsymFile = "pubKeyAsymFile.txt";
 	
 	//strutture dati
 	private ArrayList <byte[]> rootHash = new ArrayList <byte[]> ();
 	private ArrayList <byte[]> superHash = new ArrayList <byte[]> () ;
 	private ArrayList <Query> queries = new ArrayList <Query> ();
 	private byte [][] merkleTree = new byte[MERKLE_TREE_DIM][DIGEST_LENGTH];
-	private String newsPaper = "newsPaper.pub";
 	
 	//numero seriale e di timeframe
 	private static int serialNumber = 0; 
@@ -203,7 +217,6 @@ public class TSA {
 		      } catch (IOException e) {
 		         e.printStackTrace();
 		      }
-			
 		}
 		return marche;
 	}
