@@ -69,7 +69,7 @@ public class Client implements Serializable{
 		this.tsa = TSA.getInstance();
 		
 		//creo il KeyRing per l'utente
-		this.filename = "KeyRing"+ID+".txt";
+		this.filename = "./Keyrings/KeyRing"+ID+".txt";
 		this.keyR = new KeyRing(filename);
 	}
 	
@@ -401,62 +401,6 @@ public class Client implements Serializable{
 		}
 		return key;
 	}
-	
-	/*public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
-		   
-		ArrayList<byte[]> array= null;
-		ArrayList<String> value = null;
-		if(validated){
-			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
-			if(array == null)
-				System.out.println("The specified Key does not exist!");
-			else{
-				//Si ritorna una stringa nel caso si è richiesto una password.
-				if(param4.equals("null")){
-					String pass = new String(array.get(0));
-					value.add(pass);
-				}
-				else {
-					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
-						
-					}
-					
-				}
-			}
-		}
-		else{
-			System.out.println("User not validated!");
-		}
-		return value;
-	}
-	
-	public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
-		
-		ArrayList<byte[]> array= null;
-		ArrayList<String> value = null;
-		if(validated){
-			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
-			if(array == null)
-				System.out.println("The specified Key does not exist!");
-			else{
-				//Si ritorna una stringa nel caso si è richiesto una password.
-				if(param4.equals("null")){
-					String pass = new String(array.get(0));
-					value.add(pass);
-				}
-				else {
-					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
-						
-					}
-					
-				}
-			}
-		}
-		else{
-			System.out.println("User not validated!");
-		}
-		return value;
-	}*/
 	
 	public void saveKeyRing(String password){
 		
