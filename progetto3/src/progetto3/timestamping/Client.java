@@ -6,9 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
 import java.io.IOException;
-
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,26 +19,22 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import java.util.Base64;
-
 import java.util.HashMap;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
 import javax.swing.JOptionPane;
 
-public class Client {
+public class Client implements Serializable{
 	private String ID;
 	//map con documento e marca associata --> necessario per verifica
 	private HashMap <String, String> map;
 	//keyring utente
 	private KeyRing keyR;
-	private String filename = "KeyRing"+ID+".txt";
+	private String filename;
 	private String hashAlg = "SHA-256";
 	private TSA tsa;
 	private byte[] hashPassword;
@@ -58,13 +53,15 @@ public class Client {
 			e.printStackTrace();
 		}
 		this.hashPassword = digest.digest(password.getBytes());
-		ID = iD;
+		this.ID = iD;
+		System.out.println(iD);
 		this.map = new HashMap <String, String> ();
 		
 		//ottengo l'istanza univoca di TSA
 		this.tsa = TSA.getInstance();
 		
 		//creo il KeyRing per l'utente
+		this.filename = "KeyRing"+ID+".txt";
 		this.keyR = new KeyRing(filename);
 	}
 	
@@ -316,17 +313,15 @@ public class Client {
 		}
 		if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
 			validated = true;
-		else
-			JOptionPane.showMessageDialog(null,"Incorrect Password","Warning!",JOptionPane.WARNING_MESSAGE);
-
 	}
-	
-	
 	
 	public void addToKeyring (String role, String type, String param3, String param4, ArrayList<byte[]> array) {
 		
 		if(validated)
 			keyR.addToKeyring(role, type, param3, param4, array);
+		else{
+			System.out.println("User not validated!");
+		}
 	}
 	
 	public ArrayList<byte[]> getValueFromKeyRing(String role, String type, String param3, String param4){
@@ -334,20 +329,139 @@ public class Client {
 		ArrayList<byte[]> array= null;
 		if(validated){
 			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+		}
+		else{
+			System.out.println("User not validated!");
 		}
 		return array;
 	}
 	
+	/*public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
+		
+		ArrayList<byte[]> array= null;
+		ArrayList<String> value = null;
+		if(validated){
+			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else{
+				//Si ritorna una stringa nel caso si è richiesto una password.
+				if(param4.equals("null")){
+					String pass = new String(array.get(0));
+					value.add(pass);
+				}
+				else {
+					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
+						
+					}
+					
+				}
+			}
+		}
+		else{
+			System.out.println("User not validated!");
+		}
+		return value;
+	}
+	
+	public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
+		
+		ArrayList<byte[]> array= null;
+		ArrayList<String> value = null;
+		if(validated){
+			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else{
+				//Si ritorna una stringa nel caso si è richiesto una password.
+				if(param4.equals("null")){
+					String pass = new String(array.get(0));
+					value.add(pass);
+				}
+				else {
+					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
+						
+					}
+					
+				}
+			}
+		}
+		else{
+			System.out.println("User not validated!");
+		}
+		return value;
+	}*/
+	
 	public void saveKeyRing(String password){
 		
-		if(validated)
-			keyR.encodeData(password);		
+		if(validated){
+			MessageDigest digest = null;
+			try {
+				digest = MessageDigest.getInstance(hashAlg);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
+				keyR.encodeData(password);
+			else
+				System.out.println("Incorrect password!");
+		}
+		else{
+			System.out.println("User not validated!");
+		}
 	}
 	
 	public void restoreKeyRing(String password){
 		
-		if(validated)
-			keyR.decodeData(password);
+		if(validated){
+			MessageDigest digest = null;
+			try {
+				digest = MessageDigest.getInstance(hashAlg);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
+				keyR.decodeData(password);
+			else
+				System.out.println("Incorrect password!");
+		}
+		else{
+			System.out.println("User not validated!");
+		}
+	}
+
+	public KeyRing getKeyR() {
+		return keyR;
+	}
+
+
+
+	public void setKeyR(KeyRing keyR) {
+		this.keyR = keyR;
+	}
+
+
+
+	public boolean isValidated() {
+		return validated;
+	}
+
+	public void setValidated(boolean validated) {
+		this.validated = validated;
+	}
+
+
+
+	public String getID() {
+		return ID;
+	}
+
+
+
+	public void setID(String iD) {
+		ID = iD;
 	}
 
 }

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +35,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 
-public class KeyRing {
+public class KeyRing implements Serializable{
   
   private String fileName;
   private static int IV_DIM = 16;
@@ -86,7 +87,7 @@ public class KeyRing {
     
     String idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase() +
         "/" + dim.toUpperCase();
-    
+
       return this.map.get(idMap);
     }
   
@@ -123,13 +124,25 @@ public class KeyRing {
 	      //scrivo la map su file
 	      out.writeObject(data);
 	      
+	      this.map = null;
+	      
 	      out.close();
 	    }catch(IOException | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException e) {
 	      e.printStackTrace();
 	    }
 	  }
 	  
-	  public void decodeData(String password) {
+	  public HashMap<String, ArrayList<byte[]>> getMap() {
+	return map;
+}
+
+
+public void setMap(HashMap<String, ArrayList<byte[]>> map) {
+	this.map = map;
+}
+
+
+	public void decodeData(String password) {
 	    
 	    byte[] salt = new byte[SALT_DIM];
 	    byte IVBytes[] = new byte[IV_DIM];
@@ -153,7 +166,7 @@ public class KeyRing {
 	      
 	      ciph.init(Cipher.DECRYPT_MODE, secretKey, iv);
 	      
-	      this.map = (HashMap<String, ArrayList< byte []>>) sealedObject.getObject(ciph);
+	      this.map = (HashMap<String, ArrayList<byte []>>) sealedObject.getObject(ciph);
 	      
 	      in.close();
 	    } catch(EOFException eof){
