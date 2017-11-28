@@ -1,8 +1,10 @@
 package progetto3.timestamping;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -13,6 +15,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -361,4 +364,21 @@ public class TSA implements Serializable{
 	public void serializeTSA () {
 		
 	}
+	
+	public void savePublicKey(PublicKey key, String filePath) {
+		
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath));
+			
+			byte [] byteKey = key.getEncoded();
+			
+			out.writeObject(byteKey);
+			
+			out.close();
+		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 }

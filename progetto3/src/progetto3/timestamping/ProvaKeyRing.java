@@ -6,6 +6,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -40,7 +41,9 @@ public class ProvaKeyRing {
 	  
     	k.decodeData("ehi");
 		ArrayList<byte[]> x = k.getValueFromKeyRing("Giuseppe", "Key", "AES/CBC", "128");
-		System.out.println(x.get(0));      
+		System.out.println(Arrays.toString(x.get(0)));
+		System.out.println(Arrays.toString(b));
+		System.out.println(Arrays.equals(x.get(0), b));      
   }
   
 }

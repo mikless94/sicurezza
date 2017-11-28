@@ -12,11 +12,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -26,6 +32,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JOptionPane;
 
 public class Client implements Serializable{
@@ -269,31 +277,133 @@ public class Client implements Serializable{
 			validated = true;
 	}
 	
-	public void addToKeyring (String role, String type, String param3, String param4, ArrayList<byte[]> array) {
-		
-		if(validated)
+	public void addPasswordToKeyring (String role, String type, String param3, String param4, String password) {
+		if(validated) {
+			ArrayList<byte []> array = new ArrayList<byte []>();
+			array.add(password.getBytes());
 			keyR.addToKeyring(role, type, param3, param4, array);
+		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" not validated!");
 		}
 	}
 	
-	public ArrayList<byte[]> getValueFromKeyRing(String role, String type, String param3, String param4){
-		
-		ArrayList<byte[]> array= null;
-		if(validated){
-			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
-			if(array == null)
-				System.out.println("The specified Key does not exist!");
+	public void addSecretKeyToKeyring (String role, String type, String param3, String param4, SecretKey key) {
+		if(validated) {
+			ArrayList<byte []> array = new ArrayList<byte []>();
+			array.add(key.getEncoded());
+			keyR.addToKeyring(role, type, param3, param4, array);
 		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" not validated!");
 		}
-		return array;
+	}
+	
+	public void addKeyPairToKeyring (String role, String type, String param3, String param4, KeyPair pair) {
+		if(validated) {
+			ArrayList<byte []> array = new ArrayList<byte []>();
+			array.add(pair.getPublic().getEncoded());
+			array.add(pair.getPrivate().getEncoded());
+			keyR.addToKeyring(role, type, param3, param4, array);
+		}
+		else{
+			System.out.println("User " + ID +" not validated!");
+		}
+	}
+	
+	public void deleteFromKeyRing(String role, String type, String param3, String param4) {
+		
+		boolean flag;
+		if(validated) {
+			 flag = keyR.deleteKey(role, type, param3, param4);
+			 if(!flag)
+				 System.out.println("Key for user " + ID + "not found!");
+		}
+		else{
+			System.out.println("User " + ID +" not validated!");
+		}
+	}
+	
+	public String getPasswordFromKeyRing(String role, String type, String param3, String param4){
+		
+		String password= null;
+		if(validated){
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else {
+					password = new String(array.get(0));
+				}
+		}
+		else{
+			System.out.println("User " + ID +" not validated!");
+		}
+		return password;
+	}
+	
+	public SecretKey getSecretKeyFromKeyRing(String role, String type, String param3, String param4){
+		
+		SecretKey key = null;
+		if(validated){
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else {
+				key = new SecretKeySpec(array.get(0), 0, Integer.parseInt(param4), param3);
+				}
+		}
+		else{
+			System.out.println("User " + ID +" not validated!");
+		}
+		return key;
+	}
+	
+	public PublicKey getPublicKeyFromKeyRing(String role, String type, String param3, String param4){
+		
+		PublicKey key = null;
+		if(validated){
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else {
+				try {
+					key = KeyFactory.getInstance(param3).generatePublic(new X509EncodedKeySpec(array.get(0)));
+				} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				}
+		}
+		else{
+			System.out.println("User " + ID +" not validated!");
+		}
+		return key;
+	}
+	
+	public PrivateKey getPrivateKeyFromKeyRing(String role, String type, String param3, String param4){
+		
+		PrivateKey key = null;
+		if(validated){
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else {
+				try {
+					KeyFactory kf = KeyFactory.getInstance(param3);
+					key = kf.generatePrivate(new PKCS8EncodedKeySpec(array.get(1)));
+				} catch (InvalidKeySpecException | NoSuchAlgorithmException e) 
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		else{
+			System.out.println("User " + ID +" not validated!");
+		}
+		return key;
 	}
 	
 	/*public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
-		
+		   
 		ArrayList<byte[]> array= null;
 		ArrayList<String> value = null;
 		if(validated){
@@ -360,10 +470,10 @@ public class Client implements Serializable{
 			if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
 				keyR.encodeData(password);
 			else
-				System.out.println("Incorrect password!");
+				System.out.println("Incorrect password for " + ID);
 		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" not validated!");
 		}
 	}
 	
@@ -379,10 +489,10 @@ public class Client implements Serializable{
 			if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
 				keyR.decodeData(password);
 			else
-				System.out.println("Incorrect password!");
+				System.out.println("Incorrect password for " + ID);
 		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" not validated!");
 		}
 	}
 
@@ -417,5 +527,27 @@ public class Client implements Serializable{
 	public void setID(String iD) {
 		ID = iD;
 	}
-
+	
+	public PublicKey getTSAPublicKey(String filePath) {
+		PublicKey key = null;
+		String mode;
+		try {
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath));
+			
+			byte [] byteKey = (byte []) in.readObject();
+			
+			in.close();
+			
+			if(filePath.compareTo(tsa.getPubKeySignFile()) == 0) {
+				mode = "DSA";
+			}
+			else
+				mode = "RSA";
+			key = KeyFactory.getInstance(mode).generatePublic(new X509EncodedKeySpec(byteKey));
+			
+		} catch (IOException | ClassNotFoundException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return key;
+	}
 }
