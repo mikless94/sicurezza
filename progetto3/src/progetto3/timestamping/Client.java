@@ -62,15 +62,14 @@ public class Client implements Serializable{
 		}
 		this.hashPassword = digest.digest(password.getBytes());
 		this.ID = iD;
-		System.out.println(iD);
 		this.map = new HashMap <String, String> ();
 		
 		//ottengo l'istanza univoca di TSA
-				this.tsa = TSA.getInstance();
+		this.tsa = TSA.getInstance();
 				
-				//creo il KeyRing per l'utente
-				this.filename = "./Keyrings/KeyRing"+ID+".txt";
-				this.keyR = new KeyRing(filename);
+		//creo il KeyRing per l'utente
+		this.filename = "./Keyrings/KeyRing"+ID+".txt";
+		this.keyR = new KeyRing(filename);
 	}
 
 	/*private ReplyToSend deserializeReply(String marca) {
@@ -413,12 +412,12 @@ public class Client implements Serializable{
 	
 	public void addPasswordToKeyring (String role, String type, String param3, String param4, String password) {
 		if(validated) {
-			ArrayList<byte []> array = new ArrayList<byte []>();
-			array.add(password.getBytes());
-			keyR.addToKeyring(role, type, param3, param4, array);
+				ArrayList<byte []> array = new ArrayList<byte []>();
+				array.add(password.getBytes());
+				keyR.addToKeyring(role, type, param3, param4, array);
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for adding Password!");
 		}
 	}
 	
@@ -429,7 +428,7 @@ public class Client implements Serializable{
 			keyR.addToKeyring(role, type, param3, param4, array);
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for adding Secret Keys!");
 		}
 	}
 	
@@ -441,7 +440,7 @@ public class Client implements Serializable{
 			keyR.addToKeyring(role, type, param3, param4, array);
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for adding KeyPairs!");
 		}
 	}
 	
@@ -454,7 +453,7 @@ public class Client implements Serializable{
 				 System.out.println("Key for user " + ID + "not found!");
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for delete User!");
 		}
 	}
 	
@@ -470,7 +469,7 @@ public class Client implements Serializable{
 				}
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for getting Password!");
 		}
 		return password;
 	}
@@ -483,11 +482,11 @@ public class Client implements Serializable{
 			if(array == null)
 				System.out.println("The specified Key does not exist!");
 			else {
-				key = new SecretKeySpec(array.get(0), 0, Integer.parseInt(param4), param3);
+				key = new SecretKeySpec(array.get(0), 0, array.get(0).length, param3);
 				}
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for getting Secret Keys!");
 		}
 		return key;
 	}
@@ -508,7 +507,7 @@ public class Client implements Serializable{
 				}
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for getting Public Keys!");
 		}
 		return key;
 	}
@@ -531,7 +530,7 @@ public class Client implements Serializable{
 			}
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for getting Private Keys!");
 		}
 		return key;
 	}
@@ -551,7 +550,7 @@ public class Client implements Serializable{
 				System.out.println("Incorrect password for " + ID);
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for save KeyRing!");
 		}
 	}
 	
@@ -570,7 +569,7 @@ public class Client implements Serializable{
 				System.out.println("Incorrect password for " + ID);
 		}
 		else{
-			System.out.println("User " + ID +" not validated!");
+			System.out.println("User " + ID +" is not validated for restore KeyRing!");
 		}
 	}
 

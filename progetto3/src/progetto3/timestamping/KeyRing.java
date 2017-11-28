@@ -144,13 +144,13 @@ public class KeyRing implements Serializable{
 	  }
 	  
 	  public HashMap<String, ArrayList<byte[]>> getMap() {
-	return map;
-}
+		  return map;
+	  }
 
 
-public void setMap(HashMap<String, ArrayList<byte[]>> map) {
-	this.map = map;
-}
+	  public void setMap(HashMap<String, ArrayList<byte[]>> map) {
+		  this.map = map;
+	  }
 
 
 	public void decodeData(String password) {
