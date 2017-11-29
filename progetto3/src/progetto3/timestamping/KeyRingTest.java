@@ -72,7 +72,7 @@ public class KeyRingTest {
 		System.out.println("\n-----------------Test con Utente non validato-----------------\n");
 		
 		System.out.println("Inserimento di una password nel Keyring di un utente non validato:");
-		michele.addPasswordToKeyring("Studente", "Password", "Whatsapp", null, "ehi");
+		michele.addPasswordToKeyring("Studente", "Password ", "Whatsapp", null, "ehi");
 		
 		System.out.println("\nSalvataggio del KeyRing di un utente non validato:");
 		michele.saveKeyRing("222");
