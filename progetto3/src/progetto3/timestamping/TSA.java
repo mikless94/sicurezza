@@ -1,3 +1,4 @@
+
 package progetto3.timestamping;
 
 import java.io.ByteArrayOutputStream;
@@ -9,14 +10,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -32,12 +37,40 @@ import javax.crypto.NoSuchPaddingException;
 
 public class TSA implements Serializable{
 	
-	private KeyPair kpSign ;
-	private KeyPair kpRSA;
-	/**
-	 * 
-	 */
+	private static TSA instance = null;
+	
+	//costanti
+	public static final int MERKLE_TREE_DIM = 15;
+	public static final int TIMEFRAME_DIM = 8;
+	private String hashAlg = "SHA-256";
+	private String signType = "SHA224withDSA";
+	public static final int DIGEST_LENGTH = 32;
+	public static byte [] SHV0 ;
+	public static final String pubKeySignFile = "pubKeySignFile.txt";
+	public static final String pubKeyAsymFile = "pubKeyAsymFile.txt";
+	
+	//strutture dati
+	private ArrayList <byte[]> rootHash = new ArrayList <byte[]> ();
+	private ArrayList <byte[]> superHash = new ArrayList <byte[]> () ;
+	private ArrayList <Query> queries = new ArrayList <Query> ();
+	private byte [][] merkleTree = new byte[MERKLE_TREE_DIM][DIGEST_LENGTH];
+	private KeyRing tsaKR;
+	private Repository rep;
+	
+	//numero seriale e di timeframe
+	private static int serialNumber = 0; 
+	private static int timeframeNumber = 0; 
+	
+	
 	public TSA() {
+		tsaKR = new KeyRing ("keyringTSA.txt");
+		rep = Repository.getInstance();
+		//Repository repository = new Repository ();
+		//genero superhash iniziale random
+		byte [] b = new byte [DIGEST_LENGTH];
+		new Random().nextBytes(b); 
+		setSHV0 (b);
+		
 		//genero chiave di firma DSA per la TSA
 		KeyPairGenerator keyPairGenerator = null;
 		try {
@@ -48,10 +81,15 @@ public class TSA implements Serializable{
 		}
 		//sicurezza DSA 1024 non ottima ---> uso 2048
 		keyPairGenerator.initialize(2048, new SecureRandom());
-		kpSign = keyPairGenerator.generateKeyPair();
-		savePublicKey (kpSign.getPublic(), pubKeySignFile);
-		
-		
+		KeyPair kpSign = keyPairGenerator.generateKeyPair();
+		//aggiungo chiave pubblica al repository
+		rep.addToRepository("TSA", "europa", "DSA", kpSign.getPublic());
+		//aggiungo coppia al keyring associato alla TSA
+		ArrayList <byte[]> keysToAdd = new ArrayList <byte[]> ();
+		keysToAdd.add(kpSign.getPublic().getEncoded());
+		keysToAdd.add(kpSign.getPrivate().getEncoded());
+		tsaKR.addToKeyring("europa", "key", "DSA", "2048", keysToAdd);
+	
 		//genero chiave RSA per la TSA
 		KeyPairGenerator keyPairGenerator2 = null;
 		try {
@@ -62,30 +100,16 @@ public class TSA implements Serializable{
 		}
 		//2048 ha una sicurezza di 112 bits
 		keyPairGenerator.initialize(2048, new SecureRandom());
-		kpRSA = keyPairGenerator2.generateKeyPair();
-		savePublicKey (kpRSA.getPublic(), pubKeyAsymFile);
+		KeyPair kpRSA = keyPairGenerator2.generateKeyPair();
+		rep.addToRepository("TSA", "europa", "RSA", kpRSA.getPublic());
+		//aggiungo coppia al keyring associato alla TSA
+		ArrayList <byte[]> keysToAdd2 = new ArrayList <byte[]> ();
+		keysToAdd2.add(kpRSA.getPublic().getEncoded());
+		keysToAdd2.add(kpRSA.getPrivate().getEncoded());
+		tsaKR.addToKeyring("europa", "key", "RSA", "2048", keysToAdd2);
 	}
+
 	
-
-	private void savePublicKey(PublicKey public1, String pubkeysignfile2) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	/**
-	 * @return the kpSign
-	 */
-	public KeyPair getKpSign() {
-		return kpSign;
-	}
-
-	/**
-	 * @return the kpRSA
-	 */
-	public KeyPair getKpRSA() {
-		return kpRSA;
-	}
 
 	/**
 	 * @return the shv0
@@ -94,36 +118,17 @@ public class TSA implements Serializable{
 		return SHV0;
 	}
 
+	/**
+	 * @param sHV0 the sHV0 to set
+	 */
+	public static void setSHV0(byte[] sHV0) {
+		SHV0 = sHV0;
+	}
 
 
 
 
-
-
-
-
-	private static TSA instance = null;
 	
-	//costanti
-	public static final int MERKLE_TREE_DIM = 15;
-	public static final int TIMEFRAME_DIM = 8;
-	private String hashAlg = "SHA-256";
-	private String signType = "SHA224withDSA";
-	public static final int DIGEST_LENGTH = 32;
-	public static final byte [] SHV0 = new byte [DIGEST_LENGTH];
-	public static final String pubKeySignFile = "pubKeySignFile.txt";
-	public static final String pubKeyAsymFile = "pubKeyAsymFile.txt";
-	
-	//strutture dati
-	private ArrayList <byte[]> rootHash = new ArrayList <byte[]> ();
-	private ArrayList <byte[]> superHash = new ArrayList <byte[]> () ;
-	private ArrayList <Query> queries = new ArrayList <Query> ();
-	private byte [][] merkleTree = new byte[MERKLE_TREE_DIM][DIGEST_LENGTH];
-	
-	//numero seriale e di timeframe
-	private static int serialNumber = 0; 
-	private static int timeframeNumber = 0; 
-
 	
 	//pattern singleton TSA
 	public static TSA getInstance() {
@@ -232,7 +237,16 @@ public class TSA implements Serializable{
 			//firmo reply
 			byte[] firma = null;
 			Signature dsa = Signature.getInstance(signType);
-			dsa.initSign(kpSign.getPrivate());
+			ArrayList<byte []> keys = tsaKR.getValueFromKeyRing("europa", "key", "DSA", "2048");
+			KeyFactory kf = KeyFactory.getInstance("DSA");
+			PrivateKey key = null;
+			try {
+				key = kf.generatePrivate(new PKCS8EncodedKeySpec(keys.get(1)));
+			} catch (InvalidKeySpecException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			dsa.initSign(key);
 			//traformo le reply in byte per essere firmate
 			try(ByteArrayOutputStream b = new ByteArrayOutputStream()){
 	            try(ObjectOutputStream o = new ObjectOutputStream(b)){
@@ -316,8 +330,23 @@ public class TSA implements Serializable{
 			e1.printStackTrace();
 		}
 		// ottengo chiave privata TSA dal keyring
+		ArrayList<byte []> keys = tsaKR.getValueFromKeyRing("europa", "key", "RSA", "2048");
+		KeyFactory kf = null;
 		try {
-			c.init(Cipher.DECRYPT_MODE, kpRSA.getPrivate());
+			kf = KeyFactory.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		PrivateKey key = null;
+		try {
+			key = kf.generatePrivate(new PKCS8EncodedKeySpec(keys.get(1)));
+		} catch (InvalidKeySpecException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			c.init(Cipher.DECRYPT_MODE, key);
 		} catch (InvalidKeyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -370,8 +399,6 @@ public class TSA implements Serializable{
 		//aggiunta query al buffer
 		queries.add(query);
 	}
-	
-	public void serializeTSA () {
-		
-	}
 }
+
+

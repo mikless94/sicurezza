@@ -76,20 +76,31 @@ public class KeyRing implements Serializable{
   
   
   public void addToKeyring (String role, String type, String algOrService, String dim, ArrayList<byte []> array) {
-      
-    String idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase() +
-        "/" + dim.toUpperCase();
+	  
+	  String idMap;
+	  
+	  if(dim != null) {
+		  idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase() +
+			        "/" + dim.toUpperCase();
+	  }
+	  else
+		  idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase();
+    
     this.map.put(idMap, array);
   }
   
   
   public ArrayList<byte []> getValueFromKeyRing(String role, String type, String algOrService, String dim){
-    
-    String idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase() +
-        "/" + dim.toUpperCase();
-
-      return this.map.get(idMap);
-    }
+	  String idMap;
+	  if(dim != null) {
+		  idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase()
+		  +  "/" + dim.toUpperCase();
+	  }
+	  else
+		  idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase();
+	  
+	  return this.map.get(idMap);
+	  }
   
   public void encodeData(String password){
 	    byte[] salt = new byte[SALT_DIM];
@@ -133,13 +144,13 @@ public class KeyRing implements Serializable{
 	  }
 	  
 	  public HashMap<String, ArrayList<byte[]>> getMap() {
-	return map;
-}
+		  return map;
+	  }
 
 
-public void setMap(HashMap<String, ArrayList<byte[]>> map) {
-	this.map = map;
-}
+	  public void setMap(HashMap<String, ArrayList<byte[]>> map) {
+		  this.map = map;
+	  }
 
 
 	public void decodeData(String password) {
@@ -186,5 +197,23 @@ public void setMap(HashMap<String, ArrayList<byte[]>> map) {
 	    }
 	    
 	    System.out.println(s);
+	  }
+	  
+	  public boolean deleteKey(String role, String type, String algOrService, String dim) {
+		  String idMap;
+		  
+		  if(dim != null) {
+			  idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase()
+			  +  "/" + dim.toUpperCase();
+		  }
+		  else
+			  idMap = role.toUpperCase() + "/" + type.toUpperCase() + "/" + algOrService.toUpperCase();
+		  
+		  if(this.map.containsKey(idMap)) {
+			  this.map.remove(idMap);
+			  return true;
+		  }
+		  else
+			  return false;
 	  }
 }

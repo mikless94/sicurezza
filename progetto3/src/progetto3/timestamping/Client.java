@@ -12,11 +12,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -26,6 +32,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JOptionPane;
 
 public class Client implements Serializable{
@@ -37,6 +45,7 @@ public class Client implements Serializable{
 	private String filename;
 	private String hashAlg = "SHA-256";
 	private TSA tsa;
+	private Repository rep;
 	private byte[] hashPassword;
 	boolean validated = false;
 
@@ -55,12 +64,13 @@ public class Client implements Serializable{
 		this.hashPassword = digest.digest(password.getBytes());
 		this.ID = iD;
 		this.map = new HashMap <String, String> ();
-		
+
 		//ottengo l'istanza univoca di TSA
 		this.tsa = TSA.getInstance();
+		this.rep = Repository.getInstance();
 		
 		//creo il KeyRing per l'utente
-		this.filename = "KeyRing"+ID+".txt";
+		this.filename = "./KeyRings/KeyRing"+ID+".txt";
 		this.keyR = new KeyRing(filename);
 	}
 	
@@ -110,7 +120,7 @@ public class Client implements Serializable{
 	
 	private byte[] encryptHash(byte[] hash) {
 		//estraggo dal keyring la chiave pubblica e le relative informazioni necessarie alla cifratura
-		PublicKey pubKey = tsa.getKpRSA().getPublic();
+		PublicKey pubKey = rep.getFromRepository("TSA", "europa", "RSA");
 		Cipher c = null;
 		try {
 			c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -147,7 +157,8 @@ public class Client implements Serializable{
 			e.printStackTrace();
 		}
 		//ottengo chiave pubblica di firma TSA
-		PublicKey pubKey = tsa.getKpSign().getPublic();
+		PublicKey pubKey = rep.getFromRepository("TSA", "europa", "DSA");
+		//PublicKey pubKey = tsa.getKpSign().getPublic();
 		try {
 			dsa.initVerify(pubKey);
 		} catch (InvalidKeyException e) {
@@ -274,12 +285,13 @@ public class Client implements Serializable{
 				if (reply.getTimeframeNumber()+range<superHashValues.size()-1)
 					end = reply.getTimeframeNumber()+range;
 				
-				for (int i=start; i<end; i++) {
-					if (i==0) 
-						SHVStart = tsa.getShv0();
-					else
-						SHVStart = superHashValues.get(i-1);
-					
+				
+				if (start==0) 
+					SHVStart = tsa.getShv0();
+				else
+					SHVStart = superHashValues.get(start-1);
+				
+				for (int i=start; i<=end; i++) {
 					if (!Arrays.equals(superHashValues.get(i), hashConcatenate(SHVStart, rootHashValues.get(i), reply.getTSAHash())))
 						return false;
 					SHVStart = superHashValues.get(i);
@@ -289,8 +301,7 @@ public class Client implements Serializable{
 		} 
 		return false;
 	}
-	
-	
+
 	private byte[] hashConcatenate(byte [] byte1 , byte [] byte2, String TSAHash) {
 		byte[] concatenated = new byte[byte1.length + byte2.length];
 		System.arraycopy(byte1, 0, concatenated, 0, byte1.length);
@@ -303,6 +314,7 @@ public class Client implements Serializable{
 		}
 		return digest.digest(concatenated);
 	}
+
 		
 	public void userValidation(String password){
 		MessageDigest digest = null;
@@ -315,84 +327,130 @@ public class Client implements Serializable{
 			validated = true;
 	}
 	
-	public void addToKeyring (String role, String type, String param3, String param4, ArrayList<byte[]> array) {
-		
-		if(validated)
+	public void addPasswordToKeyring (String role, String type, String param3, String param4, String password) {
+		if(validated) {
+				ArrayList<byte []> array = new ArrayList<byte []>();
+				array.add(password.getBytes());
+				keyR.addToKeyring(role, type, param3, param4, array);
+		}
+		else{
+			System.out.println("User " + ID +" is not validated for adding Password!");
+		}
+	}
+	
+	public void addSecretKeyToKeyring (String role, String type, String param3, String param4, SecretKey key) {
+		if(validated) {
+			ArrayList<byte []> array = new ArrayList<byte []>();
+			array.add(key.getEncoded());
 			keyR.addToKeyring(role, type, param3, param4, array);
+		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" is not validated for adding Secret Keys!");
 		}
 	}
 	
-	public ArrayList<byte[]> getValueFromKeyRing(String role, String type, String param3, String param4){
-		
-		ArrayList<byte[]> array= null;
-		if(validated){
-			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
-			if(array == null)
-				System.out.println("The specified Key does not exist!");
+	public void addKeyPairToKeyring (String role, String type, String param3, String param4, KeyPair pair) {
+		if(validated) {
+			ArrayList<byte []> array = new ArrayList<byte []>();
+			array.add(pair.getPublic().getEncoded());
+			array.add(pair.getPrivate().getEncoded());
+			keyR.addToKeyring(role, type, param3, param4, array);
 		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" is not validated for adding KeyPairs!");
 		}
-		return array;
 	}
 	
-	/*public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
+	public void deleteFromKeyRing(String role, String type, String param3, String param4) {
 		
-		ArrayList<byte[]> array= null;
-		ArrayList<String> value = null;
+		boolean flag;
+		if(validated) {
+			 flag = keyR.deleteKey(role, type, param3, param4);
+			 if(!flag)
+				 System.out.println("Key for user " + ID + "not found!");
+		}
+		else{
+			System.out.println("User " + ID +" is not validated for delete User!");
+		}
+	}
+	
+	public String getPasswordFromKeyRing(String role, String type, String param3, String param4){
+		
+		String password= null;
 		if(validated){
-			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
 			if(array == null)
 				System.out.println("The specified Key does not exist!");
-			else{
-				//Si ritorna una stringa nel caso si è richiesto una password.
-				if(param4.equals("null")){
-					String pass = new String(array.get(0));
-					value.add(pass);
+			else {
+					password = new String(array.get(0));
 				}
-				else {
-					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
-						
-					}
-					
+		}
+		else{
+			System.out.println("User " + ID +" is not validated for getting Password!");
+		}
+		return password;
+	}
+	
+	public SecretKey getSecretKeyFromKeyRing(String role, String type, String param3, String param4){
+		
+		SecretKey key = null;
+		if(validated){
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else {
+				key = new SecretKeySpec(array.get(0), 0, array.get(0).length, param3);
+				}
+		}
+		else{
+			System.out.println("User " + ID +" is not validated for getting Secret Keys!");
+		}
+		return key;
+	}
+	
+	public PublicKey getPublicKeyFromKeyRing(String role, String type, String param3, String param4){
+		
+		PublicKey key = null;
+		if(validated){
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else {
+				try {
+					key = KeyFactory.getInstance(param3).generatePublic(new X509EncodedKeySpec(array.get(0)));
+				} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				}
+		}
+		else{
+			System.out.println("User " + ID +" is not validated for getting Public Keys!");
+		}
+		return key;
+	}
+	
+	public PrivateKey getPrivateKeyFromKeyRing(String role, String type, String param3, String param4){
+		
+		PrivateKey key = null;
+		if(validated){
+			ArrayList<byte[]> array =  keyR.getValueFromKeyRing(role, type, param3, param4);
+			if(array == null)
+				System.out.println("The specified Key does not exist!");
+			else {
+				try {
+					KeyFactory kf = KeyFactory.getInstance(param3);
+					key = kf.generatePrivate(new PKCS8EncodedKeySpec(array.get(1)));
+				} catch (InvalidKeySpecException | NoSuchAlgorithmException e) 
+				{
+					e.printStackTrace();
 				}
 			}
 		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" is not validated for getting Private Keys!");
 		}
-		return value;
+		return key;
 	}
-	
-	public ArrayList<String> getValueFromKeyRing(String role, String type, String param3, String param4){
-		
-		ArrayList<byte[]> array= null;
-		ArrayList<String> value = null;
-		if(validated){
-			array =  keyR.getValueFromKeyRing(role, type, param3, param4);
-			if(array == null)
-				System.out.println("The specified Key does not exist!");
-			else{
-				//Si ritorna una stringa nel caso si è richiesto una password.
-				if(param4.equals("null")){
-					String pass = new String(array.get(0));
-					value.add(pass);
-				}
-				else {
-					if(param3.equals("AES") || param3.equals("DES") || param3.equals("DESede")){
-						
-					}
-					
-				}
-			}
-		}
-		else{
-			System.out.println("User not validated!");
-		}
-		return value;
-	}*/
 	
 	public void saveKeyRing(String password){
 		
@@ -406,10 +464,10 @@ public class Client implements Serializable{
 			if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
 				keyR.encodeData(password);
 			else
-				System.out.println("Incorrect password!");
+				System.out.println("Incorrect password for " + ID);
 		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" is not validated for save KeyRing!");
 		}
 	}
 	
@@ -425,10 +483,10 @@ public class Client implements Serializable{
 			if (Arrays.equals(hashPassword,digest.digest(password.getBytes())))
 				keyR.decodeData(password);
 			else
-				System.out.println("Incorrect password!");
+				System.out.println("Incorrect password for " + ID);
 		}
 		else{
-			System.out.println("User not validated!");
+			System.out.println("User " + ID +" is not validated for restore KeyRing!");
 		}
 	}
 
@@ -463,5 +521,27 @@ public class Client implements Serializable{
 	public void setID(String iD) {
 		ID = iD;
 	}
-
+	
+	/*public PublicKey getTSAPublicKey(String filePath) {
+		PublicKey key = null;
+		String mode;
+		try {
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath));
+			
+			byte [] byteKey = (byte []) in.readObject();
+			
+			in.close();
+			
+			if(filePath.compareTo(tsa.getPubKeySignFile()) == 0) {
+				mode = "DSA";
+			}
+			else
+				mode = "RSA";
+			key = KeyFactory.getInstance(mode).generatePublic(new X509EncodedKeySpec(byteKey));
+			
+		} catch (IOException | ClassNotFoundException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return key;
+	}*/
 }

@@ -44,6 +44,7 @@ public class TimeStampTest {
 		System.out.println("#################INVIO RICHIESTE#################");
 		//ogni utente manda le sue query
 		for (String key: user.keySet()) {
+			System.out.println("utente "+key);
 			File directory = new File ("./doc"+key);
 			File [] files = directory.listFiles();
 			
@@ -58,6 +59,8 @@ public class TimeStampTest {
 					e.printStackTrace();
 				}
 			}
+			System.out.println();
+			
 		}
 		
 		//TSA genera marche 
@@ -90,17 +93,20 @@ public class TimeStampTest {
 				System.out.println ("verifica firma: "+c.verifySign(files[i].getPath()));
 				System.out.println ("verifica offline: "+c.verifyOffline(files[i].getPath()));
 				System.out.println ("verifica online: "+c.verifyOnline(files[i].getPath()));
-				System.out.println ("verifica catena di lunghezza 3: "+c.verifyChain(files[i].getPath(), 3));
+				System.out.println ("verifica catena di lunghezza 1: "+c.verifyChain(files[i].getPath(), 1));
 				System.out.println ("verifica intera catena: "+c.verifyChain(files[i].getPath(), -1));
 			}
 		}
 	}
 	
 	private static void saveUser(HashMap<String, Client> user){
+		
 		try {
 			//Resetto il bit di validità a FALSE per tutti i client.
-			for(String s : user.keySet())
+			for(String s : user.keySet()) {
 				user.get(s).setValidated(false);
+			}
+			
 			//Scrivo su file la struttura dati contenente i client.
 			FileOutputStream f = new FileOutputStream(new File("ClientsTSA.txt"));
 			ObjectOutputStream o = new ObjectOutputStream(f);
