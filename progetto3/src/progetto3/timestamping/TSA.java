@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -37,7 +38,7 @@ public class TSA implements Serializable{
 	 * 
 	 */
 	public TSA() {
-		//genero chiavi di firma DSA per la TSA
+		//genero chiave di firma DSA per la TSA
 		KeyPairGenerator keyPairGenerator = null;
 		try {
 			keyPairGenerator = KeyPairGenerator.getInstance("DSA");
@@ -51,7 +52,7 @@ public class TSA implements Serializable{
 		savePublicKey (kpSign.getPublic(), pubKeySignFile);
 		
 		
-		//genero chiavi RSA per la TSA
+		//genero chiave RSA per la TSA
 		KeyPairGenerator keyPairGenerator2 = null;
 		try {
 			keyPairGenerator2 = KeyPairGenerator.getInstance("RSA");
@@ -59,7 +60,7 @@ public class TSA implements Serializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//2048 ha una sicurezza di 103 bits
+		//2048 ha una sicurezza di 112 bits
 		keyPairGenerator.initialize(2048, new SecureRandom());
 		kpRSA = keyPairGenerator2.generateKeyPair();
 		savePublicKey (kpRSA.getPublic(), pubKeyAsymFile);
@@ -156,17 +157,15 @@ public class TSA implements Serializable{
 
 
 	public void generateReply () throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, IOException {
-		int timeframeDimension = 0;
 		ArrayList <Query> queriesToTree = new ArrayList <Query> ();
 		for (Query q: queries) {
-			if (timeframeDimension < 8) {
+			if (queriesToTree.size()<8) 
 				queriesToTree.add(q);
-				timeframeDimension++;
-			}
 			else {
 				generateTimestamp (queriesToTree);
 				timeframeNumber++;
-				timeframeDimension = 0;
+				queriesToTree.clear();
+				queriesToTree.add(q);
 			}
 		}
 		if (!queriesToTree.isEmpty()) {
@@ -205,8 +204,8 @@ public class TSA implements Serializable{
 		ArrayList <String> marche = new ArrayList<String> ();
 		for (int i = 0; i<repliesToSend.size() ; i++) {
 			try {
-				String marcaPath = "C:\\\\Users\\\\Michele\\\\Desktop\\\\messaggio.txt.marca";
-				//String marcaPath = "reply_"+repliesToSend.get(i).getReply().getID()+".trs";
+				 String marcaPath = "./timestamps/reply_"+repliesToSend.get(i).getReply().getID()+"_"+
+						 repliesToSend.get(i).getReply().getSerialNumber()+".trs";
 		         FileOutputStream fileOut = new FileOutputStream(marcaPath);
 		         ObjectOutputStream out = new ObjectOutputStream(fileOut);
 		         out.writeObject(repliesToSend.get(i));
@@ -223,8 +222,7 @@ public class TSA implements Serializable{
 	private ArrayList<ReplyToSend> buildTimeStamp(ArrayList<Query> queriesToTree) throws NoSuchAlgorithmException, InvalidKeyException, IOException, SignatureException {
 		int i = 0;
 		ArrayList <ReplyToSend> repliesToSend = new ArrayList <ReplyToSend> ();
-		
-		for (i = 0; i<queriesToTree.size() ; i++) {
+		for (i = 0; i<queriesToTree.size(); i++) {
 			//costruiamo linking info per richiesta di posizione i nell albero di Merkle
 			ArrayList<Info> linkingInfo = buildLinkingInfo (i);	
 			//costruiamo reply
@@ -294,7 +292,9 @@ public class TSA implements Serializable{
 		//aggiungere nodi fittizi
 		int num_fittizi = TIMEFRAME_DIM - queries.size();
 		while (num_fittizi > 0) {
-			merkleTree[i] = new byte [DIGEST_LENGTH];
+			byte [] fakeNode = new byte [DIGEST_LENGTH];
+			new Random().nextBytes(fakeNode);
+			merkleTree[i] = fakeNode;
 			num_fittizi--;
 			i++;
 		}

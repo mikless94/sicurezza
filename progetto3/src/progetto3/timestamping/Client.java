@@ -54,7 +54,6 @@ public class Client implements Serializable{
 		}
 		this.hashPassword = digest.digest(password.getBytes());
 		this.ID = iD;
-		System.out.println(iD);
 		this.map = new HashMap <String, String> ();
 		
 		//ottengo l'istanza univoca di TSA
@@ -139,7 +138,7 @@ public class Client implements Serializable{
 	public boolean verifySign (String doc) {
 		//deserializziamo in modo da ottenere oggetto ReplyToSend
 		ReplyToSend replyReceived = deserializeReply (map.get(doc));
-		
+		//replyReceived.getReply().setSerialNumber(898934);
 		Signature dsa = null;
 		try {
 			dsa = Signature.getInstance(replyReceived.getSignType());
@@ -187,11 +186,10 @@ public class Client implements Serializable{
 	}
 
 	public boolean verifyOffline(String doc) {
-
-		
 		//si presuppone che la firma sia verificata per verificare il root value all'interno della marca
 		if (verifySign(doc)) {
 			ReplyToSend replyReceived = deserializeReply (map.get(doc));
+			//replyReceived.getReply().setRootHash(new byte[13]);
 			Reply reply = replyReceived.getReply();
 			byte [] computedRootHash = computeRootHash (reply.getLinkingInfo(), reply.getTSAHash());
 			return Arrays.equals(computedRootHash, reply.getRootHash());
@@ -232,7 +230,8 @@ public class Client implements Serializable{
 			ReplyToSend replyReceived = deserializeReply (map.get(doc));
 			Reply reply = replyReceived.getReply();
 			byte [] computedRootHash = computeRootHash (reply.getLinkingInfo(), reply.getTSAHash());
-			
+			//modifico valore di super hash i-1
+			//tsa.getSuperHash().set(reply.getTimeframeNumber(), new byte[3]);
 			byte [] SHVprec = null;
 			if (reply.getTimeframeNumber()==0)
 				SHVprec = tsa.getShv0();
@@ -250,7 +249,8 @@ public class Client implements Serializable{
 			Reply reply = replyReceived.getReply();
 			ArrayList <byte[]> superHashValues = tsa.getSuperHash();
 			ArrayList <byte[]> rootHashValues = tsa.getRootHash();
-			
+			//modifico un elemento nella catena
+			//superHashValues.set(reply.getTimeframeNumber(), new byte[3]);
 			byte [] SHVStart = null;
 			
 			//range <= 0 --> verifico intera catena

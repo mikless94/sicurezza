@@ -1,8 +1,9 @@
 package progetto3.timestamping;
 
+import java.io.Serializable;
 import java.security.Timestamp;
 
-public class Query {
+public class Query implements Serializable{
 
 	//hash del documento criptato con la chiave pubblica della TSA
 	byte [] encryptedHash;
