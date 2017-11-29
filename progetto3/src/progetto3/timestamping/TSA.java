@@ -299,7 +299,6 @@ public class TSA implements Serializable{
 		for (i = 0; i<queries.size(); i++) {
 			byte [] decryptedHash = decryptHash (queries.get(i).getEncryptedHash());
 			byte [] createdNode = hashConcatenate (decryptedHash, queries.get(i).getTimestamp().getBytes());
-			merkleTree[i] = new byte [createdNode.length];
 			merkleTree[i] = createdNode;
 		}
 		
@@ -308,7 +307,10 @@ public class TSA implements Serializable{
 		while (num_fittizi > 0) {
 			byte [] fakeNode = new byte [DIGEST_LENGTH];
 			new Random().nextBytes(fakeNode);
-			merkleTree[i] = fakeNode;
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
+			String timeStamp  = dateFormat.format(new java.util.Date());
+			byte [] createdNode = hashConcatenate (fakeNode, timeStamp.getBytes());
+			merkleTree[i] = createdNode;
 			num_fittizi--;
 			i++;
 		}
@@ -390,9 +392,6 @@ public class TSA implements Serializable{
 	
 	public void addQuery (Query query) {
 		//TSA aggiunge timestamp una volta ricevuta la query dal client
-		/*Calendar calendar = Calendar.getInstance();
-		java.util.Date now = calendar.getTime();
-		java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());*/
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
 		String timeStamp  = dateFormat.format(new java.util.Date());
 		query.setTimestamp(timeStamp);

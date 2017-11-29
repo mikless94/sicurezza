@@ -522,26 +522,4 @@ public class Client implements Serializable{
 		ID = iD;
 	}
 	
-	/*public PublicKey getTSAPublicKey(String filePath) {
-		PublicKey key = null;
-		String mode;
-		try {
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath));
-			
-			byte [] byteKey = (byte []) in.readObject();
-			
-			in.close();
-			
-			if(filePath.compareTo(tsa.getPubKeySignFile()) == 0) {
-				mode = "DSA";
-			}
-			else
-				mode = "RSA";
-			key = KeyFactory.getInstance(mode).generatePublic(new X509EncodedKeySpec(byteKey));
-			
-		} catch (IOException | ClassNotFoundException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		return key;
-	}*/
 }

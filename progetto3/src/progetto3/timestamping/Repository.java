@@ -38,9 +38,6 @@ public class Repository implements Serializable {
 	      return instance;
 	   }
 
-	
-	
-	
 	public void addToRepository (String ID, String role, String type, PublicKey pubKey) {
 		restoreRepository();
 		String idMap;
