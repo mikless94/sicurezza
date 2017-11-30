@@ -71,9 +71,7 @@ public class TimeStampTest {
 			e.printStackTrace();
 		}
 		saveUser (user);
-		user = null;
 		saveTSA (tsa);
-		tsa = null;
 	}
 	
 	private static void verify () {
@@ -87,13 +85,14 @@ public class TimeStampTest {
 			File [] files = directory.listFiles();
 		
 			for (int i = 0; i< files.length; i++) {
-				//il primo terzo dei file e inviato da demetrio
 				Client c = user.get(key);
 				System.out.println("\nverifica marca relativa al documento "+files[i].getPath());
+				//simulazione modifica marca sulla rete
+				//c.modifyMarca(files[i].getPath());
 				System.out.println ("verifica firma: "+c.verifySign(files[i].getPath()));
 				System.out.println ("verifica offline: "+c.verifyOffline(files[i].getPath()));
 				System.out.println ("verifica online: "+c.verifyOnline(files[i].getPath()));
-				System.out.println ("verifica catena di lunghezza 1: "+c.verifyChain(files[i].getPath(), 1));
+				System.out.println ("verifica catena di lunghezza 2: "+c.verifyChain(files[i].getPath(), 2));
 				System.out.println ("verifica intera catena: "+c.verifyChain(files[i].getPath(), -1));
 			}
 		}
@@ -122,6 +121,7 @@ public class TimeStampTest {
 			e.printStackTrace();
 			System.out.println("Error initializing stream");
 		}
+		user = null;
 	}
 	
 	private static void saveTSA(TSA tsa){
@@ -142,10 +142,11 @@ public class TimeStampTest {
 			e.printStackTrace();
 			System.out.println("Error initializing stream");
 		}
+		tsa = null;
 	}
 	
 	private static HashMap<String, Client> restoreUser(){
-		HashMap<String, Client> user = null;
+		user = null;
 		try {
 			
 			//Leggo da file la struttura dati contenente i client.
@@ -174,7 +175,7 @@ public class TimeStampTest {
 	}
 	
 	private static TSA restoreTSA(){
-		TSA tsa = null;
+		tsa = null;
 		try {
 			
 			//Leggo da file la struttura dati contenente i client.

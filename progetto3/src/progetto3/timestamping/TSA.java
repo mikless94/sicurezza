@@ -40,12 +40,12 @@ public class TSA implements Serializable{
 	private static TSA instance = null;
 	
 	//costanti
-	public static final int MERKLE_TREE_DIM = 15;
-	public static final int TIMEFRAME_DIM = 8;
+	private static final int MERKLE_TREE_DIM = 15;
+	private static final int TIMEFRAME_DIM = 8;
 	private String hashAlg = "SHA-256";
 	private String signType = "SHA224withDSA";
-	public static final int DIGEST_LENGTH = 32;
-	public static byte [] SHV0 ;
+	private static final int DIGEST_LENGTH = 32;
+	private byte [] SHV0 ;
 	public static final String pubKeySignFile = "pubKeySignFile.txt";
 	public static final String pubKeyAsymFile = "pubKeyAsymFile.txt";
 	
@@ -114,14 +114,14 @@ public class TSA implements Serializable{
 	/**
 	 * @return the shv0
 	 */
-	public static byte[] getShv0() {
+	public byte[] getShv0() {
 		return SHV0;
 	}
 
 	/**
 	 * @param sHV0 the sHV0 to set
 	 */
-	public static void setSHV0(byte[] sHV0) {
+	public void setSHV0(byte[] sHV0) {
 		SHV0 = sHV0;
 	}
 
@@ -234,6 +234,10 @@ public class TSA implements Serializable{
 			Reply reply = new Reply (queriesToTree.get(i).getID(), queriesToTree.get(i).getTimestamp(), serialNumber, 
 					timeframeNumber, rootHash.get(rootHash.size()-1), linkingInfo, hashAlg);
 			serialNumber++;
+			
+			//simulazione invio informazioni false da parte della TSA
+			//reply = TSAAttack (reply);
+			
 			//firmo reply
 			byte[] firma = null;
 			Signature dsa = Signature.getInstance(signType);
@@ -397,6 +401,26 @@ public class TSA implements Serializable{
 		query.setTimestamp(timeStamp);
 		//aggiunta query al buffer
 		queries.add(query);
+	}
+	
+	private Reply TSAAttack (Reply reply) {
+		//modifica root hash value
+		/*byte [] falseRoot = new byte [DIGEST_LENGTH];
+		new Random().nextBytes(falseRoot);
+		reply.setRootHash(falseRoot);
+		return reply;*/
+		
+		//modifica informazioni di linking
+		/*int oldPosition = reply.getLinkingInfo().get(1).getPosition();
+		byte [] falseRoot2 = new byte [DIGEST_LENGTH];
+		new Random().nextBytes(falseRoot2);
+		reply.getLinkingInfo().set(1, new Info (falseRoot2, oldPosition));
+		return reply;*/
+		
+		//modifica numero timeframe
+		/*reply.setTimeframeNumber(1);
+		return reply;*/
+		return null;
 	}
 }
 

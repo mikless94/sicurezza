@@ -47,7 +47,6 @@ public class KeyRing implements Serializable{
     
     //associa il file all'istanza
     this.fileName = new File(fileName).getAbsolutePath();
-    
     //crea una map
     this.map = new HashMap<String, ArrayList<byte []>>();
     

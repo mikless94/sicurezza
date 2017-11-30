@@ -3,6 +3,8 @@ package progetto3.timestamping;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -520,6 +522,50 @@ public class Client implements Serializable{
 
 	public void setID(String iD) {
 		ID = iD;
+	}
+	
+	
+	//simula modifica marca sulla rete --> test funzionamento firma
+	public void modifyMarca (String doc) {
+		ReplyToSend replyReceived = deserializeReply (map.get(doc));
+		
+		//modifico campo della marca
+		replyReceived.getReply().setSerialNumber(54353);
+		
+		FileOutputStream fileOut = null;
+		
+		try {
+			fileOut = new FileOutputStream(map.get(doc));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        ObjectOutputStream out = null;
+		try {
+			out = new ObjectOutputStream(fileOut);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        try {
+			out.writeObject(replyReceived);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        try {
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        try {
+			fileOut.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 }
