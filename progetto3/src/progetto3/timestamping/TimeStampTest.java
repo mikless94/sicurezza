@@ -20,7 +20,7 @@ public class TimeStampTest {
 
 	public static void main(String[] args) {
 		// creazione marche
-		init();
+		//init();
 		
 		//verifica marche (può avvenire in un qualsiasi momento a partire dalla risposta della TSA
 		verify ();	
