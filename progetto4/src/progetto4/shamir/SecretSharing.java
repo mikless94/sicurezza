@@ -9,33 +9,26 @@ public class SecretSharing {
 	
 	
 	//s appartenente a Zp
-	public static int [] generateShares (int secret, int [] coeff ) {
+	public static BigInteger [] generateShares (BigInteger secret, BigInteger [] coeff ) {
 		int n = 5;
-		int [] shares = new int [n];
+		BigInteger [] shares = new BigInteger [n];
 		for (int x = 1; x<=n; x++) {
 			shares[x-1] = secret;
-			for (int i=0; i<=coeff.length-1; i++) {
-				//System.out.println("coeff\t"+coeff[i]);
-				//System.out.println("x\t"+x);
-				//System.out.println("i+1\t"+(i+1));
-				shares[x-1] += coeff[i]*(int)Math.pow(x,i+1); 
-			}
-			
-			shares[x-1] = shares[x-1]%19;
+			for (int i=0; i<=coeff.length-1; i++) 
+				shares [x-1] = shares[x-1].add(coeff[i].multiply(BigInteger.valueOf((long)Math.pow(x,i+1))));
+			shares[x-1] = shares[x-1].remainder(BigInteger.valueOf(19));
 		}
 		return shares;
 	}
-	
+	 
 	
 	//necessario avere identità partecipante / share 
-	public int rebuildSecret (Map <BigInteger, Integer> info ) {
-		int secret = 0;
-		for (Map.Entry<BigInteger, Integer> entry: info.entrySet()) {
-			secret += entry.getValue()
-			
+	public BigInteger rebuildSecret (ArrayList <BigInteger []> info ) {
+		BigInteger secret = BigInteger.ZERO;
+		for (int i=0; i<info.size(); i++) {
+			int current = i;
+			secret = secret.add(info.get(i)[1]);
 		}
 		return secret;
 	}
-	
-
 }
