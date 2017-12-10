@@ -13,9 +13,9 @@ import java.util.Random;
 public class DistributedStorageService {
 	
 	//Numeri di server disponibili
-	private int n;
+	private static int n;
 	//Numero di partecipanti
-	private int k;
+	private static int k;
 	//La dimensione del blocco è espressa in byte.
 	private final int BLOCK_DIMENSION = 8;
 	//La dimensione è espressa in bit. In questo caso 16 byte espresso in bit.
@@ -28,8 +28,7 @@ public class DistributedStorageService {
 
 	
 	private DistributedStorageService(int n, int k) {
-		this.n = n;
-		this.k = k;
+
 		shamir = new SecretSharing(n, k);
 
 		for(int i=1; i<=n; i++){
@@ -41,7 +40,7 @@ public class DistributedStorageService {
 	
 	public static DistributedStorageService getInstance(int n, int k) {
 	      if(instance == null) {
-	         instance = new DistributedStorageService(n,k);
+	         instance = new DistributedStorageService(n, k);
 	      }
 	      return instance;
 	   }
@@ -53,6 +52,10 @@ public class DistributedStorageService {
 	//scrive share su ogni server
 	//calcola MAC per ogni share e lo associa al client
 	public void distributeFile (String fileName) {
+
+		
+		//Per il file in input generiamo un file con nome casuale su ogni server che contiene il nostro share
+
 		for(int i = 1; i <= n; i++){
 			File f = null;
 			try {
@@ -64,6 +67,8 @@ public class DistributedStorageService {
 				e.printStackTrace();
 			}
 		}
+		
+		//Qui dobbiamo associare il file in ingresso con i file generati!!
 		
 		BigInteger p = genPrime();
 		//System.out.println(p.compareTo(BigInteger.valueOf((long) Math.pow(2, BLOCK_DIMENSION*8))));
@@ -91,8 +96,12 @@ public class DistributedStorageService {
 			e.printStackTrace();
 		}	
 		
+
 		System.out.print("len total in byte "+len*8);
 		
+
+		//qui dobbiamo inserire gli share nei rispettivi server(quindi nei rispettivi file presenti su ogni server)
+
 	}
 	
 	//dati gli share dei partecipanti ricostruisce il file
