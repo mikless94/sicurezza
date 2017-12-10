@@ -81,7 +81,7 @@ public class DistributedStorageService {
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(fileName));
 			
 			while(in.read(stream) != -1){
-				len++;
+				len++ ;
 		
 				BigInteger secret = new BigInteger(1, stream);
 				shares = shamir.generateShares(p, secret, coeff);
