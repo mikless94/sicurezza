@@ -11,7 +11,8 @@ public class Prova {
 		BigInteger [] a = new BigInteger [] {BigInteger.valueOf(11),BigInteger.valueOf(2)};
 		BigInteger [] shares;
 		BigInteger prime = BigInteger.valueOf(19);
-		//shares = SecretSharing.generateShares(new BigInteger ("12"), a, prime);
+		SecretSharing s = new SecretSharing(5, 3);
+		shares = s.generateShares(prime, new BigInteger ("12"), a);
 		System.out.println("shares");
 		for (BigInteger k:shares) {
 			System.out.print(k+"\t");
@@ -26,8 +27,8 @@ public class Prova {
 		info.add(participants1);
 		info.add(participants2);
 		info.add(participants3);
-		//BigInteger secret = SecretSharing.rebuildSecret(info, prime);
-		//System.out.println("\nsegreto ricostruito "+secret);		
+		BigInteger secret = s.rebuildSecret(info, prime);
+		System.out.println("\nsegreto ricostruito "+secret);		
 	}
 
 }
