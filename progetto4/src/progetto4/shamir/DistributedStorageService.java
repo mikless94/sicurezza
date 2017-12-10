@@ -13,9 +13,9 @@ import java.util.Random;
 public class DistributedStorageService {
 	
 	//Numeri di server disponibili
-	private int n;
+	private static int n;
 	//Numero di partecipanti
-	private int k;
+	private static int k;
 	//La dimensione del blocco è espressa in byte.
 	private final int BLOCKDIMENSION = 8;
 	//La dimensione è espressa in bit. In questo caso 16 byte espresso in bit.
@@ -27,9 +27,8 @@ public class DistributedStorageService {
 
 
 	
-	private DistributedStorageService(int n, int k) {
-		this.n = n;
-		this.k = k;
+	private DistributedStorageService() {
+
 		shamir = new SecretSharing(n, k);
 		
 		for(int i=1; i<=n; i++){
@@ -39,9 +38,9 @@ public class DistributedStorageService {
 		}
 	}
 	
-	public static DistributedStorageService getInstance(int n, int k) {
+	public static DistributedStorageService getInstance() {
 	      if(instance == null) {
-	         instance = new DistributedStorageService(n,k);
+	         instance = new DistributedStorageService();
 	      }
 	      return instance;
 	   }
