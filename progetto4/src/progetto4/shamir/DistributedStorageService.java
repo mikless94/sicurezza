@@ -7,25 +7,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SealedObject;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import progetto3.timestamping.TSA;
 public class DistributedStorageService {
 	
 	//Numeri di server disponibili
@@ -72,9 +56,14 @@ public class DistributedStorageService {
 		
 		for(int i = 1; i <= n; i++){
 			File f;
-			do{
-				f = new File(server.get(i-1) + "/" + genRandomName() + ".txt");
-			} while(!f.createNewFile());
+			try {
+				do{
+					f = new File(server.get(i-1) + "/" + genRandomName() + ".txt");
+				} while(!f.createNewFile());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		BigInteger p = genPrime();
