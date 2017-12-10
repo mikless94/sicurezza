@@ -2,18 +2,20 @@ package progetto4.shamir;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Prova {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		BigInteger [] a = new BigInteger [] {BigInteger.valueOf(11),BigInteger.valueOf(2)};
-		BigInteger [] shares;
-		shares = SecretSharing.generateShares(new BigInteger ("12"), a);
-		System.out.println("shares");
-		for (BigInteger k:shares) {
-			System.out.println(k);
+		String output;
+		char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+		StringBuilder sb = new StringBuilder();
+		Random random = new Random();
+		for (int i = 0; i < 10; i++) {
+		    char c = chars[random.nextInt(chars.length)];
+		    sb.append(c);
 		}
+		System.out.println(sb.toString());
 	}
 
 }
