@@ -17,12 +17,12 @@ public class DistributedStorageService {
 	//Numero di partecipanti
 	private int k;
 	//La dimensione del blocco è espressa in byte.
-	private final int BLOCKDIMENSION = 8;
+	private final int BLOCK_DIMENSION = 8;
 	//La dimensione è espressa in bit. In questo caso 16 byte espresso in bit.
 	private final int modLength = 16*8;
 	private final int CERTAINTY = 50;
 	private SecretSharing shamir;
-	private ArrayList<String> server;
+	private ArrayList<String> server = new ArrayList<String> ();
 	private static DistributedStorageService instance = null;
 
 
@@ -31,11 +31,11 @@ public class DistributedStorageService {
 		this.n = n;
 		this.k = k;
 		shamir = new SecretSharing(n, k);
-		
+
 		for(int i=1; i<=n; i++){
-			File f = new File(".//" + "server" + i);
+			File f = new File("server" + i);
 			f.mkdir();
-			server.add(f.getPath());
+			server.add(f.getAbsolutePath());
 		}
 	}
 	
@@ -53,9 +53,8 @@ public class DistributedStorageService {
 	//scrive share su ogni server
 	//calcola MAC per ogni share e lo associa al client
 	public void distributeFile (String fileName) {
-		
 		for(int i = 1; i <= n; i++){
-			File f;
+			File f = null;
 			try {
 				do{
 					f = new File(server.get(i-1) + "/" + genRandomName() + ".txt");
@@ -67,23 +66,33 @@ public class DistributedStorageService {
 		}
 		
 		BigInteger p = genPrime();
+		//System.out.println(p.compareTo(BigInteger.valueOf((long) Math.pow(2, BLOCK_DIMENSION*8))));
 		BigInteger [] coeff = new BigInteger[this.k-1];
+		
 		for(int i = 0; i < k-1; i++){
 			coeff[i] = randomZp(p);
 		}
+	
+		int len = 0;
+		BigInteger [] shares = null;
 		
-		byte[] stream = new byte[BLOCKDIMENSION];
+		byte[] stream = new byte[BLOCK_DIMENSION];
 		try {
-			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(fileName)));
+			BufferedInputStream in = new BufferedInputStream(new FileInputStream(fileName));
 			
 			while(in.read(stream) != -1){
+				len++;
+		
 				BigInteger secret = new BigInteger(1, stream);
-				BigInteger [] shares = shamir.generateShares(p, secret, coeff);
+				shares = shamir.generateShares(p, secret, coeff);
 			}
 		}
 		catch(IOException e) {
 			e.printStackTrace();
 		}	
+		
+		System.out.print("len total in byte "+len*8);
+		
 	}
 	
 	//dati gli share dei partecipanti ricostruisce il file
@@ -123,7 +132,7 @@ public class DistributedStorageService {
 		boolean ok=false;
 		do{
 			p=BigInteger.probablePrime(this.modLength, new Random());
-			if(p.isProbablePrime(this.CERTAINTY) && (p.compareTo(BigInteger.valueOf((long) Math.pow(2, BLOCKDIMENSION*8))) == 1))
+			if(p.isProbablePrime(this.CERTAINTY) && (p.compareTo(BigInteger.valueOf((long) Math.pow(2, BLOCK_DIMENSION*8))) == 1))
 				ok=true;
 		}while(ok==false);
 			return p;
