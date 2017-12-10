@@ -53,6 +53,7 @@ public class DistributedStorageService {
 	//calcola MAC per ogni share e lo associa al client
 	public void distributeFile (String fileName) {
 		
+		//Per il file in input generiamo un file con nome casuale su ogni server che contiene il nostro share
 		for(int i = 1; i <= n; i++){
 			File f;
 			try {
@@ -64,6 +65,8 @@ public class DistributedStorageService {
 				e.printStackTrace();
 			}
 		}
+		
+		//Qui dobbiamo associare il file in ingresso con i file generati!!
 		
 		BigInteger p = genPrime();
 		BigInteger [] coeff = new BigInteger[this.k-1];
@@ -83,6 +86,8 @@ public class DistributedStorageService {
 		catch(IOException e) {
 			e.printStackTrace();
 		}	
+		
+		//qui dobbiamo inserire gli share nei rispettivi server(quindi nei rispettivi file presenti su ogni server)
 	}
 	
 	//dati gli share dei partecipanti ricostruisce il file
