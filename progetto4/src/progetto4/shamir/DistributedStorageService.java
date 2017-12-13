@@ -22,14 +22,14 @@ public class DistributedStorageService {
 	private static int k;
 	//numero di byte per blocco
 	private final int BLOCK_DIMENSION = 8;
-	//La dimensione è espressa in bit. In questo caso 16 byte espresso in bit.
+	//La dimensione è espressa in bit. In questo caso 8 byte espresso in bit. //Dubbio dimensione
 	private final int MOD_LENGTH = 8*8;
 	private final int CERTAINTY = 50;
 	private SecretSharing shamir;
-	private ArrayList<String> server = new ArrayList<String> ();
 	private static DistributedStorageService instance = null;
-	private HashMap<String, ArrayList<String>> files = new HashMap<String, ArrayList<String>> () ;
+	private HashMap<String, HashMap<Server, String>> files = new HashMap<String, HashMap<Server,String>> () ;
 	private ArrayList <Server> servers;
+	private HashMap<String, BigInteger> primeOfFile = new HashMap<String, BigInteger>();
 	byte [][] sharesToWrite = new byte[n][];
 
 	
@@ -41,8 +41,10 @@ public class DistributedStorageService {
 		
 		servers = new ArrayList <Server> ();
 		for (int i=0; i<n; i++) 
-			servers.add (new Server ());
+			servers.add (new Server());
 	}
+	
+	
 	
 	public static DistributedStorageService getInstance(int n, int k) {
 	      if(instance == null) {
@@ -51,6 +53,7 @@ public class DistributedStorageService {
 	      return instance;
 	   }
 
+	
 	//divide il file in blocchi di m byte
 	//genera il numero primo p (funzione del prof) maggiore di 2^m
 	//calcolare coefficienti random per blocco
@@ -66,17 +69,17 @@ public class DistributedStorageService {
 		     sharesToServer.add(temp);
 		}
 		
-		ArrayList <String> filesServer = new ArrayList <String> ();
 		HashMap <Server, String> randomFilesOnServer = new HashMap <Server, String> ();  
 		for (Server s: servers) {
 			randomFilesOnServer.put(s, genRandomFiles(s,fileName));
 		}
-		//filesServer = genRandomFiles(fileName);
-		files.put(fileName, filesServer);
+		
+		files.put(fileName, randomFilesOnServer);
 		
 		BigInteger [] shares = null;
 		byte[] stream = new byte[BLOCK_DIMENSION];
 		BigInteger p = genPrime();
+		primeOfFile.put(fileName, p);
 		
 		BigInteger [] coeff = new BigInteger[this.k-1];
 		for(int i = 0; i < k-1; i++){
@@ -127,16 +130,97 @@ public class DistributedStorageService {
 					}
 				}
 			}
-				
-			
-			
-			}
 		}
-		      	
-		//System.out.println("numero di blocchi file "+len/5);
-		
-
+	}
 	
+	
+	//dati gli share dei partecipanti ricostruisce il file
+	//controllo MAC
+	public void reconstructFile (String fileName, ArrayList<BigInteger> partecipants) {
+		
+		HashMap<Server, String> filesOnServer = files.get(fileName);
+		if(filesOnServer == null){
+			System.out.println("There is no file with stored in the servers.");
+			return;
+		}
+		BigInteger prime = primeOfFile.get(fileName);
+		HashMap<BigInteger, ArrayList<BigInteger>> sharesToRead = new HashMap<BigInteger, ArrayList<BigInteger>>();
+		
+		for(int i=0; i<partecipants.size(); i++){
+			for(Server s : filesOnServer.keySet()){
+				if (partecipants.get(i).compareTo(s.getID())==0){
+					String file = filesOnServer.get(s);
+					BufferedInputStream in = null;
+					try {
+						in = new BufferedInputStream(new FileInputStream(file));
+						byte[] stream = new byte[MOD_LENGTH / 8];
+						ArrayList<BigInteger> list = new ArrayList<BigInteger>();
+						while(in.read(stream) != -1){
+							BigInteger share = new BigInteger(1, stream);
+							list.add(share);
+						}
+						sharesToRead.put(partecipants.get(i), list);
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+						
+				}
+			}	
+		}
+		BigInteger[] rebuild = new BigInteger[sharesToRead.get(partecipants.get(0)).size()];
+
+		for(int i = 0; i <sharesToRead.get(partecipants.get(0)).size(); i++){
+			ArrayList<byte[]> fileStructure = new ArrayList<byte[]>();
+			ArrayList<BigInteger[]> info = new ArrayList<BigInteger[]>();
+			BigInteger [] coppia = new BigInteger[2];
+			for(BigInteger par : sharesToRead.keySet()){
+				coppia[0] = par;
+				coppia[1] = sharesToRead.get(par).get(i);
+				info.add(coppia);
+			}
+			rebuild[i] = shamir.rebuildSecret(info, prime);
+		}
+		
+		byte [][] secretsToWrite = generateSharesBytes (rebuild, prime);
+		
+		BufferedOutputStream out = null;
+		try {
+			out = new BufferedOutputStream(new FileOutputStream("Reconstructed"+fileName));
+			for (byte[] byteToWrite : secretsToWrite)
+				out.write(byteToWrite);
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+	}
+
+	private void computeMAC (String share) {
+			
+	}
+	
+	private boolean verifyMAC (String share, byte[] MAC) {
+		return true;
+	}
+		
+	public int getN() {
+		return n;
+	}
+
+	public void setN(int n) {
+		this.n = n;
+	}
+
+	public int getK() {
+		return k;
+	}
+
+	public void setK(int k) {
+		this.k = k;
+	}
+
 	
 	private byte[][] generateSharesBytes(BigInteger[] shares, BigInteger p) {
 		byte [][] sharesToWrite = new byte[n][];
@@ -145,7 +229,7 @@ public class DistributedStorageService {
 			if (bigI.compareTo(p) == 1)
 				System.out.println("error");
 			sharesToWrite [i] = bigI.toByteArray();
-
+			
 			for (int j =0; j< sharesToWrite[i].length; j++) {
 				if (sharesToWrite[i].length < MOD_LENGTH / 8) {
 					int paddingDim = MOD_LENGTH/8 - sharesToWrite[i].length;
@@ -206,37 +290,6 @@ public class DistributedStorageService {
 		
 	}
 
-	//dati gli share dei partecipanti ricostruisce il file
-	//controllo MAC
-	public void reconstructFile (String fileName, ArrayList<BigInteger> participants) {
-		
-	}
-	
-	private void computeMAC (String share) {
-		
-	}
-	
-	private boolean verifyMAC (String share, byte[] MAC) {
-		return true;
-	}
-	
-	
-	
-	public int getN() {
-		return n;
-	}
-
-	public void setN(int n) {
-		this.n = n;
-	}
-
-	public int getK() {
-		return k;
-	}
-
-	public void setK(int k) {
-		this.k = k;
-	}
 
 	private BigInteger genPrime() {
 		BigInteger p=null;
