@@ -14,7 +14,7 @@ public class Client {
 		ID = iD;
 		dict = new HashMap<String, ArrayList<String>>();
 		//vedere se passare n e k
-		service = DistributedStorageService.getInstance();
+		service = DistributedStorageService.getInstance(5,3);
 	}
 	
 	
