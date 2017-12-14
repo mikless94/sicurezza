@@ -21,9 +21,12 @@ public class Server implements Serializable{
 		//creazione directory
 		File f = new File("server" + ID);
 		String [] entries = f.list();
-		for(String s: entries){
-		    File currentFile = new File(f.getPath(),s);
-		    currentFile.delete();
+		
+		if (entries!=null) {
+			for(String s: entries){
+			    File currentFile = new File(f.getPath(),s);
+			    currentFile.delete();
+			}
 		}
 		f.mkdir();
 		directory = f.getAbsolutePath();
