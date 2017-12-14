@@ -1,7 +1,15 @@
 package progetto4.shamir;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 public class Prova {
@@ -30,9 +38,79 @@ public class Prova {
 		BigInteger secret = s.rebuildSecret(info, prime);
 		System.out.println("\nsegreto ricostruito "+secret);*/
 		
+		
+		
 		DistributedStorageService dss = DistributedStorageService.getInstance(5,3);
-		dss.distributeFile("C:\\Users\\Michele\\Desktop\\jamesharden.jpg");
+		dss.distributeFile("C:\\Users\\Demetrio Laveglia\\Desktop\\milan.jpg");
+		
+		saveService(dss);
+		
+		/*DistributedStorageService dss = restoreService();
+		BigInteger p1 = new BigInteger("1");
+		BigInteger p2 = new BigInteger("2");
+		BigInteger p4 = new BigInteger("4");
+		
+		ArrayList<BigInteger> partecipants = new ArrayList<BigInteger>();
+		partecipants.add(p1);
+		partecipants.add(p2);
+		partecipants.add(p4);
+		
+		dss.reconstructFile("C:\\Users\\Demetrio Laveglia\\Desktop\\milan.jpg", partecipants);*/
 		
 	}
+	
+	private static void saveService(DistributedStorageService dss){
+		try {
 
+			//Scrivo su file la struttura dati contenente il Servizio salvandone il suo stato.
+			FileOutputStream f = new FileOutputStream(new File("Storage Service.dds"));
+			ObjectOutputStream o = new ObjectOutputStream(f);
+
+			// Write objects to file
+			o.writeObject(dss);
+			f.close();
+			o.close();
+
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Error initializing stream");
+		}
+	}
+	
+	private static DistributedStorageService restoreService(){
+		
+		DistributedStorageService  dss = null;
+		try {
+			
+			//Leggo da file la struttura dati contenente il servizio.
+			FileInputStream f = new FileInputStream(("Storage Service.dds"));
+			ObjectInputStream o = new ObjectInputStream(f);
+
+			try {
+				dss = (DistributedStorageService) o.readObject();
+				for(String s : dss.getFiles().keySet()){
+					System.out.println("File salvato: " + s);
+					for(Server server : dss.getFiles().get(s).keySet())
+						System.out.println("Server: " + server.getDirectory() + " , Filename: " + dss.getFiles().get(s).get(server));
+				}
+
+				return dss;
+				
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			f.close();
+			o.close();
+
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Error initializing stream");
+		}
+		return dss;
+	}
 }

@@ -8,13 +8,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class DistributedStorageService {
+public class DistributedStorageService implements Serializable{
 	
 	//Numeri di server disponibili
 	private static int n;
@@ -61,6 +62,11 @@ public class DistributedStorageService {
 	//scrive share su ogni server
 	//calcola MAC per ogni share e lo associa al client
 	public void distributeFile (String fileName) {
+		
+		if (!new File(fileName).isFile()){
+			System.out.println("Specified file does not exist!");
+			return;
+		}
 		
 		ArrayList<ArrayList<byte[]>> sharesToServer = new ArrayList<ArrayList<byte[]>>(n);
 
@@ -139,6 +145,7 @@ public class DistributedStorageService {
 	public void reconstructFile (String fileName, ArrayList<BigInteger> partecipants) {
 		
 		HashMap<Server, String> filesOnServer = files.get(fileName);
+		
 		if(filesOnServer == null){
 			System.out.println("There is no file with stored in the servers.");
 			return;
@@ -164,8 +171,7 @@ public class DistributedStorageService {
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}
-						
+					}		
 				}
 			}	
 		}
@@ -197,6 +203,7 @@ public class DistributedStorageService {
 		}			
 	}
 
+	
 	private void computeMAC (String share) {
 			
 	}
@@ -204,7 +211,15 @@ public class DistributedStorageService {
 	private boolean verifyMAC (String share, byte[] MAC) {
 		return true;
 	}
+	
+	
 		
+	public HashMap<String, HashMap<Server, String>> getFiles() {
+		return files;
+	}
+
+
+
 	public int getN() {
 		return n;
 	}

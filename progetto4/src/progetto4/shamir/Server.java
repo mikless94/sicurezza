@@ -1,9 +1,11 @@
 package progetto4.shamir;
 
 import java.io.File;
+import java.io.Serializable;
 import java.math.BigInteger;
 
-public class Server {
+
+public class Server implements Serializable{
 
 	private static BigInteger IDToAssign = BigInteger.ZERO;
 	private BigInteger ID;
@@ -18,6 +20,11 @@ public class Server {
 		
 		//creazione directory
 		File f = new File("server" + ID);
+		String [] entries = f.list();
+		for(String s: entries){
+		    File currentFile = new File(f.getPath(),s);
+		    currentFile.delete();
+		}
 		f.mkdir();
 		directory = f.getAbsolutePath();
 	}

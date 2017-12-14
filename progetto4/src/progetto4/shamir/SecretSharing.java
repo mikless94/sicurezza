@@ -1,10 +1,11 @@
 package progetto4.shamir;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class SecretSharing {
+public class SecretSharing implements Serializable{
 	private  int n;
 	private  int k;
 
