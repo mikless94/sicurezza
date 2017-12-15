@@ -40,11 +40,11 @@ public class Prova {
 		
 		
 		
-		/*DistributedStorageService dss = DistributedStorageService.getInstance(5,3);
-		dss.distributeFile("C:\\Users\\Michele\\Desktop\\jamesharden.jpg");
-		saveService(dss);*/
-		
-		DistributedStorageService dss = restoreService();
+		DistributedStorageService dss = DistributedStorageService.getInstance(5,3);
+		dss.distributeFile("C:\\Users\\Demetrio Laveglia\\Desktop\\CIAO.docx");
+		saveService(dss);
+
+		/*DistributedStorageService dss = restoreService();
 		BigInteger p1 = BigInteger.valueOf(1);
 		BigInteger p2 = BigInteger.valueOf(2);
 		BigInteger p4 = BigInteger.valueOf(4);
@@ -54,7 +54,7 @@ public class Prova {
 		partecipants.add(p2);
 		partecipants.add(p4);
 		
-		dss.reconstructFile("C:\\Users\\Michele\\Desktop\\jamesharden.jpg", partecipants);
+		dss.reconstructFile("C:\\Users\\Demetrio Laveglia\\Desktop\\CIAO.docx", partecipants);*/
 		
 	}
 	

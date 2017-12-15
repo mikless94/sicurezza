@@ -34,8 +34,9 @@ public class DistributedStorageService implements Serializable{
 	private static DistributedStorageService instance = null;
 	private HashMap<String, HashMap<Server, String>> files = new HashMap<String, HashMap<Server,String>> () ;
 	private ArrayList <Server> servers;
-	private HashMap<String, BigInteger> primeOfFile = new HashMap<String, BigInteger>();
 	byte [][] sharesToWrite = new byte[n][];
+	private HashMap<String, BigInteger> primeOfFile = new HashMap<String, BigInteger>();
+	private HashMap<String, Integer> padding = new HashMap<String, Integer>();
 
 	
 	private DistributedStorageService(int n, int k) {
@@ -45,8 +46,10 @@ public class DistributedStorageService implements Serializable{
 		shamir = new SecretSharing(n, k);
 		
 		servers = new ArrayList <Server> ();
-		for (int i=0; i<n; i++) 
+		for (int i=1; i<=n; i++) {
 			servers.add (new Server());
+			System.out.println(servers.get(i-1).getID());
+		}
 	}
 	
 	
@@ -67,7 +70,7 @@ public class DistributedStorageService implements Serializable{
 	//calcola MAC per ogni share e lo associa al client
 	public void distributeFile (String fileName) {
 		
-		/*Path path = Paths.get(fileName);
+		Path path = Paths.get(fileName);
 		byte[] file = null;
 		try {
 			file = Files.readAllBytes(path);
@@ -76,11 +79,11 @@ public class DistributedStorageService implements Serializable{
 			e2.printStackTrace();
 		}
 		
-		for (int i=0; i<file.length; i++) {
-			System.out.print(file[i]+" ");
-		}*/
-		
-		
+		for (int i=1; i<file.length; i++) {
+			System.out.print(file[i-1]+" ");
+			if(i % 8 == 0)
+				System.out.println();
+		}
 		
 		
 		if (!new File(fileName).isFile()){
@@ -89,10 +92,18 @@ public class DistributedStorageService implements Serializable{
 		}
 		
 		ArrayList<ArrayList<byte[]>> sharesToServer = new ArrayList<ArrayList<byte[]>>(n);
+		
+		ArrayList<ArrayList<BigInteger>> ser = new ArrayList<ArrayList<BigInteger>>();
 
 		for(int i = 0; i < n; i++) {
 		     ArrayList<byte[]> temp = new ArrayList<byte[]>();
 		     sharesToServer.add(temp);
+		}
+		
+		//Debug
+		for(int i = 0; i < n; i++) {
+		     ArrayList<BigInteger> temp = new ArrayList<BigInteger>();
+		     ser.add(temp);
 		}
 		
 		HashMap <Server, String> randomFilesOnServer = new HashMap <Server, String> ();  
@@ -116,31 +127,39 @@ public class DistributedStorageService implements Serializable{
 		try {
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(fileName));
 			
-			System.out.println();
 			while(in.read(stream) != -1) {
 				/*for (int i = 0; i<stream.length ; i++) {
 					System.out.print(stream [i]+" ");
 				}*/
-				System.out.println();
+				//System.out.println();
 				BigInteger secret = new BigInteger(1, stream);
 				shares = shamir.generateShares(p, secret, coeff);
-				sharesToWrite = generateSharesBytes (shares,p, n);
+				sharesToWrite = generateSharesBytes (shares,p, n, fileName);
 				
-				for (int i=0; i<n; i++) 
+				for (int i=0; i<n; i++) {
 					sharesToServer.get(i).add(sharesToWrite[i]);
+				}
+				 //Debug
+				for (int i=0; i<n; i++){
+					//System.out.println(shares[i]);
+					ser.get(i).add(shares[i]);
+				}
 				
 				for (int i = 0; i<stream.length; i++) {
 					stream[i] = 0;
 				}
 			}
+			/*for(int x=0;x<ser.get(0).size(); x++)			
+				System.out.println(ser.get(0).get(x));*/
 			in.close();
 		}
 		catch(IOException e) {
 			e.printStackTrace();
-		}	
+		}
+
 		
 		for ( Map.Entry<Server, String> entry: randomFilesOnServer.entrySet()) {
-			for (int i=0; i<n; i++) {
+			for (int i=1; i<=n; i++) {
 				if (entry.getKey().getID().compareTo(BigInteger.valueOf(i)) == 0) {
 					BufferedOutputStream out = null;
 					try {
@@ -149,7 +168,7 @@ public class DistributedStorageService implements Serializable{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					for (byte[] byteToWrite : sharesToServer.get(i))
+					for (byte[] byteToWrite : sharesToServer.get(i-1))
 						try {
 							out.write(byteToWrite);
 						} catch (IOException e) {
@@ -193,6 +212,7 @@ public class DistributedStorageService implements Serializable{
 						byte[] stream = new byte[MOD_LENGTH / 8];
 						ArrayList<BigInteger> list = new ArrayList<BigInteger>();
 						while(in.read(stream) != -1){
+							
 							BigInteger share = new BigInteger(1, stream);
 							list.add(share);
 						}
@@ -204,6 +224,10 @@ public class DistributedStorageService implements Serializable{
 				}
 			}	
 		}
+		
+		/*for(int i=0; i<sharesToRead.get(partecipants.get(0)).size();i++)
+			System.out.println(sharesToRead.get(partecipants.get(0)).get(i));
+		System.out.println();*/
 		
 		BigInteger[] rebuild = new BigInteger[sharesToRead.get(partecipants.get(0)).size()];
 		int i;
@@ -218,10 +242,11 @@ public class DistributedStorageService implements Serializable{
 			}
 			rebuild[i] = shamir.rebuildSecret(info, prime);
 		}
-		
-		byte [][] secretsToWrite = generateSharesBytes (rebuild, prime, i);
-		
-		//Arrays.copyOfRange(secretsToWrite[secretsToWrite.length-1], 0, 6);
+
+		byte [][] secretsToWrite = generateSharesBytes (rebuild, prime, i, fileName);
+	    
+		//Togliamo il padding inserito all'atto di distribuzione degli share.
+		//Arrays.copyOfRange(secretsToWrite[secretsToWrite.length-1], 0, MOD_LENGTH/8 - padding.get(fileName)-1);
 		
 		BufferedOutputStream out = null;
 		try {
@@ -230,13 +255,14 @@ public class DistributedStorageService implements Serializable{
 				for (int j=0; j< byteToWrite.length; j++) {
 					System.out.print(byteToWrite [j] + " ");
 				}
-			System.out.println();
-			out.write(byteToWrite);
+				System.out.println();
+				out.write(byteToWrite);
 			}
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}			
+
 	}
 
 	
@@ -273,7 +299,7 @@ public class DistributedStorageService implements Serializable{
 	}
 
 	
-	private byte[][] generateSharesBytes(BigInteger[] shares, BigInteger p, int dim) {
+	private byte[][] generateSharesBytes(BigInteger[] shares, BigInteger p, int dim, String fileName) {
 		
 		byte [][] sharesToWrite = new byte[dim][];
 		for (int i=0; i<shares.length; i++) {
@@ -285,6 +311,7 @@ public class DistributedStorageService implements Serializable{
 			for (int j =0; j< sharesToWrite[i].length; j++) {
 				if (sharesToWrite[i].length < MOD_LENGTH / 8) {
 					int paddingDim = MOD_LENGTH/8 - sharesToWrite[i].length;
+					padding.put(fileName, paddingDim);
 					byte[] tmp = new byte[MOD_LENGTH/8];
 				    System.arraycopy(sharesToWrite[i], 0, tmp, paddingDim, sharesToWrite[i].length);
 				    sharesToWrite[i] = tmp;
@@ -309,23 +336,6 @@ public class DistributedStorageService implements Serializable{
 	}
 
 	private String genRandomFiles(Server s, String fileName) {
-		/*ArrayList <String> filesServer = new ArrayList <String> ();
-		
-		for(int i = 1; i <= n; i++){
-			File f = null;
-			try {
-				do{ 
-					f = new File(genRandomName() + ".share");
-					filesServer.add(f.getAbsolutePath());
-					
-				} while(!f.createNewFile());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		return filesServer;*/
 		
 		File f = null;
 		try {

@@ -7,7 +7,7 @@ import java.math.BigInteger;
 
 public class Server implements Serializable{
 
-	private static BigInteger IDToAssign = BigInteger.ZERO;
+	private static BigInteger IDToAssign = BigInteger.valueOf(1);
 	private BigInteger ID;
 	private String directory;
 	
