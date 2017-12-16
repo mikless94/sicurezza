@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,8 +29,8 @@ public class DistributedStorageService implements Serializable{
 	private static int k;
 	//numero di byte per blocco
 	private final int BLOCK_DIMENSION = 8;
-	//La dimensione è espressa in bit. In questo caso 8 byte espresso in bit. //Dubbio dimensione
-	private final int MOD_LENGTH = 8*8;
+	//La dimensione è espressa in bit. In questo caso 9 byte espresso in bit.
+	private final int MOD_LENGTH = (BLOCK_DIMENSION+1)*8;
 	private final int CERTAINTY = 50;
 	private SecretSharing shamir;
 	private static DistributedStorageService instance = null;
@@ -48,7 +50,6 @@ public class DistributedStorageService implements Serializable{
 		servers = new ArrayList <Server> ();
 		for (int i=1; i<=n; i++) {
 			servers.add (new Server());
-			System.out.println(servers.get(i-1).getID());
 		}
 	}
 	
@@ -79,11 +80,11 @@ public class DistributedStorageService implements Serializable{
 			e2.printStackTrace();
 		}
 		
-		for (int i=1; i<file.length; i++) {
+		/*for (int i=1; i<file.length; i++) {
 			System.out.print(file[i-1]+" ");
 			if(i % 8 == 0)
 				System.out.println();
-		}
+		}*/
 		
 		
 		if (!new File(fileName).isFile()){
@@ -168,6 +169,8 @@ public class DistributedStorageService implements Serializable{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+					
+					
 					for (byte[] byteToWrite : sharesToServer.get(i-1))
 						try {
 							out.write(byteToWrite);
@@ -209,7 +212,7 @@ public class DistributedStorageService implements Serializable{
 					BufferedInputStream in = null;
 					try {
 						in = new BufferedInputStream(new FileInputStream(file));
-						byte[] stream = new byte[MOD_LENGTH / 8];
+						byte[] stream = new byte[MOD_LENGTH/8];
 						ArrayList<BigInteger> list = new ArrayList<BigInteger>();
 						while(in.read(stream) != -1){
 							
@@ -244,18 +247,31 @@ public class DistributedStorageService implements Serializable{
 		}
 
 		byte [][] secretsToWrite = generateSharesBytes (rebuild, prime, i, fileName);
-	    
-		//Togliamo il padding inserito all'atto di distribuzione degli share.
-		//Arrays.copyOfRange(secretsToWrite[secretsToWrite.length-1], 0, MOD_LENGTH/8 - padding.get(fileName)-1);
+		long reconstructedDim = 0;
 		
 		BufferedOutputStream out = null;
 		try {
 			out = new BufferedOutputStream(new FileOutputStream(fileName));
 			for (byte[] byteToWrite : secretsToWrite) {
+				reconstructedDim += BLOCK_DIMENSION;
+				//Togliamo il padding inserito all'atto di distribuzione degli share.
+				byte[] tmp = new byte[byteToWrite.length-(MOD_LENGTH/8 - BLOCK_DIMENSION)];
+			    System.arraycopy(byteToWrite, 1, tmp, 0, tmp.length);
+			    byteToWrite = tmp;
+				
 				for (int j=0; j< byteToWrite.length; j++) {
-					System.out.print(byteToWrite [j] + " ");
+					System.out.print(byteToWrite[j]+" ");
 				}
+				
 				System.out.println();
+				
+				if (reconstructedDim > fileDim.get(fileName)) {
+					int bytesToRemove = reconstructedDim-fileDim.get(fileName);
+					byte[] tmp2 = new byte[byteToWrite.length-bytesToRemove];
+				    System.arraycopy(byteToWrite, 0, tmp2, 0, tmp2.length);
+				    byteToWrite = tmp2;
+				}
+				
 				out.write(byteToWrite);
 			}
 			out.close();
@@ -309,7 +325,7 @@ public class DistributedStorageService implements Serializable{
 			sharesToWrite [i] = bigI.toByteArray();
 			
 			for (int j =0; j< sharesToWrite[i].length; j++) {
-				if (sharesToWrite[i].length < MOD_LENGTH / 8) {
+				if (sharesToWrite[i].length < MOD_LENGTH/8) {
 					int paddingDim = MOD_LENGTH/8 - sharesToWrite[i].length;
 					padding.put(fileName, paddingDim);
 					byte[] tmp = new byte[MOD_LENGTH/8];
@@ -327,7 +343,7 @@ public class DistributedStorageService implements Serializable{
 			if (sharesToWrite[i].length != MOD_LENGTH/8) { 
 				System.out.println (sharesToWrite[i].length);
 				for (int j=0; j<sharesToWrite[i].length; j++) {
-					System.out.print(sharesToWrite[j] +" ");
+					System.out.print(sharesToWrite[i][j] +" ");
 				}
 				System.out.println("error");
 			}
@@ -358,8 +374,13 @@ public class DistributedStorageService implements Serializable{
 		boolean ok=false;
 		do{
 			p=BigInteger.probablePrime(this.MOD_LENGTH, new Random());
-			if(p.isProbablePrime(this.CERTAINTY) && (p.compareTo(BigInteger.valueOf((long) Math.pow(2, BLOCK_DIMENSION*8))) == 1))
+			if(p.isProbablePrime(this.CERTAINTY) && (p.compareTo(new BigDecimal(Math.pow(2, BLOCK_DIMENSION*8)).toBigInteger()) == 1)
+					&& (p.compareTo(BigInteger.valueOf((long)n)) == 1)) {
+				System.out.println("primo maggiore di 2 64");
+				System.out.println(p);
+				System.out.println(Math.pow(2, BLOCK_DIMENSION*8));
 				ok=true;
+			}
 		}while(ok==false);
 			return p;
 		} 
