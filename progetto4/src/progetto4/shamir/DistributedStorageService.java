@@ -35,7 +35,6 @@ public class DistributedStorageService implements Serializable{
 	private HashMap<String, HashMap<Server, String>> files = new HashMap<String, HashMap<Server,String>> () ;
 	private ArrayList <Server> servers;
 	byte [][] sharesToWrite = new byte[n][];
-	private HashMap<String, BigInteger> primeOfFile = new HashMap<String, BigInteger>();
 	private HashMap<String, Integer> padding = new HashMap<String, Integer>();
 
 	
@@ -116,7 +115,6 @@ public class DistributedStorageService implements Serializable{
 		BigInteger [] shares = null;
 		byte[] stream = new byte[BLOCK_DIMENSION];
 		BigInteger p = genPrime();
-		primeOfFile.put(fileName, p);
 		
 		BigInteger [] coeff = new BigInteger[this.k-1];
 		for(int i = 0; i < k-1; i++){
@@ -160,6 +158,7 @@ public class DistributedStorageService implements Serializable{
 		
 		for ( Map.Entry<Server, String> entry: randomFilesOnServer.entrySet()) {
 			for (int i=1; i<=n; i++) {
+				byte [] pm = p.toByteArray();
 				if (entry.getKey().getID().compareTo(BigInteger.valueOf(i)) == 0) {
 					BufferedOutputStream out = null;
 					try {
@@ -168,24 +167,28 @@ public class DistributedStorageService implements Serializable{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					for (byte[] byteToWrite : sharesToServer.get(i-1))
-						try {
+					/*Controllo sull'array di byte del BigInteger*/
+					if (pm.length < MOD_LENGTH / 8) {
+						int paddingDim = MOD_LENGTH/8 - pm.length;
+						byte [] tmp = new byte[MOD_LENGTH/8];
+					    System.arraycopy(pm, 0, tmp, paddingDim, pm.length);
+					    pm = tmp;
+					}
+
+					//scrittura primo su file (il primo ha dimensione fissata)
+					try {
+						out.write(pm);
+						for (byte[] byteToWrite : sharesToServer.get(i-1))
 							out.write(byteToWrite);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-			      	
-			      	try {
 						out.close();
-					} catch (IOException e) {
+						}catch (IOException e1) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+							e1.printStackTrace();
+						}
 					}
 				}
 			}
 		}
-	}
 	
 	
 	//dati gli share dei partecipanti ricostruisce il file
@@ -199,8 +202,9 @@ public class DistributedStorageService implements Serializable{
 			return;
 		}
 		
-		BigInteger prime = primeOfFile.get(fileName);
 		HashMap<BigInteger, ArrayList<BigInteger>> sharesToRead = new HashMap<BigInteger, ArrayList<BigInteger>>();
+		
+		BigInteger prime = null;
 		
 		for(int i=0; i<partecipants.size(); i++){
 			for(Server s : filesOnServer.keySet()){
@@ -210,6 +214,9 @@ public class DistributedStorageService implements Serializable{
 					try {
 						in = new BufferedInputStream(new FileInputStream(file));
 						byte[] stream = new byte[MOD_LENGTH / 8];
+						while(in.read(stream) != -1 && (prime == null)){
+							prime = new BigInteger(1, stream);
+						}
 						ArrayList<BigInteger> list = new ArrayList<BigInteger>();
 						while(in.read(stream) != -1){
 							
