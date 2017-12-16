@@ -41,7 +41,7 @@ public class Prova {
 		
 
 		/*DistributedStorageService dss = DistributedStorageService.getInstance(5,3);
-		dss.distributeFile("C:\\Users\\Michele\\Desktop\\jamesharden.jpg");
+		dss.distributeFile("C:\\Users\\Michele\\Desktop\\jh.jpg");
 		saveService(dss);*/
 
 		DistributedStorageService dss = restoreService();
@@ -54,8 +54,7 @@ public class Prova {
 		partecipants.add(p2);
 		partecipants.add(p4);
 		
-		dss.reconstructFile("C:\\Users\\Michele\\Desktop\\jamesharden.jpg", partecipants);
-		
+		dss.reconstructFile("C:\\Users\\Michele\\Desktop\\jh.jpg", partecipants);
 	}
 	
 	private static void saveService(DistributedStorageService dss){
