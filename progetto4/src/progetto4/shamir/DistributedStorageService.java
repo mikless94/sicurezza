@@ -32,11 +32,11 @@ public class DistributedStorageService implements Serializable{
 	private final int CERTAINTY = 50;
 	private SecretSharing shamir;
 	private static DistributedStorageService instance = null;
-	private HashMap<String, HashMap<Server, String>> files = new HashMap<String, HashMap<Server,String>> () ;
 	private ArrayList <Server> servers;
 	byte [][] sharesToWrite = new byte[n][];
+	private HashMap<String, HashMap<Server, String>> files = new HashMap<String, HashMap<Server,String>> () ;
+	private HashMap<String, Long> fileDim = new HashMap<String, Long>();
 	private HashMap<String, BigInteger> primeOfFile = new HashMap<String, BigInteger>();
-	private HashMap<String, Integer> padding = new HashMap<String, Integer>();
 
 	
 	private DistributedStorageService(int n, int k) {
@@ -70,6 +70,11 @@ public class DistributedStorageService implements Serializable{
 	//calcola MAC per ogni share e lo associa al client
 	public void distributeFile (String fileName) {
 		
+		/*Dobbiamo assegnare la dimensione del file d ogni file in modo da eliminare i byte di padding nella ricostruzione.*/
+		File f =new File(fileName);
+		fileDim.put(fileName, f.length());
+		
+		
 		Path path = Paths.get(fileName);
 		byte[] file = null;
 		try {
@@ -93,17 +98,10 @@ public class DistributedStorageService implements Serializable{
 		
 		ArrayList<ArrayList<byte[]>> sharesToServer = new ArrayList<ArrayList<byte[]>>(n);
 		
-		ArrayList<ArrayList<BigInteger>> ser = new ArrayList<ArrayList<BigInteger>>();
 
 		for(int i = 0; i < n; i++) {
 		     ArrayList<byte[]> temp = new ArrayList<byte[]>();
 		     sharesToServer.add(temp);
-		}
-		
-		//Debug
-		for(int i = 0; i < n; i++) {
-		     ArrayList<BigInteger> temp = new ArrayList<BigInteger>();
-		     ser.add(temp);
 		}
 		
 		HashMap <Server, String> randomFilesOnServer = new HashMap <Server, String> ();  
@@ -139,18 +137,12 @@ public class DistributedStorageService implements Serializable{
 				for (int i=0; i<n; i++) {
 					sharesToServer.get(i).add(sharesToWrite[i]);
 				}
-				 //Debug
-				for (int i=0; i<n; i++){
-					//System.out.println(shares[i]);
-					ser.get(i).add(shares[i]);
-				}
 				
 				for (int i = 0; i<stream.length; i++) {
 					stream[i] = 0;
 				}
 			}
-			/*for(int x=0;x<ser.get(0).size(); x++)			
-				System.out.println(ser.get(0).get(x));*/
+
 			in.close();
 		}
 		catch(IOException e) {
@@ -192,6 +184,7 @@ public class DistributedStorageService implements Serializable{
 	//controllo MAC
 	public void reconstructFile (String fileName, ArrayList<BigInteger> partecipants) {
 		
+		//Estraggo la map contenente la corrispondenza tra server e file memorizzato sui server per il dato file in input.
 		HashMap<Server, String> filesOnServer = files.get(fileName);
 		
 		if(filesOnServer == null){
@@ -202,6 +195,10 @@ public class DistributedStorageService implements Serializable{
 		BigInteger prime = primeOfFile.get(fileName);
 		HashMap<BigInteger, ArrayList<BigInteger>> sharesToRead = new HashMap<BigInteger, ArrayList<BigInteger>>();
 		
+		
+		/* Estraggo dai server specificati gli share, e li vado ad inserire in una map (sharesToRead) che contiene la corrispondenza tra il server
+		    e l'ArrayList di Share.
+		*/
 		for(int i=0; i<partecipants.size(); i++){
 			for(Server s : filesOnServer.keySet()){
 				if (partecipants.get(i).compareTo(s.getID())==0){
@@ -229,6 +226,9 @@ public class DistributedStorageService implements Serializable{
 			System.out.println(sharesToRead.get(partecipants.get(0)).get(i));
 		System.out.println();*/
 		
+		/*Ricostruisco i segreti passando alla funzione di SecretSharing le identità dei server specificati insieme ai loro share, per ogni blocco di byte
+		 * di dimensione BLOCK_DIMENSION.
+		 */
 		BigInteger[] rebuild = new BigInteger[sharesToRead.get(partecipants.get(0)).size()];
 		int i;
 		for(i = 0; i <sharesToRead.get(partecipants.get(0)).size(); i++){
@@ -242,12 +242,15 @@ public class DistributedStorageService implements Serializable{
 			}
 			rebuild[i] = shamir.rebuildSecret(info, prime);
 		}
-
+		
+		/*  Trasformiamo l'array di Biginteger che rappresentano il segreto complessivo (cioè i segreti per ogni blocco di byte)
+		 *  in array di byte. */
 		byte [][] secretsToWrite = generateSharesBytes (rebuild, prime, i, fileName);
 	    
-		//Togliamo il padding inserito all'atto di distribuzione degli share.
-		//Arrays.copyOfRange(secretsToWrite[secretsToWrite.length-1], 0, MOD_LENGTH/8 - padding.get(fileName)-1);
 		
+		/* Andiamo a scrivere l'array di byte in un file che rappresenta il file ricostruito. Tale file ha lo stesso percorso del file in
+		 * input.
+		 */
 		BufferedOutputStream out = null;
 		try {
 			out = new BufferedOutputStream(new FileOutputStream(fileName));
@@ -311,7 +314,6 @@ public class DistributedStorageService implements Serializable{
 			for (int j =0; j< sharesToWrite[i].length; j++) {
 				if (sharesToWrite[i].length < MOD_LENGTH / 8) {
 					int paddingDim = MOD_LENGTH/8 - sharesToWrite[i].length;
-					padding.put(fileName, paddingDim);
 					byte[] tmp = new byte[MOD_LENGTH/8];
 				    System.arraycopy(sharesToWrite[i], 0, tmp, paddingDim, sharesToWrite[i].length);
 				    sharesToWrite[i] = tmp;
