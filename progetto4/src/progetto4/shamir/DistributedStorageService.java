@@ -15,6 +15,8 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,11 +38,11 @@ public class DistributedStorageService implements Serializable{
 	private static DistributedStorageService instance = null;
 	private ArrayList <Server> servers;
 	byte [][] sharesToWrite = new byte[n][];
+	
 	private HashMap<String, HashMap<Server, String>> files = new HashMap<String, HashMap<Server,String>> () ;
 	private HashMap<String, Long> fileDim = new HashMap<String, Long>();
 	private HashMap<String, BigInteger> primeOfFile = new HashMap<String, BigInteger>();
 
-	
 	private DistributedStorageService(int n, int k) {
 		this.n= n;
 		this.k = k;
@@ -75,15 +77,6 @@ public class DistributedStorageService implements Serializable{
 		File f =new File(fileName);
 		fileDim.put(fileName, f.length());
 		
-		
-		Path path = Paths.get(fileName);
-		byte[] file = null;
-		try {
-			file = Files.readAllBytes(path);
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
 		
 		/*for (int i=1; i<file.length; i++) {
 			System.out.print(file[i-1]+" ");
@@ -180,6 +173,27 @@ public class DistributedStorageService implements Serializable{
 				}
 			}
 		}
+		
+		for ( Map.Entry<Server, String> entry: randomFilesOnServer.entrySet()) {
+			Path path = Paths.get(entry.getValue());
+			byte[] file = null;
+			try {
+				file = Files.readAllBytes(path);
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			
+			MessageDigest digest = null;
+			try {
+				digest = MessageDigest.getInstance("SHA-256");
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			byte [] hash = digest.digest(file);
+		}
+		
+		
 	}
 	
 	
@@ -194,9 +208,37 @@ public class DistributedStorageService implements Serializable{
 			System.out.println("No shares for the file on the servers.");
 			return;
 		}
-		
+	
 		BigInteger prime = primeOfFile.get(fileName);
 		HashMap<BigInteger, ArrayList<BigInteger>> sharesToRead = new HashMap<BigInteger, ArrayList<BigInteger>>();
+		
+		
+		
+		//verifica integrità hash
+		
+		for(int i=0; i<partecipants.size(); i++){
+			for(Server s : filesOnServer.keySet()){
+				if (partecipants.get(i).compareTo(s.getID())==0){
+					String fileServer = filesOnServer.get(s);
+					Path path = Paths.get(fileServer);
+					byte[] file = null;
+					try {
+						file = Files.readAllBytes(path);
+					} catch (IOException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+			
+					MessageDigest digest = null;
+					try {
+						digest = MessageDigest.getInstance("SHA-256");
+					} catch (NoSuchAlgorithmException e) {
+						e.printStackTrace();
+					}
+					byte [] hash = digest.digest(file);
+		}
+
+		
 		
 		
 		/* Estraggo dai server specificati gli share, e li vado ad inserire in una map (sharesToRead) che contiene la corrispondenza tra il server
