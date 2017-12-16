@@ -1,18 +1,17 @@
 package progetto4.shamir;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Client {
+public class Client implements Serializable{
 	private String ID;
-	private HashMap<String, ArrayList<String>> dict;
 	private DistributedStorageService service;
 	
 	
 	public Client(String iD) {
 		ID = iD;
-		dict = new HashMap<String, ArrayList<String>>();
 		//vedere se passare n e k
 		service = DistributedStorageService.getInstance(5,3);
 	}
@@ -24,13 +23,6 @@ public class Client {
 	public void setID(String iD) {
 		ID = iD;
 	}
-	public HashMap<String, ArrayList<String>> getDict() {
-		return dict;
-	}
-	public void setDict(HashMap<String, ArrayList<String>> dict) {
-		this.dict = dict;
-	}
-	
 	
 	public void shareFile(String filename){
 		

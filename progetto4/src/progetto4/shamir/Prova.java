@@ -12,49 +12,68 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+
 public class Prova {
 
+	/*Per distribuire tutti i file dei client decommentare la funzione init() e commentare codice successivo
+	 * Per ricostruire lo specifico file del client commentare init() e decommentare codice successivo  
+	 */
 	public static void main(String[] args) {
-		//test generazione shares
-		/*BigInteger [] a = new BigInteger [] {BigInteger.valueOf(11),BigInteger.valueOf(2)};
-		BigInteger [] shares;
-		BigInteger prime = BigInteger.valueOf(19);
-		SecretSharing s = new SecretSharing(5, 3);
-		shares = s.generateShares(prime, new BigInteger ("12"), a);
-		System.out.println("shares");
-		for (BigInteger k:shares) {
-			System.out.print(k+"\t");
-		}*/
-		
-		//test ricostruzione segreto
-		/*prime = BigInteger.valueOf(11);
-		BigInteger [] participants1 = new BigInteger [] {BigInteger.valueOf(1),BigInteger.valueOf(4)};
-		BigInteger [] participants2 = new BigInteger [] {BigInteger.valueOf(2),BigInteger.valueOf(0)};
-		BigInteger [] participants3 = new BigInteger [] {BigInteger.valueOf(5),BigInteger.valueOf(4)};
-		ArrayList <BigInteger []> info = new ArrayList <BigInteger []> ();
-		info.add(participants1);
-		info.add(participants2);
-		info.add(participants3);
-		BigInteger secret = s.rebuildSecret(info, prime);
-		System.out.println("\nsegreto ricostruito "+secret);*/
-		
 		
 
-		/*DistributedStorageService dss = DistributedStorageService.getInstance(5,3);
-		dss.distributeFile("C:\\Users\\Michele\\Desktop\\james harden.png");
-		saveService(dss);*/
-
-		DistributedStorageService dss = restoreService();
+		//usiamo per inviare le richieste shamir 
+		//init (5,3);
+		
+		//usiamo per ricostruire file con partecipanti
 		BigInteger p1 = BigInteger.valueOf(1);
 		BigInteger p2 = BigInteger.valueOf(2);
 		BigInteger p4 = BigInteger.valueOf(4);
-		
 		ArrayList<BigInteger> partecipants = new ArrayList<BigInteger>();
 		partecipants.add(p1);
 		partecipants.add(p2);
 		partecipants.add(p4);
 		
-		dss.reconstructFile("C:\\Users\\Michele\\Desktop\\james harden.png", partecipants);
+		String fileName = "C:\\Users\\Michele\\git\\sicurezza\\progetto4\\.\\doc2\\messaggio3.txt";
+		reconstruct (fileName, partecipants);
+		
+	
+	}
+	
+	private static void reconstruct(String fileName, ArrayList<BigInteger> partecipants) {
+		DistributedStorageService dss = null;
+		dss = restoreService();
+		dss.reconstructFile(fileName, partecipants);
+		System.out.println("Ricostruzione "+fileName+" avvenuta con successo");
+	}
+
+	private static void init (int n, int k) {
+		System.out.println("creazione share Shamir "+"("+n+","+k+")");
+		
+		DistributedStorageService dss = DistributedStorageService.getInstance(n,k);
+		ArrayList <Client> clients = new ArrayList <Client> ();
+		
+		Client c1 = new Client("1");
+		Client c2 = new Client("2");
+		Client c3 = new Client("3");
+		
+		clients.add(c1);
+		clients.add(c2);
+		clients.add(c3);
+		
+		System.out.println("#################INVIO RICHIESTE SHAMIR#################");
+		//ogni utente manda le sue query
+		for (Client client: clients) {
+			System.out.println("utente "+client.getID());
+			File directory = new File ("./doc"+client.getID());
+			File [] files = directory.listFiles();
+			
+			for (int i = 0; i< files.length; i++) {
+				System.out.println("invio richiesta Shamir relativa al documento "+files[i].getAbsolutePath());
+				dss.distributeFile(files[i].getAbsolutePath());
+				
+			}
+		}
+		saveService (dss);
 	}
 	
 	private static void saveService(DistributedStorageService dss){
@@ -88,12 +107,6 @@ public class Prova {
 
 			try {
 				dss = (DistributedStorageService) o.readObject();
-				for(String s : dss.getFiles().keySet()){
-					System.out.println("File salvato: " + s);
-					for(Server server : dss.getFiles().get(s).keySet())
-						System.out.println("Server: " + server.getDirectory() + " , Filename: " + dss.getFiles().get(s).get(server));
-				}
-
 				return dss;
 				
 			} catch (ClassNotFoundException e) {
