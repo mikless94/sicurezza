@@ -83,14 +83,7 @@ public class DistributedStorageService implements Serializable{
 		} catch (IOException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
-		}
-		
-		/*for (int i=1; i<file.length; i++) {
-			System.out.print(file[i-1]+" ");
-			if(i % 8 == 0)
-				System.out.println();
-		}*/
-		
+		}		
 		
 		if (!new File(fileName).isFile()){
 			System.out.println("Specified file does not exist!");
@@ -99,7 +92,6 @@ public class DistributedStorageService implements Serializable{
 		
 		ArrayList<ArrayList<byte[]>> sharesToServer = new ArrayList<ArrayList<byte[]>>(n);
 		
-
 		for(int i = 0; i < n; i++) {
 		     ArrayList<byte[]> temp = new ArrayList<byte[]>();
 		     sharesToServer.add(temp);
@@ -127,10 +119,6 @@ public class DistributedStorageService implements Serializable{
 			BufferedInputStream in = new BufferedInputStream(new FileInputStream(fileName));
 			
 			while(in.read(stream) != -1) {
-				/*for (int i = 0; i<stream.length ; i++) {
-					System.out.print(stream [i]+" ");
-				}*/
-				//System.out.println();
 				BigInteger secret = new BigInteger(1, stream);
 				shares = shamir.generateShares(p, secret, coeff);
 				sharesToWrite = generateSharesBytes (shares,p, n, fileName);
@@ -225,10 +213,6 @@ public class DistributedStorageService implements Serializable{
 			}	
 		}
 		
-		/*for(int i=0; i<sharesToRead.get(partecipants.get(0)).size();i++)
-			System.out.println(sharesToRead.get(partecipants.get(0)).get(i));
-		System.out.println();*/
-		
 		/*Ricostruisco i segreti passando alla funzione di SecretSharing le identità dei server specificati insieme ai loro share, per ogni blocco di byte
 		 * di dimensione BLOCK_DIMENSION.
 		 */
@@ -255,7 +239,6 @@ public class DistributedStorageService implements Serializable{
 		/* Andiamo a scrivere l'array di byte in un file che rappresenta il file ricostruito. Tale file ha lo stesso percorso del file in
 		 * input.
 		 */
-		
 		BufferedOutputStream out = null;
 		try {
 			out = new BufferedOutputStream(new FileOutputStream(fileName));
@@ -279,10 +262,7 @@ public class DistributedStorageService implements Serializable{
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}	
-		
-		
-		
+		}		
 		System.out.println();
 
 	}
@@ -381,9 +361,6 @@ public class DistributedStorageService implements Serializable{
 			p=BigInteger.probablePrime(this.MOD_LENGTH, new Random());
 			if(p.isProbablePrime(this.CERTAINTY) && (p.compareTo(new BigDecimal(Math.pow(2, BLOCK_DIMENSION*8)).toBigInteger()) == 1)
 					&& (p.compareTo(BigInteger.valueOf((long)n)) == 1)) {
-				System.out.println("primo maggiore di 2 64");
-				System.out.println(p);
-				System.out.println(Math.pow(2, BLOCK_DIMENSION*8));
 				ok=true;
 			}
 		}while(ok==false);

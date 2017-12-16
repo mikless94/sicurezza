@@ -41,7 +41,7 @@ public class Prova {
 		
 
 		/*DistributedStorageService dss = DistributedStorageService.getInstance(5,3);
-		dss.distributeFile("C:\\Users\\Michele\\Desktop\\james harden.png");
+		dss.distributeFile("C:\\Users\\Demetrio Laveglia\\Desktop\\CIAO1.docx");
 		saveService(dss);*/
 
 		DistributedStorageService dss = restoreService();
@@ -54,7 +54,7 @@ public class Prova {
 		partecipants.add(p2);
 		partecipants.add(p4);
 		
-		dss.reconstructFile("C:\\Users\\Michele\\Desktop\\james harden.png", partecipants);
+		dss.reconstructFile("C:\\Users\\Demetrio Laveglia\\Desktop\\CIAO1.docx", partecipants);
 	}
 	
 	private static void saveService(DistributedStorageService dss){
@@ -88,12 +88,6 @@ public class Prova {
 
 			try {
 				dss = (DistributedStorageService) o.readObject();
-				for(String s : dss.getFiles().keySet()){
-					System.out.println("File salvato: " + s);
-					for(Server server : dss.getFiles().get(s).keySet())
-						System.out.println("Server: " + server.getDirectory() + " , Filename: " + dss.getFiles().get(s).get(server));
-				}
-
 				return dss;
 				
 			} catch (ClassNotFoundException e) {
